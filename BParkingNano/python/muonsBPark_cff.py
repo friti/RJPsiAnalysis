@@ -14,7 +14,7 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  maxdR_matching = cms.double(0.1),
                                  
                                  ## for the output selected collection (tag + all compatible in dZ)
-                                 dzForCleaning_wrtTrgMuon = cms.double(1.),
+                                 dzForCleaning_wrtTrgMuon = cms.double(-1),
 
                                  ptMin = cms.double(0.5),
                                  absEtaMax = cms.double(2.4),

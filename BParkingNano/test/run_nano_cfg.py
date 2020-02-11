@@ -3,10 +3,11 @@ import FWCore.ParameterSet.Config as cms
 
 options = VarParsing('python')
 
-options.register('isMC', False,
+#asks if I am working on MC or real data
+options.register('isMC', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
-    "Run this on real data"
+    "Run this on MC events"
 )
 options.register('globalTag', 'NOTSET',
     VarParsing.multiplicity.singleton,
@@ -34,7 +35,8 @@ options.register('skip', 0,
     "skip first N events"
 )
 
-options.setDefault('maxEvents', 100)
+#max events=-1 if I want to process them all
+options.setDefault('maxEvents', 500)
 options.setDefault('tag', '10215')
 options.parseArguments()
 
@@ -43,11 +45,14 @@ if options._beenSet['globalTag']:
     globaltag = options.globalTag
 
 extension = {False : 'data', True : 'mc'}
-outputFileNANO = cms.untracked.string('_'.join(['BParkNANO', extension[options.isMC], options.tag])+'.root')
+outputFileNANO = cms.untracked.string('_'.join(['BParkNANO_noee_nostar_', extension[options.isMC], options.tag])+'.root')
 outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[options.isMC], options.tag])+'.root')
 if not options.inputFiles:
     options.inputFiles = ['/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/6B5A24B1-0E6E-504B-8331-BD899EB60110.root'] if not options.isMC else \
-                         ['/store/cmst3/group/bpark/BToKmumu_1000Events_MINIAOD.root']
+                         ['root://cms-xrd-global.cern.ch///store/mc/RunIIAutumn18MiniAOD/BcToJpsiMuNu_JpsiToMuMu_13TeV-TuneCP5-evtgen-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/230000/DCC26101-8E65-DF46-88E7-EB1DD7073227.root']                        
+# ['root://cms-xrd-global.cern.ch///store/mc/RunIIAutumn18MiniAOD/BcToJPsiTauNu_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/260000/A2581C35-B56A-5046-A02D-8C8C1562DEEE.root']
+
+                         #['/store/mc/RunIIAutumn18MiniAOD/BuToKJpsi_ToMuMu_probefilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/PUPoissonAve20_BParking_102X_upgrade2018_realistic_v15-v2/120000/B9BD59FF-C7F4-7544-A37D-359EE9E75C58.root','/store/mc/RunIIAutumn18MiniAOD/BuToKJpsi_ToMuMu_probefilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/PUPoissonAve20_BParking_102X_upgrade2018_realistic_v15-v2/120000/F9DCDD53-EFD7-8844-9E7E-05B921C0F8FB.root']
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
 from Configuration.StandardSequences.Eras import eras
@@ -128,11 +133,11 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 from PhysicsTools.BParkingNano.nanoBPark_cff import *
 process = nanoAOD_customizeMuonTriggerBPark(process)
-process = nanoAOD_customizeElectronFilteredBPark(process)
+#process = nanoAOD_customizeElectronFilteredBPark(process)
 process = nanoAOD_customizeTrackFilteredBPark(process)
 process = nanoAOD_customizeBToKLL(process)
-process = nanoAOD_customizeBToKstarEE(process)
-process = nanoAOD_customizeBToKstarMuMu(process)
+#process = nanoAOD_customizeBToKstarEE(process)
+#process = nanoAOD_customizeBToKstarMuMu(process)
 process = nanoAOD_customizeTriggerBitsBPark(process)
 
 
@@ -140,9 +145,9 @@ process = nanoAOD_customizeTriggerBitsBPark(process)
 
 # Path and EndPath definitions
 process.nanoAOD_KMuMu_step = cms.Path(process.nanoSequence + process.nanoBKMuMuSequence + CountBToKmumu )
-process.nanoAOD_Kee_step   = cms.Path(process.nanoSequence + process.nanoBKeeSequence   + CountBToKee   )
-process.nanoAOD_KstarMuMu_step = cms.Path(process.nanoSequence + process.KstarToKPiSequence + process.nanoBKstarMuMuSequence + CountBToKstarMuMu )
-process.nanoAOD_KstarEE_step  = cms.Path(process.nanoSequence+ process.KstarToKPiSequence + process.nanoBKstarEESequence + CountBToKstarEE  )
+# process.nanoAOD_Kee_step   = cms.Path(process.nanoSequence + process.nanoBKeeSequence   + CountBToKee   )
+#process.nanoAOD_KstarMuMu_step = cms.Path(process.nanoSequence + process.KstarToKPiSequence + process.nanoBKstarMuMuSequence + CountBToKstarMuMu )
+# process.nanoAOD_KstarEE_step  = cms.Path(process.nanoSequence+ process.KstarToKPiSequence + process.nanoBKstarEESequence + CountBToKstarEE  )
 
 # customisation of the process.
 if options.isMC:
@@ -156,9 +161,9 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 # Schedule definition
 process.schedule = cms.Schedule(
                                 process.nanoAOD_KMuMu_step,
-                                process.nanoAOD_Kee_step, 
-                                process.nanoAOD_KstarMuMu_step,
-                                process.nanoAOD_KstarEE_step,
+                               # process.nanoAOD_Kee_step, 
+                              #  process.nanoAOD_KstarMuMu_step,
+                               # process.nanoAOD_KstarEE_step,
                                 process.endjob_step, 
                                 process.NANOAODoutput_step
                                )
@@ -178,9 +183,9 @@ associatePatAlgosToolsTask(process)
 process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
         SelectEvents = cms.vstring(
                                    'nanoAOD_KMuMu_step', 
-                                   'nanoAOD_Kee_step',
-                                   'nanoAOD_KstarMuMu_step',
-                                   'nanoAOD_KstarEE_step',
+                                  # 'nanoAOD_Kee_step',
+                                  # 'nanoAOD_KstarMuMu_step',
+                                  # 'nanoAOD_KstarEE_step',
                                    )
 )
 

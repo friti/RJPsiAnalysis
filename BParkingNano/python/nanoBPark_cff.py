@@ -23,6 +23,9 @@ from PhysicsTools.BParkingNano.tracksBPark_cff import *
 from PhysicsTools.BParkingNano.BToKLL_cff import *
 from PhysicsTools.BParkingNano.BToKstarLL_cff import *
 
+#from PhysicsTools.BParkingNano.BTommm_cff import *
+
+
 
 nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)
 
@@ -53,9 +56,15 @@ def nanoAOD_customizeTriggerBitsBPark(process):
     return process
 
 def nanoAOD_customizeBToKLL(process):
-    process.nanoBKeeSequence   = cms.Sequence( process.nanoBKeeSequence + BToKEESequence    + BToKeeTable   )
+   # process.nanoBKeeSequence   = cms.Sequence( process.nanoBKeeSequence + BToKEESequence    + BToKeeTable   )
     process.nanoBKMuMuSequence = cms.Sequence( BToKMuMuSequence + BToKmumuTable )
     return process
+
+#mia funzione
+def nanoAOD_customizeBTommm(process):
+    process.nanoBmmmSequence = cms.Sequence( BTommmSequence + BTommmTable )
+    return process
+
 
 #three possibilities for K*LL
 def nanoAOD_customizeBToKstarLL(process):

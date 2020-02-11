@@ -67,7 +67,10 @@ private:
 
 void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &) const {
 
+  //lui fa da solo evento per evento
   //input
+  //vuole accedere ai dati
+
   edm::Handle<pat::CompositeCandidateCollection> dileptons;
   evt.getByToken(dileptons_, dileptons);
   
@@ -96,7 +99,7 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 
   // output
   std::unique_ptr<pat::CompositeCandidateCollection> ret_val(new pat::CompositeCandidateCollection());
-  
+  std::cout<<"ciaoooooooooooooooO"<<std::endl;  
   for(size_t k_idx = 0; k_idx < kaons->size(); ++k_idx) {
     edm::Ptr<pat::CompositeCandidate> k_ptr(kaons, k_idx);
     if( !k_selection_(*k_ptr) ) continue;
@@ -115,6 +118,7 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       int l1_idx = ll_prt->userInt("l1_idx");
       int l2_idx = ll_prt->userInt("l2_idx");
     
+      //si crea lo stato finale cand
       pat::CompositeCandidate cand;
       cand.setP4(ll_prt->p4() + k_p4);
       cand.setCharge(ll_prt->charge() + k_ptr->charge());

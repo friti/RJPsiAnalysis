@@ -112,6 +112,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       obj.unpackFilterLabels(iEvent, *triggerBits);
       obj.unpackPathNames(names);
 
+      //bool isTriggerMuon = false;
       bool isTriggerMuon = false;
       for (unsigned h = 0; h < obj.filterIds().size(); ++h)
 	if(obj.filterIds()[h] == 83){ 
@@ -137,8 +138,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 	// Print trigger object collection and type
 	std::cout << "\t   Collection: " << obj.collection() << std::endl;
       }
-    }//trigger objects
-
+      }//trigger objects
+    
     if(debug){
       std::cout << "\n total n of triggering muons = " << triggeringMuons.size() << std::endl;
       for(auto ij : triggeringMuons){

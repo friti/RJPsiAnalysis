@@ -36,6 +36,7 @@ BToKee = cms.EDProducer(
     )
 )
 
+#couple of muons
 muonPairsForKmumu = cms.EDProducer(
     'DiMuonBuilder',
     src = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
@@ -47,10 +48,12 @@ muonPairsForKmumu = cms.EDProducer(
     postVtxSelection = electronPairsForKee.postVtxSelection,
 )
 
+#sono classi
 BToKmumu = cms.EDProducer(
     'BToKLLBuilder',
     dileptons = cms.InputTag('muonPairsForKmumu'),
     leptonTransientTracks = muonPairsForKmumu.transientTracksSrc,
+#MODIFICARE QUI??---------------------------------------------------------------    
     kaons = BToKee.kaons,
     kaonsTransientTracks = BToKee.kaonsTransientTracks,
     beamSpot = cms.InputTag("offlineBeamSpot"),
@@ -58,7 +61,7 @@ BToKmumu = cms.EDProducer(
     lostTracks = cms.InputTag("lostTracks"),
     kaonSelection = cms.string(''),
     isoTracksSelection = BToKee.isoTracksSelection,
-    # This in principle can be different between electrons and muons
+   # This in principle can be different between electrons and muons
     preVtxSelection = cms.string(
         'pt > 3. && userFloat("min_dr") > 0.03'
         '&& mass < 7. && mass > 4.'
