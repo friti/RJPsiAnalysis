@@ -4,7 +4,7 @@ import FWCore.ParameterSet.Config as cms
 options = VarParsing('python')
 
 #asks if I am working on MC or real data
-options.register('isMC', False,
+options.register('isMC', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Run this on MC events"
@@ -45,11 +45,11 @@ if options._beenSet['globalTag']:
     globaltag = options.globalTag
 
 extension = {False : 'data', True : 'mc'}
-outputFileNANO = cms.untracked.string('_'.join(['BParkNANO_noee_3mu_notr', extension[options.isMC], options.tag])+'.root')
+outputFileNANO = cms.untracked.string('_'.join(['R_jpsi_', extension[options.isMC], options.tag])+'.root')
 outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[options.isMC], options.tag])+'.root')
 if not options.inputFiles:
-    options.inputFiles = ['file:/afs/cern.ch/work/f/friti/dataset_Charm_2018B/F9D97F27-C30C-FB45-BA85-945AAD64CE5E.root'] if not options.isMC else \
-                         ['root://cms-xrd-global.cern.ch///store/data/Run2018B/Charmonium/MINIAOD/17Sep2018-v1/100000/0EB3652B-678B-1B40-A006-03EACCAD877C.root']
+    options.inputFiles = ['file:/afs/cern.ch/work/f/friti/dataset_charmonium_2018D_promptreco/FC6C7BFC-9FDD-7B4C-95A2-101652AEFCAB.root'] if not options.isMC else \
+                         ['root://cms-xrd-global.cern.ch///store/mc/RunIIAutumn18MiniAOD/BuToKJpsi_ToMuMu_probefilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/PUPoissonAve20_BParking_102X_upgrade2018_realistic_v15-v2/120000/B9BD59FF-C7F4-7544-A37D-359EE9E75C58.root']
 # ['file:/afs/cern.ch/work/f/friti/dataset_Charm_2018B/F9D97F27-C30C-FB45-BA85-945AAD64CE5E.root']
 #['file:B9BD59FF-C7F4-7544-A37D-359EE9E75C58.root']
 #['file:/afs/cern.ch/work/f/friti/dataset_Charm_2018B/F9D97F27-C30C-FB45-BA85-945AAD64CE5E.root']

@@ -53,8 +53,8 @@ public:
 
 
     //GEN
-    //src_(consumes<reco::CandidateView>(cfg.getParameter<edm::InputTag>("src"))),
-
+    src_(consumes<reco::CandidateView>(cfg.getParameter<edm::InputTag>("src"))),
+    candMap_(consumes<edm::Association<reco::GenParticleCollection>>(cfg.getParameter<edm::InputTag>("mcMap"))),
 
 
     isotrk_selection_{cfg.getParameter<std::string>("isoTracksSelection")},
@@ -89,7 +89,8 @@ private:
   const edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
 
   //GEN
-  //  const edm::EDGetTokenT<reco::CandidateView> src_;
+  const edm::EDGetTokenT<reco::CandidateView> src_;
+  const edm::EDGetTokenT<edm::Association<reco::GenParticleCollection>> candMap_;
 
   const StringCutObjectSelector<pat::PackedCandidate> isotrk_selection_; 
 
@@ -149,14 +150,21 @@ void BTommmBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   
 
   //GEN
-  /*  edm::Handle<reco::CandidateView> cands;
+  edm::Handle<reco::CandidateView> cands;
   evt.getByToken(src_, cands);
   unsigned int ncand = cands->size();
   //ma che sono questi candidati? hanno stessa dimensione di kaons, cioè i muoni displaced.
-  std::cout<<"numero di candidati: "<<ncand<<", kaons size: "<<kaons->size()<<std::endl;
+  //std::cout<<"numero di candidati: "<<ncand<<", kaons size: "<<kaons->size()<<std::endl;
   //std::cout<<"cand[0]"<<cands->ptrAt(0)->pt()<<std::endl;
-  */
+ 
+  edm::Handle<edm::Association<reco::GenParticleCollection>> map;           
+  evt.getByToken(candMap_, map);    
+  //std::cout<<map<<std::endl;
 
+  for (unsigned int i = 0; i < ncand; ++i) {
+      reco::GenParticleRef match = (*map)[cands->ptrAt(i)];
+  }
+             
 
   unsigned int nTracks     = iso_tracks->size();
   unsigned int totalTracks = nTracks + iso_lostTracks->size();
@@ -165,13 +173,13 @@ void BTommmBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 
   
   // output
-   std::unique_ptr<pat::CompositeCandidateCollection> ret_val(new pat::CompositeCandidateCollection());
+  std::unique_ptr<pat::CompositeCandidateCollection> ret_val(new pat::CompositeCandidateCollection());
   
 
   //TRIGGER
   //Controllo se ha passato il PATH giusto di trigger
   unsigned int index = names.triggerIndex("HLT_Dimuon0_Jpsi3p5_Muon2_v5");
-  //std::cout<<index<<", "<<names.size()<<std::endl;    
+  //  std::cout<<index<<", "<<triggerBits->size()<<std::endl;    
   if(index==triggerBits->size()){
     evt.put(std::move(ret_val));
   }
@@ -618,8 +626,8 @@ void BTommmBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   }
 
   evt.put(std::move(ret_val));}
-}  
-    
+  
+}    
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(BTommmBuilder);

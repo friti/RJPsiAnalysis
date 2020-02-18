@@ -21,7 +21,7 @@ config.Data.inputDBS = 'global'
 config.section_('JobType')
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = '../test/run_nano_cfg.py'
-config.JobType.maxJobRuntimeMin = 3000
+#config.JobType.maxJobRuntimeMin = 3000
 config.JobType.allowUndistributedCMSSW = True
 
 config.section_('User')
@@ -55,6 +55,7 @@ if __name__ == '__main__':
     
     # loop over samples
     for sample, info in doc['samples'].iteritems():
+      print(sample,info)
       # Given we have repeated datasets check for different parts
       parts = info['parts'] if 'parts' in info else [None]
       for part in parts:
@@ -98,6 +99,6 @@ if __name__ == '__main__':
         
         config.JobType.outputFiles = ['_'.join(['BParkNANO', 'mc' if isMC else 'data', production_tag])+'.root']
         
-        print config
+#        print config
         submit(config)
 

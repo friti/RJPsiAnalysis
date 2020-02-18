@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.BParkingNano.common_cff import *
+#from PhysicsTools.BParkingNano.muonsBPark_cff import *
+
 
 electronPairsForKee = cms.EDProducer(
     'DiElectronBuilder',
@@ -36,6 +38,9 @@ BToKee = cms.EDProducer(
     )
 )
 
+
+
+
 #couple of muons
 muonPairsForKmumu = cms.EDProducer(
     'DiMuonBuilder',
@@ -47,6 +52,21 @@ muonPairsForKmumu = cms.EDProducer(
                                  '&& mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > 0.03'),
     postVtxSelection = electronPairsForKee.postVtxSelection,
 )
+
+
+muonsMatch = cms.EDProducer('MCMatcher',            # cut on deltaR, deltaPt/Pt; pick best by deltaR                                                                      
+    src         = cms.InputTag('muonTrgSelector:SelectedMuons'),               # final reco collection        
+    matched     = cms.InputTag("finalGenParticlesBPark"),     # final mc-truth particle collection                                                                                       
+    mcPdgId     = cms.vint32(13),                             # one or more PDG ID (13 = mu)\; absolute values (see below)                                                                
+    checkCharge = cms.bool(False),                            # True = require RECO and MC objects to have the same charge                                                               
+    mcStatus    = cms.vint32(1),                              # PYTHIA status code (1 = stable, 2 = shower, 3 = hard scattering)                                                         
+    maxDeltaR   = cms.double(0.03),                           # Minimum deltaR for the match
+    maxDPtRel   = cms.double(0.5),                            # Minimum deltaPt/Pt for the match                                                                                         
+    resolveAmbiguities    = cms.bool(True),                   # Forbid two RECO objects to maatch to the same GEN object                                                                  
+    resolveByMatchQuality = cms.bool(True),                   # False = just match input in order; True = pick lowest deltaR pair first                                                  
+)
+
+
 
 #sono classi
 BTommm = cms.EDProducer(
@@ -75,12 +95,12 @@ BTommm = cms.EDProducer(
     ),
     #TRIGGER
     bits=cms.InputTag("TriggerResults","","HLT"),
-    objects=cms.InputTag("slimmedPatTrigger")
+    objects=cms.InputTag("slimmedPatTrigger"),
     #GEN
-#    src = cms.InputTag("muonTrgSelector:SelectedMuons")
+    src = cms.InputTag("muonTrgSelector:SelectedMuons"),
+    mcMap   = cms.InputTag("muonsMatch")
 
 )
-
 
 
 BTommmTable = cms.EDProducer(

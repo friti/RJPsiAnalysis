@@ -1,0 +1,51 @@
+common:
+  data:
+    lumimask: https://raw.githubusercontent.com/vinzenzstampf/HNL/HNL_18/data/golden_but_json.txt
+    splitting: 20
+    globaltag: 102X_dataRun2_v11
+  mc:
+    splitting: 1
+    globaltag: 102X_upgrade2018_realistic_v15
+samples:
+    data_Run2018B_pv2:
+       dataset: /Charmonium/Run2018B-PromptReco-v2/MINIAOD
+       isMC: False
+    data_Run2018B_pv1:
+       dataset: /Charmonium/Run2018B-PromptReco-v1/MINIAOD
+       isMC: False
+    data_Run2018C_pv1:
+       dataset:  /Charmonium/Run2018C-PromptReco-v1/MINIAOD
+       isMC: False
+    data_Run2018C_sepv1:  
+       dataset: /Charmonium/Run2018C-17Sep2018-v1/MINIAOD
+       isMC: False
+    data_Run2018C_novv1:
+       dataset: /Charmonium/Run2018C-12Nov2019_UL2018-v1/MINIAOD
+       isMC: False
+    data_Run2018B_sepv1:
+       dataset: /Charmonium/Run2018B-17Sep2018-v1/MINIAOD
+       isMC: False
+    data_Run2018B_novv1:
+       dataset: /Charmonium/Run2018B-12Nov2019_UL2018-v1/MINIAOD
+       isMC: False
+    data_Run2018A_novv1:
+       dataset: /Charmonium/Run2018A-PromptReco-v3/MINIAOD
+       isMC: False
+    data_Run2018A_pv2:
+       dataset: /Charmonium/Run2018A-PromptReco-v2/MINIAOD
+       isMC: False
+    data_Run2018A_pv1:
+       dataset: /Charmonium/Run2018A-PromptReco-v1/MINIAOD
+       isMC: False
+    data_Run2018A_sepv1:
+       dataset: /Charmonium/Run2018A-17Sep2018-v1/MINIAOD
+       isMC: False
+    data_Run2018D_pv2:
+       dataset: /Charmonium/Run2018D-PromptReco-v2/MINIAOD
+       isMC: False
+    data_Run2018C_pv3:
+       dataset: /Charmonium/Run2018C-PromptReco-v3/MINIAOD
+       isMC: False
+    data_Run2018C_pv2:
+       dataset: /Charmonium/Run2018C-PromptReco-v2/MINIAOD
+       isMC: False
