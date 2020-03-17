@@ -23,10 +23,10 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                              )
 
 countTrgMuons = cms.EDFilter("PATCandViewCountFilter",
-    minNumber = cms.uint32(1),
-    maxNumber = cms.uint32(999999),
-    src = cms.InputTag("muonTrgSelector", "trgMuons")
-)
+                             minNumber = cms.uint32(0),
+                             maxNumber = cms.uint32(999999),
+                             src = cms.InputTag("muonTrgSelector", "trgMuons")
+                         )
 
 
 muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",

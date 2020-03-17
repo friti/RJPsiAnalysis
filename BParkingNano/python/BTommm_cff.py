@@ -1,4 +1,4 @@
-import FWCore.ParameterSet.Config as cms
+B65;5401;1cimport FWCore.ParameterSet.Config as cms
 from PhysicsTools.BParkingNano.common_cff import *
 
 electronPairsForKee = cms.EDProducer(
@@ -147,7 +147,7 @@ CountBToKee = cms.EDFilter("PATCandViewCountFilter",
     src = cms.InputTag("BToKee")
 )    
 CountBTommm = CountBToKee.clone(
-    minNumber = cms.uint32(1),
+    minNumber = cms.uint32(0),
     src = cms.InputTag("BTommm")
 )
 
