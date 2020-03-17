@@ -1,4 +1,4 @@
-B65;5401;1cimport FWCore.ParameterSet.Config as cms
+import FWCore.ParameterSet.Config as cms
 from PhysicsTools.BParkingNano.common_cff import *
 
 electronPairsForKee = cms.EDProducer(
