@@ -204,7 +204,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
        // anyway it is off in the configuration
        if (softMuonsOnly_ && !mu.isSoftMuon(PV)) continue;
 
-       // same PV as the tag muon, both tag and probe only dz selection
+       /*       // same PV as the tag muon, both tag and probe only dz selection
        bool SkipMuon=true;
        for (const pat::Muon & trgmu : *trgmuons_out) {
 	 if( fabs(mu.vz()-trgmu.vz()) > dzTrg_cleaning_ && dzTrg_cleaning_ >0 )
@@ -213,7 +213,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
        } 
        // needs decission: what about events without trg muon? now we SKIP them
        if (SkipMuon)  continue;
-       
+       */
 
        // build transient track
        const reco::TransientTrack muonTT((*(mu.bestTrack())), &(*bFieldHandle)); //sara: check, why not using inner track for muons? 
