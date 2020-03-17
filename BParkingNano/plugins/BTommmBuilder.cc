@@ -8,6 +8,7 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "TLorentzVector.h"
 
 #include <vector>
 #include <memory>
@@ -192,6 +193,71 @@ void BTommmBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("fitted_k_pt"  , fitter.daughter_p4(2).pt()); 
       cand.addUserFloat("fitted_k_eta" , fitter.daughter_p4(2).eta());
       cand.addUserFloat("fitted_k_phi" , fitter.daughter_p4(2).phi());
+
+	      //mie variabili                                                                                
+	      //conto quanti mu totali aveva l'evento
+      //	      cand.addUserInt("pass_3mu",pass_3mu.size());                                 
+	      
+	      TLorentzVector P_b;
+	      P_b.SetPtEtaPhiM(fit_p4.pt(),fit_p4.eta(),fit_p4.phi(),fitter.fitted_candidate().mass());
+	      
+	      TLorentzVector P_k;
+	      P_k.SetPtEtaPhiM(fitter.daughter_p4(2).pt(),fitter.daughter_p4(2).eta(),fitter.daughter_p4(2).phi(),MUON_MASS);
+	      
+	      TLorentzVector P_l1;
+	      P_l1.SetPtEtaPhiM(fitter.daughter_p4(0).pt(),fitter.daughter_p4(0).eta(),fitter.daughter_p4(0).phi(),MUON_MASS);
+	      
+	      TLorentzVector P_l2;
+	      P_l2.SetPtEtaPhiM(fitter.daughter_p4(1).pt(),fitter.daughter_p4(1).eta(),fitter.daughter_p4(1).phi(),MUON_MASS);
+	      
+	      
+	      float m_miss_2=(P_b-P_k-P_l1-P_l2)*(P_b-P_k-P_l1-P_l2);
+	      
+	      float Q_2=(P_b-P_l1-P_l2)*(P_b-P_l1-P_l2);
+	      
+	      float pt_miss=(P_b.Pt()-P_k.Pt()-P_l1.Pt()-P_l2.Pt());
+	      
+	      float pt_var=((P_l1.Pt()+P_l2.Pt())-P_k.Pt());
+	      
+	      float dr_l1l2=sqrt((P_l1.Phi()-P_l2.Phi())*(P_l1.Phi()-P_l2.Phi())+(P_l1.Eta()-P_l2.Eta())*(P_l1.Eta()-P_l2.Eta()));
+	      
+	      float m_jpsi=sqrt((P_l1+P_l2)*(P_l1+P_l2));
+	      
+	      cand.addUserFloat("m_miss_2", m_miss_2);
+	      cand.addUserFloat("Q_2",Q_2);
+	      cand.addUserFloat("pt_miss",pt_miss);
+	      cand.addUserFloat("pt_var",pt_var);
+	      cand.addUserFloat("dr_l1l2",dr_l1l2);
+	      cand.addUserFloat("m_jpsi",m_jpsi);
+	      
+	      //energia del mu unpaired in diversi sistemi di riferimento                                                                          
+	      
+	      TLorentzVector P_mu;
+	      P_mu.SetPtEtaPhiM(fit_p4.pt(),fit_p4.eta(),fit_p4.phi(),MUON_MASS);
+	      
+	      TVector3 mu_beta_lab=P_mu.BoostVector();
+	      
+	      P_mu.Boost(-mu_beta_lab);
+	      
+	      
+	      cand.addUserFloat("E_mu_star",P_mu.E());
+	      
+	      //Risetto P_mu al valore originario perche altrimenti e' boostato
+	      
+	      
+	    
+	      P_mu.SetPtEtaPhiM(fit_p4.pt(),fit_p4.eta(),fit_p4.phi(),MUON_MASS);
+	      
+	      
+	      TLorentzVector jpsi=P_l1+P_l1;
+	      
+	      TVector3 jpsi_beta_lab=jpsi.BoostVector();
+	      
+	      P_mu.Boost(jpsi_beta_lab);
+	    
+	      cand.addUserFloat("E_mu_#",P_mu.E());
+	      
+
     
       if( !post_vtx_selection_(cand) ) continue;        
 
