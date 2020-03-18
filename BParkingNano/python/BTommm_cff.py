@@ -67,7 +67,12 @@ BTommm = cms.EDProducer(
         'userInt("sv_OK") == 1 && userFloat("sv_prob") > 0.001 '
         '&& userFloat("fitted_cos_theta_2D") >= 0'
         #'&& userFloat("fitted_mass") > 4.5 && userFloat("fitted_mass") < 6.'
-    )
+    ),
+    #TRIGGER                                        
+     
+    bits=cms.InputTag("TriggerResults","","HLT"),               
+    objects=cms.InputTag("slimmedPatTrigger"), 
+
 )
 
 BToKeeTable = cms.EDProducer(
@@ -143,16 +148,17 @@ BTommmTable = cms.EDProducer(
     singleton=cms.bool(False),
     extension=cms.bool(False),
     variables=cms.PSet(
-        # pre-fit quantities                                                                                                       
+        # pre-fit quantities                                                      
         CandVars,
-        #nome branch= nome variabile del .cc                                                                                       
+        #nome branch= nome variabile del .cc
         l1Idx = uint('l1_idx'),
         l2Idx = uint('l2_idx'),
         kIdx = uint('k_idx'),
         minDR = ufloat('min_dr'),
         maxDR = ufloat('max_dr'),
-# fit and vtx info                                                                                                    
-        #chi2 = ufloat('sv_chi2'),                                                                                            
+        # fit and vtx info                                                                                                    
+        #chi2 = ufloat('sv_chi2'),
+                         
         svprob = ufloat('sv_prob'),
         l_xy = ufloat('l_xy'),
         l_xy_unc = ufloat('l_xy_unc'),
@@ -197,7 +203,7 @@ BTommmTable = cms.EDProducer(
         n_l1_used = uint('n_l1_used'),
         n_l2_used = uint('n_l2_used'),
         #my variables
-#        pass_3mu=uint('pass_3mu'),
+        pass_3mu=uint('pass_3mu'),
         m_miss_sq=ufloat('m_miss_2'),
         Q_sq=ufloat('Q_2'),
         pt_miss=ufloat('pt_miss'),
