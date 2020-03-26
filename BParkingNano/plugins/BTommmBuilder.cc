@@ -317,18 +317,19 @@ void BTommmBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 	      //mie variabili                                                                                
 	      //conto quanti mu totali aveva l'evento
 	      cand.addUserInt("pass_3mu",pass_3mu.size());                                 
+	      float B_pt=(Bc_MASS/cand.mass())*cand.pt();
 	      
 	      TLorentzVector P_b;
-	      P_b.SetPtEtaPhiM(fit_p4.pt(),fit_p4.eta(),fit_p4.phi(),fitter.fitted_candidate().mass());
+	      P_b.SetPtEtaPhiM(B_pt,cand.eta(),cand.phi(),Bc_MASS);
 	      
 	      TLorentzVector P_k;
-	      P_k.SetPtEtaPhiM(fitter.daughter_p4(2).pt(),fitter.daughter_p4(2).eta(),fitter.daughter_p4(2).phi(),MUON_MASS);
+	      P_k.SetPtEtaPhiM(k_ptr->pt(),k_ptr->eta(),k_ptr->phi(),k_ptr->mass());
 	      
 	      TLorentzVector P_l1;
-	      P_l1.SetPtEtaPhiM(fitter.daughter_p4(0).pt(),fitter.daughter_p4(0).eta(),fitter.daughter_p4(0).phi(),MUON_MASS);
+	      P_l1.SetPtEtaPhiM(l1_ptr->pt(),l1_ptr->eta(),l1_ptr->phi(),l1_ptr->mass());
 	      
 	      TLorentzVector P_l2;
-	      P_l2.SetPtEtaPhiM(fitter.daughter_p4(1).pt(),fitter.daughter_p4(1).eta(),fitter.daughter_p4(1).phi(),MUON_MASS);
+	      P_l2.SetPtEtaPhiM(l2_ptr->pt(),l2_ptr->eta(),l2_ptr->phi(),l2_ptr->mass());
 	      
 	      
 	      float m_miss_2=(P_b-P_k-P_l1-P_l2)*(P_b-P_k-P_l1-P_l2);

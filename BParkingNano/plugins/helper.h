@@ -18,6 +18,7 @@
 
 typedef std::vector<reco::TransientTrack> TransientTrackCollection;
 
+constexpr float Bc_MASS= 6.276;
 constexpr float K_MASS = 0.493677;
 constexpr float PI_MASS = 0.139571;
 constexpr float LEP_SIGMA = 0.0000001;

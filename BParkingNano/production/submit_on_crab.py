@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
 
   parser = ArgumentParser()
-  parser.add_argument('-y', '--yaml', default = 'samples.yml', help = 'File with dataset descriptions')
+  parser.add_argument('-y', '--yaml', default = 'samples_mc_mmm.yml', help = 'File with dataset descriptions')
   parser.add_argument('-f', '--filter', default='*', help = 'filter samples, POSIX regular expressions allowed')
   args = parser.parse_args()
 

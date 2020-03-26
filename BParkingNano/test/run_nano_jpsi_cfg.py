@@ -46,16 +46,22 @@ extension = {False : 'data', True : 'mc'}
 outputFileNANO = cms.untracked.string('_'.join(['BParkNANO', extension[options.isMC], options.tag])+'.root')
 outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[options.isMC], options.tag])+'.root')
 if not options.inputFiles:
-    options.inputFiles = ['root://cms-xrd-global.cern.ch///store/data/Run2018D/Charmonium/MINIAOD/PromptReco-v2/000/324/840/00000/7E4DE168-4DE7-C747-AFD2-B6D1C308C0E8.root'] if not options.isMC else \
+    options.inputFiles = ['root://cms-xrd-global.cern.ch//store/data/Run2018C/Charmonium/MINIAOD/17Sep2018-v1/60000/5865682B-91E0-F047-969B-C52A2FCB241F.root'] if not options.isMC else \
                          ['root://cms-xrd-global.cern.ch///store/mc/RunIIAutumn18MiniAOD/BcToJpsiMuNu_JpsiToMuMu_13TeV-TuneCP5-evtgen-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/230000/A9DE66AD-7301-004C-8D87-3FBE21CA63BD.root']
 
 #data
 #original
 #/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/6B5A24B1-0E6E-504B-8331-BD899EB60110.root
 
+#runD
+#/store/data/Run2018D/Charmonium/MINIAOD/PromptReco-v2/000/324/840/00000/7E4DE168-4DE7-C747-AFD2-B6D1C308C0E8.root
+
 #mc
 #original
 #/store/cmst3/group/bpark/BToKmumu_1000Events_MINIAOD.root
+#munu
+#/store/mc/RunIIAutumn18MiniAOD/BcToJpsiMuNu_JpsiToMuMu_13TeV-TuneCP5-evtgen-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/230000/A9DE66AD-7301-004C-8D87-3FBE21CA63BD.root
+
 
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
