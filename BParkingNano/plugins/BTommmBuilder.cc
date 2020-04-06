@@ -22,7 +22,6 @@
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
-#include "DataFormats/Math/interface/deltaR.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "helper.h"
 #include <limits>
@@ -317,6 +316,8 @@ void BTommmBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 	      //mie variabili                                                                                
 	      //conto quanti mu totali aveva l'evento
 	      cand.addUserInt("pass_3mu",pass_3mu.size());                                 
+	      
+	      
 	      float B_pt=(Bc_MASS/cand.mass())*cand.pt();
 	      
 	      TLorentzVector P_b;
@@ -338,48 +339,53 @@ void BTommmBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 	      
 	      float pt_miss=(P_b.Pt()-P_k.Pt()-P_l1.Pt()-P_l2.Pt());
 	      
-	      float pt_var=((P_l1.Pt()+P_l2.Pt())-P_k.Pt());
+	      float pt_miss_vec=((P_b-P_k-P_l1-P_l2).Pt());
+
+	      float pt_var=((P_l1+P_l2).Pt()-P_k.Pt());
+	     
+	      float DR=deltaR(P_l1.Eta(),P_l1.Phi(),P_l2.Eta(),P_l2.Phi());
 	      
-	      float dr_l1l2=sqrt((P_l1.Phi()-P_l2.Phi())*(P_l1.Phi()-P_l2.Phi())+(P_l1.Eta()-P_l2.Eta())*(P_l1.Eta()-P_l2.Eta()));
+	      //float deta = P_l1.Eta() - P_l2.Eta();
+	      //float dphi = P_l1.Phi() - P_l2.Phi();
 	      
+	      //float DR_2=std::sqrt(deta * deta + dphi * dphi);	      
+
+
 	      float m_jpsi=sqrt((P_l1+P_l2)*(P_l1+P_l2));
 	      
 	      cand.addUserFloat("m_miss_2", m_miss_2);
 	      cand.addUserFloat("Q_2",Q_2);
+
 	      cand.addUserFloat("pt_miss",pt_miss);
+	      cand.addUserFloat("pt_miss_vec",pt_miss_vec);
+	      
+
 	      cand.addUserFloat("pt_var",pt_var);
-	      cand.addUserFloat("dr_l1l2",dr_l1l2);
+	      
+	      cand.addUserFloat("DR",DR);
+
 	      cand.addUserFloat("m_jpsi",m_jpsi);
 	      
-	      //energia del mu unpaired in diversi sistemi di riferimento                                                                          
-	      
-	      TLorentzVector P_mu;
-	      P_mu.SetPtEtaPhiM(fit_p4.pt(),fit_p4.eta(),fit_p4.phi(),MUON_MASS);
-	      
-	      TVector3 mu_beta_lab=P_mu.BoostVector();
+
+	      //energia del mu unpaired in diversi sistemi di riferimento                  
+	      TLorentzVector P_mu=P_k;	      
+
+	      TVector3 mu_beta_lab=P_b.BoostVector();
 	      
 	      P_mu.Boost(-mu_beta_lab);
 	      
-	      
 	      cand.addUserFloat("E_mu_star",P_mu.E());
 	      
-	      //Risetto P_mu al valore originario perche altrimenti e' boostato
-	      
-	      
-	    
-	      P_mu.SetPtEtaPhiM(fit_p4.pt(),fit_p4.eta(),fit_p4.phi(),MUON_MASS);
-	      
-	      
-	      TLorentzVector jpsi=P_l1+P_l1;
+	      P_mu=P_k;	      
+	      	      
+	      TLorentzVector jpsi=P_l1+P_l2;
 	      
 	      TVector3 jpsi_beta_lab=jpsi.BoostVector();
 	      
-	      P_mu.Boost(jpsi_beta_lab);
+	      P_mu.Boost(-jpsi_beta_lab);
 	    
 	      cand.addUserFloat("E_mu_#",P_mu.E());
-	      
-	      //	      std::cout<<"EHIIII"<<std::endl;
-	      //      std::cout<<fitter.success()<<" "<<fitter.prob()<<" "<<cos_theta_2D(fitter, *beamspot, fit_p4)<<std::endl;    
+	       
 	      if( !post_vtx_selection_(cand) ) continue;        
 	      
 	      //std::cout<<"EHIIII"<<std::endl;
@@ -400,7 +406,16 @@ void BTommmBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 		// define selections for iso tracks (pT, eta, ...)
 		if( !isotrk_selection_(trk) ) continue;
 		// check if the track is the kaon
-		if (k_ptr->userCand("cand") ==  edm::Ptr<reco::Candidate> ( iso_tracks, iTrk ) ) continue;
+		/*if (k_ptr->userCand("cand") ==  edm::Ptr<reco::Candidate> ( iso_tracks, iTrk ) ) {
+		  
+		  std::cout<<"old"<<std::endl;
+		  continue;
+		}*/
+		
+		if(track_to_lepton_match(k_ptr, iso_tracks.id(), iTrk)  ) {
+		  // std::cout<<"new"<<std::endl;
+		  continue;
+		}
 		// check if the track is one of the two leptons
 		if (track_to_lepton_match(l1_ptr, iso_tracks.id(), iTrk) || 
 		    track_to_lepton_match(l2_ptr, iso_tracks.id(), iTrk) ) continue;
