@@ -208,7 +208,7 @@ void BTommmBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 					    k_ptr->pt(), 
 					    k_ptr->eta(),
 					    k_ptr->phi(),
-					    MUON_MASS
+					    k_ptr->mass()
 					    );
 
 	  for(size_t ll_idx = 0; ll_idx < dileptons->size(); ++ll_idx) {
@@ -259,7 +259,7 @@ void BTommmBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 	      //	      std::cout<<"PRIMA"<<std::endl;
 	      KinVtxFitter fitter(
 				  {leptons_ttracks->at(l1_idx), leptons_ttracks->at(l2_idx), kaons_ttracks->at(k_idx)},
-				  {l1_ptr->mass(), l2_ptr->mass(), MUON_MASS},
+				  {l1_ptr->mass(), l2_ptr->mass(), k_ptr->mass()},
 				  {LEP_SIGMA, LEP_SIGMA, LEP_SIGMA} //some small sigma for the lepton mass
 				  );
 	      //std::cout<<"DOPO"<<std::endl;
