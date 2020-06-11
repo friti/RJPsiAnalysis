@@ -4,7 +4,7 @@
 import subprocess
 import os
 import sys
-crab_path = '/work/friti/new/CMSSW_10_2_15/src/PhysicsTools/BParkingNano/production/BParkingNANO_2020May07'
+crab_path = '/work/friti/new/CMSSW_10_2_15/src/PhysicsTools/BParkingNano/production/BParkingNANO_2020May12'
 
 dataset_dict = {'data':['data_Run2018A_sep_v1','data_Run2018B_sep_v1','data_Run2018C_sep_v1','data_Run2018D_pr_v2'],
                 'BcToJpsiMuNu':['BcToJpsiMuNu_JpsiToMuMu'],
