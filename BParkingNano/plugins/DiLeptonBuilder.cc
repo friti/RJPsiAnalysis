@@ -91,6 +91,7 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         {LEP_SIGMA, LEP_SIGMA} //some small sigma for the particle mass
         );
 
+      /*
       lepton_pair.setVertex(
 		     reco::Candidate::Point(
 					    fitter.fitted_vtx().x(),
@@ -98,19 +99,19 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 					    fitter.fitted_vtx().z()
 					    )
 		     );
-
+      */
       lepton_pair.addUserFloat("sv_chi2", fitter.chi2());
       lepton_pair.addUserFloat("sv_ndof", fitter.dof()); // float??
       lepton_pair.addUserFloat("sv_prob", fitter.prob());
       lepton_pair.addUserFloat("fitted_mass", fitter.success() ? fitter.fitted_candidate().mass() : -1);
       lepton_pair.addUserFloat("fitted_massErr", fitter.success() ? sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)) : -1);
-      lepton_pair.addUserFloat("vtx_x",lepton_pair.vx());
+      /* lepton_pair.addUserFloat("vtx_x",lepton_pair.vx());
       lepton_pair.addUserFloat("vtx_y",lepton_pair.vy());
       lepton_pair.addUserFloat("vtx_z",lepton_pair.vz());
       lepton_pair.addUserFloat("vtx_ex",sqrt(fitter.fitted_vtx_uncertainty().cxx()));
       lepton_pair.addUserFloat("vtx_ey",sqrt(fitter.fitted_vtx_uncertainty().cyy()));
       lepton_pair.addUserFloat("vtx_ez",sqrt(fitter.fitted_vtx_uncertainty().czz()));
-
+      */
      
  // if needed, add here more stuff
 
