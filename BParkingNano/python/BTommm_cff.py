@@ -96,12 +96,12 @@ BToKeeTable = cms.EDProducer(
         svprob = ufloat('sv_prob'),
         l_xy = ufloat('l_xy'),
         l_xy_unc = ufloat('l_xy_unc'),
-        vtx_x = ufloat('vtx_x'),
-        vtx_y = ufloat('vtx_y'),
-        vtx_z = ufloat('vtx_z'),
-        vtx_ex = ufloat('vtx_ex'), ## only saving diagonal elements of the cov matrix
-        vtx_ey = ufloat('vtx_ey'),
-        vtx_ez = ufloat('vtx_ez'),
+#        vtx_x = ufloat('vtx_x'),
+#        vtx_y = ufloat('vtx_y'),
+#        vtx_z = ufloat('vtx_z'),
+#        vtx_ex = ufloat('vtx_ex'), ## only saving diagonal elements of the cov matrix
+#        vtx_ey = ufloat('vtx_ey'),
+#        vtx_ez = ufloat('vtx_ez'),
         # Mll
         mll_raw = Var('userCand("dilepton").mass()', float),
         mll_llfit = Var('userCand("dilepton").userFloat("fitted_mass")', float), # this might not work
@@ -173,12 +173,12 @@ BTommmTable = cms.EDProducer(
         mll_llfit = Var('userCand("dilepton").userFloat("fitted_mass")', float), # this might not work                        
         mllErr_llfit = Var('userCand("dilepton").userFloat("fitted_massErr")', float), # this might not work                  
         mll_fullfit = ufloat('fitted_mll'),
-        mll_vtxx= Var('userCand("dilepton").userFloat("vtx_x")',float),
-        mll_vtxy= Var('userCand("dilepton").userFloat("vtx_y")',float),
-        mll_vtxz= Var('userCand("dilepton").userFloat("vtx_z")',float),
-        mll_vtxex= Var('userCand("dilepton").userFloat("vtx_ex")',float),
-        mll_vtxey= Var('userCand("dilepton").userFloat("vtx_ey")',float),
-        mll_vtxez= Var('userCand("dilepton").userFloat("vtx_ez")',float),
+#        mll_vtxx= Var('userCand("dilepton").userFloat("vtx_x")',float),
+#        mll_vtxy= Var('userCand("dilepton").userFloat("vtx_y")',float),
+#        mll_vtxz= Var('userCand("dilepton").userFloat("vtx_z")',float),
+#        mll_vtxex= Var('userCand("dilepton").userFloat("vtx_ex")',float),
+#        mll_vtxey= Var('userCand("dilepton").userFloat("vtx_ey")',float),
+#        mll_vtxez= Var('userCand("dilepton").userFloat("vtx_ez")',float),
 
         # Cos(theta)                                                                                                          
         cos2D = ufloat('cos_theta_2D'),
