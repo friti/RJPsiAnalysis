@@ -1,3 +1,4 @@
+
 # nanoAOD producer customized for BParking analysis (focus on RK/K*/phi)
 
 ## Getting started
@@ -57,7 +58,7 @@ cmsRun run_nano_cfg.py
 
 We use the _fork and pull_ model:
 
-fork this repository https://github.com/CMSBParking/BParkingNANO (top right _Fork button)
+fork this repository https://github.com/friti/RJPsiAnalysis (top right _Fork button)
 
 If you haven't done so yet, clone this repository:
 
