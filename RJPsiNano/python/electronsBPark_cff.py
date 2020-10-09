@@ -9,7 +9,7 @@ lowPtGsfElectronLatestID.rho = 'fixedGridRhoFastjetAll'
 
 mvaConfigsForEleProducer = cms.VPSet( )
 # Import and add all desired MVAs
-from PhysicsTools.BParkingNano.mvaElectronID_BParkRetrain_cff \
+from PhysicsTools.RJPsiNano.mvaElectronID_BParkRetrain_cff \
     import mvaEleID_BParkRetrain_producer_config
 mvaConfigsForEleProducer.append( mvaEleID_BParkRetrain_producer_config )
 

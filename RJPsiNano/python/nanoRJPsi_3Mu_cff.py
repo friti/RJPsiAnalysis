@@ -5,22 +5,22 @@ from PhysicsTools.NanoAOD.globals_cff import *
 from PhysicsTools.NanoAOD.nano_cff import *
 from PhysicsTools.NanoAOD.vertices_cff import *
 from PhysicsTools.NanoAOD.NanoAODEDMEventContent_cff import *
-from PhysicsTools.BParkingNano.trgbits_cff import *
+from PhysicsTools.RJPsiNano.trgbits_cff import *
 
 
 
 ##for gen and trigger muon
-from PhysicsTools.BParkingNano.genparticlesBPark_cff import *
-from PhysicsTools.BParkingNano.particlelevelBPark_cff import *
-from PhysicsTools.BParkingNano.triggerObjectsBPark_cff import *
-from PhysicsTools.BParkingNano.muonsBPark_cff import * 
+from PhysicsTools.RJPsiNano.genparticlesBPark_cff import *
+from PhysicsTools.RJPsiNano.particlelevelBPark_cff import *
+from PhysicsTools.RJPsiNano.triggerObjectsBPark_cff import *
+from PhysicsTools.RJPsiNano.muonsBPark_cff import * 
 
 ## filtered input collections
-from PhysicsTools.BParkingNano.electronsBPark_cff import * 
-from PhysicsTools.BParkingNano.tracksBPark_cff import *
+from PhysicsTools.RJPsiNano.electronsBPark_cff import * 
+from PhysicsTools.RJPsiNano.tracksBPark_cff import *
 
 ## B collections
-from PhysicsTools.BParkingNano.BTo3Mu_cff import *
+from PhysicsTools.RJPsiNano.BTo3Mu_cff import *
 
 
 nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)  #purpose?

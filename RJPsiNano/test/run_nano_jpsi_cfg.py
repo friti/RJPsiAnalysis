@@ -60,7 +60,7 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load("Configuration.StandardSequences.MagneticField_cff")
-process.load('PhysicsTools.BParkingNano.nanoRJPsi_3Mu_cff')
+process.load('PhysicsTools.RJPsiNano.nanoRJPsi_3Mu_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -123,7 +123,7 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 
-from PhysicsTools.BParkingNano.nanoRJPsi_3Mu_cff import *
+from PhysicsTools.RJPsiNano.nanoRJPsi_3Mu_cff import *
 process = nanoAOD_customizeMuonTriggerBPark(process)  #delete?
 #process = nanoAOD_customizeElectronFilteredBPark(process)  #not needed now, but prob in the future
 process = nanoAOD_customizeBTo3Mu(process)
@@ -137,7 +137,7 @@ process.nanoAOD_3Mu_step = cms.Path(process.nanoSequence + process.nanoBTo3MuSeq
 
 # customisation of the process.
 if options.isMC:
-    from PhysicsTools.BParkingNano.nanoRJPsi_3Mu_cff import nanoAOD_customizeMC
+    from PhysicsTools.RJPsiNano.nanoRJPsi_3Mu_cff import nanoAOD_customizeMC
     nanoAOD_customizeMC(process)
 
 process.endjob_step = cms.EndPath(process.endOfProcess)

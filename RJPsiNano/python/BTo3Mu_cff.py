@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from PhysicsTools.BParkingNano.common_cff import *
+from PhysicsTools.RJPsiNano.common_cff import *
 
 
 muonPairsForBTo3Mu = cms.EDProducer(
