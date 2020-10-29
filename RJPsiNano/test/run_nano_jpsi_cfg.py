@@ -31,10 +31,13 @@ options.register('skip', 0,
 )
 
 options.setDefault('maxEvents',1000)
-options.setDefault('tag', '10215')
+options.setDefault('tag', '10614')
 options.parseArguments()
 
-globaltag = '102X_dataRun2_v11' if not options.isMC else '102X_upgrade2018_realistic_v15'
+#globaltag = '102X_dataRun2_v11' if not options.isMC else '102X_upgrade2018_realistic_v15'
+globaltag = '106X_dataRun2_v28' if not options.isMC else '106X_upgrade2018_realistic_v11_L1v1'
+
+
 if options._beenSet['globalTag']:
     globaltag = options.globalTag
 
@@ -44,7 +47,8 @@ outputFileNANO = cms.untracked.string('_'.join(['RJPsi', extension[options.isMC]
 #input files (it can be a list of files)
 if not options.inputFiles:
     options.inputFiles = ['root://cms-xrd-global.cern.ch//store/data/Run2018C/Charmonium/MINIAOD/17Sep2018-v1/60000/5865682B-91E0-F047-969B-C52A2FCB241F.root'] if not options.isMC else \
-                         ['root://cms-xrd-global.cern.ch///store/mc/RunIIAutumn18MiniAOD/BcToJpsiMuNu_JpsiToMuMu_13TeV-TuneCP5-evtgen-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/230000/A9DE66AD-7301-004C-8D87-3FBE21CA63BD.root']
+                         ['root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL18MiniAOD/BcToJPsiTauNu_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/MINIAODSIM/106X_upgrade2018_realistic_v11_L1v1_ext1-v2/100000/02F13381-1D94-CC43-948A-2EFFB8572949.root']
+                         #['root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL16MiniAOD/BcToJPsiTauNu_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/MINIAODSIM/106X_mcRun2_asymptotic_v13-v2/00000/1C9BA089-BFA5-E54B-BF1A-288035067E66.root']
 
 
 #what's the purpose of this 
@@ -125,7 +129,6 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 from PhysicsTools.RJPsiNano.nanoRJPsi_3Mu_cff import *
 process = nanoAOD_customizeMuonTriggerBPark(process)  #delete?
-#process = nanoAOD_customizeElectronFilteredBPark(process)  #not needed now, but prob in the future
 process = nanoAOD_customizeBTo3Mu(process)
 process = nanoAOD_customizeTriggerBitsBPark(process)  #? delete?
 
