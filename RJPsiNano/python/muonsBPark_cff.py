@@ -22,11 +22,11 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  softMuonsOnly = cms.bool(False)
                              )
 
-#G: countTrgMuons = cms.EDFilter("PATCandViewCountFilter",
-#G:                              minNumber = cms.uint32(0),
-#G:                              maxNumber = cms.uint32(999999),
-#G:                              src = cms.InputTag("muonTrgSelector", "trgMuons")
-#G:                          )
+countTrgMuons = cms.EDFilter("PATCandViewCountFilter",
+                            minNumber = cms.uint32(0),
+                            maxNumber = cms.uint32(999999),
+                            src = cms.InputTag("muonTrgSelector", "trgMuons")
+                         )
 
 
 muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
@@ -70,7 +70,10 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 #        multiIsoId = Var("?passed('MultiIsoMedium')?2:passed('MultiIsoLoose')","uint8",doc="MultiIsoId from miniAOD selector (1=MultiIsoLoose, 2=MultiIsoMedium)"),
         triggerIdLoose = Var("passed('TriggerIdLoose')",bool,doc="TriggerIdLoose ID"),
 #        inTimeMuon = Var("passed('InTimeMuon')",bool,doc="inTimeMuon ID"),
-#G: isTriggering = Var("userInt('isTriggering')", int,doc="flag the reco muon is also triggering")
+        isTriggering = Var("userInt('isTriggering')", int,doc="flag the reco muon is also triggering"),
+        isJpsiMuon = Var("userInt('isJpsiMuon')", int,doc="flag if the muon triggered is comming from a JPsi"),
+        isDimuon0Trg = Var("userInt('isDimuon0Trg')", int,doc="flag if the Dimuon0 path was triggered"),
+        isJpsiTrkTrg = Var("userInt('isJpsiTrkTrg')", int,doc="flag if the JpsiTrkTrg path was triggered")
     ),
 )
 
@@ -102,19 +105,19 @@ selectedMuonsMCMatchEmbedded = cms.EDProducer(
     matching = cms.InputTag('muonsBParkMCMatchForTable')
 )
 
-#G: muonTriggerMatchedTable = muonBParkTable.clone(
-#G:     src = cms.InputTag("muonTrgSelector:trgMuons"),
-#G:     name = cms.string("TriggerMuon"),
-#G:     doc  = cms.string("reco muon matched to triggering muon"),
-#G:     variables = cms.PSet(CandVars,
-#G:         vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
-#G:         vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
-#G:         vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6),
-#G:         trgMuonIndex = Var("userInt('trgMuonIndex')", int,doc="index in trigger muon collection")
-#G:    )
-#G: )
+muonTriggerMatchedTable = muonBParkTable.clone(
+    src = cms.InputTag("muonTrgSelector:trgMuons"),
+    name = cms.string("TriggerMuon"),
+    doc  = cms.string("reco muon matched to triggering muon"),
+    variables = cms.PSet(CandVars,
+        vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
+        vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
+        vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6),
+        trgMuonIndex = Var("userInt('trgMuonIndex')", int,doc="index in trigger muon collection")
+   )
+)
 
-#G: muonBParkSequence = cms.Sequence(muonTrgSelector * countTrgMuons)
+muonBParkSequence = cms.Sequence(muonTrgSelector * countTrgMuons)
 muonBParkSequence = cms.Sequence(muonTrgSelector)
 muonBParkMC = cms.Sequence(muonBParkSequence + muonsBParkMCMatchForTable + selectedMuonsMCMatchEmbedded + muonBParkMCTable)
 #muonBParkMC = cms.Sequence(muonBParkSequence + muonsBParkMCMatchForTable + muonBParkMCTable)

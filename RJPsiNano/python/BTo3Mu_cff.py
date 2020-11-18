@@ -6,23 +6,23 @@ muonPairsForBTo3Mu = cms.EDProducer(
     'DiMuonBuilder',
     src = cms.InputTag('muonTrgSelector', 'SelectedMuons'),  #try to change
     transientTracksSrc = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'), #try to change
-    lep1Selection = cms.string('pt > 1.5'),
-    lep2Selection = cms.string(''),
-    preVtxSelection = cms.string('abs(userCand("l1").vz - userCand("l2").vz) <= 1. && mass() < 5 '
-                                 '&& mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > 0.03'),
+    muon1Selection = cms.string('pt > 1.5'),
+    muon2Selection = cms.string(''),
+    preVtxSelection = cms.string('abs(userCand("mu1").vz - userCand("mu2").vz) <= 1. && mass() < 5 '
+                                 '&& mass() > 0 && charge() == 0 && userFloat("muons12_deltaR") > 0.03'),
     postVtxSelection = cms.string('userFloat("sv_chi2") < 998 && userFloat("sv_prob") > 1.e-5')
 )
 
 BTo3Mu = cms.EDProducer(
     'BTo3MuBuilder',
-    dileptons = cms.InputTag('muonPairsForBTo3Mu'),
-    leptonTransientTracks = muonPairsForBTo3Mu.transientTracksSrc,
-    kaons = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
-    kaonsTransientTracks = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'),
+    dimuons = cms.InputTag('muonPairsForBTo3Mu'),
+    muonTransientTracks = muonPairsForBTo3Mu.transientTracksSrc,
+    muons = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
+    #kaonsTransientTracks = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'),
     beamSpot = cms.InputTag("offlineBeamSpot"),
     tracks = cms.InputTag("packedPFCandidates"),
     lostTracks = cms.InputTag("lostTracks"),
-    kaonSelection = cms.string(''),
+    muonSelection = cms.string(''),
     isoTracksSelection = cms.string('pt > 0.7 && abs(eta)<2.5'),
     # This in principle can be different between electrons and muons
     preVtxSelection = cms.string(
@@ -34,11 +34,6 @@ BTo3Mu = cms.EDProducer(
         '&& userFloat("fitted_cos_theta_2D") >= 0'
         #'&& userFloat("fitted_mass") > 4.5 && userFloat("fitted_mass") < 6.'
     ),
-    #TRIGGER                                        
-     
-    bits=cms.InputTag("TriggerResults","","HLT"),               
-    objects=cms.InputTag("slimmedPatTrigger"), 
-
 )
 
 BTo3MuTable = cms.EDProducer(
@@ -53,9 +48,9 @@ BTo3MuTable = cms.EDProducer(
         # pre-fit quantities                                                      
         CandVars,
         #nome branch= nome variabile del .cc
-        l1Idx = uint('l1_idx'),
-        l2Idx = uint('l2_idx'),
-        kIdx = uint('k_idx'),
+        mu1Idx = uint('mu1_idx'),
+        mu2Idx = uint('mu2_idx'),
+        mu3dx = uint('mu3_idx'),
         minDR = ufloat('min_dr'),
         maxDR = ufloat('max_dr'),
         # fit and vtx info                                                                                                    
@@ -71,16 +66,17 @@ BTo3MuTable = cms.EDProducer(
         vtx_ey = ufloat('vtx_ey'),
         vtx_ez = ufloat('vtx_ez'),
         # Mll                                                                                                                 
-        mll_raw = Var('userCand("dilepton").mass()', float),
-        mll_llfit = Var('userCand("dilepton").userFloat("fitted_mass")', float), # this might not work                        
-        mllErr_llfit = Var('userCand("dilepton").userFloat("fitted_massErr")', float), # this might not work                  
+        mll_raw = Var('userCand("dimuon").mass()', float),
+        mll_llfit = Var('userCand("dimuon").userFloat("fitted_mass")', float), # this might not work                        
+        mllErr_llfit = Var('userCand("dimuon").userFloat("fitted_massErr")', float), # this might not work                  
         mll_fullfit = ufloat('fitted_mll'),
-#        mll_vtxx= Var('userCand("dilepton").userFloat("vtx_x")',float),
-#        mll_vtxy= Var('userCand("dilepton").userFloat("vtx_y")',float),
-#        mll_vtxz= Var('userCand("dilepton").userFloat("vtx_z")',float),
-#        mll_vtxex= Var('userCand("dilepton").userFloat("vtx_ex")',float),
-#        mll_vtxey= Var('userCand("dilepton").userFloat("vtx_ey")',float),
-#        mll_vtxez= Var('userCand("dilepton").userFloat("vtx_ez")',float),
+        mll_vtxex= Var('userCand("dimuon").userFloat("vtx_ex")',float),
+#        mll_vtxx= Var('userCand("dimuon").userFloat("vtx_x")',float),
+#        mll_vtxy= Var('userCand("dimuon").userFloat("vtx_y")',float),
+#        mll_vtxz= Var('userCand("dimuon").userFloat("vtx_z")',float),
+#        mll_vtxex= Var('userCand("dimuon").userFloat("vtx_ex")',float),
+#        mll_vtxey= Var('userCand("dimuon").userFloat("vtx_ey")',float),
+#        mll_vtxez= Var('userCand("dimuon").userFloat("vtx_ez")',float),
 
         # Cos(theta)                                                                                                          
         cos2D = ufloat('cos_theta_2D'),
@@ -91,28 +87,28 @@ BTo3MuTable = cms.EDProducer(
         fit_pt = ufloat('fitted_pt'),
         fit_eta = ufloat('fitted_eta'),
         fit_phi = ufloat('fitted_phi'),
-        fit_l1_pt = ufloat('fitted_l1_pt'),
-        fit_l1_eta = ufloat('fitted_l1_eta'),
-        fit_l1_phi = ufloat('fitted_l1_phi'),
-        fit_l2_pt = ufloat('fitted_l2_pt'),
-        fit_l2_eta = ufloat('fitted_l2_eta'),
-        fit_l2_phi = ufloat('fitted_l2_phi'),
-        fit_k_pt = ufloat('fitted_k_pt'),
-        fit_k_eta = ufloat('fitted_k_eta'),
-        fit_k_phi = ufloat('fitted_k_phi'),
-        l1_iso03 = ufloat('l1_iso03'),
-        l1_iso04 = ufloat('l1_iso04'),
-        l2_iso03 = ufloat('l2_iso03'),
-        l2_iso04 = ufloat('l2_iso04'),
-        k_iso03  = ufloat('k_iso03'),
-        k_iso04  = ufloat('k_iso04'),
+        fit_mu1_pt = ufloat('fitted_mu1_pt'),
+        fit_mu1_eta = ufloat('fitted_mu1_eta'),
+        fit_mu1_phi = ufloat('fitted_mu1_phi'),
+        fit_mu2_pt = ufloat('fitted_mu2_pt'),
+        fit_mu2_eta = ufloat('fitted_mu2_eta'),
+        fit_mu2_phi = ufloat('fitted_mu2_phi'),
+        fit_mu3_pt = ufloat('fitted_mu3_pt'),
+        fit_mu3_eta = ufloat('fitted_mu3_eta'),
+        fit_mu3_phi = ufloat('fitted_mu3_phi'),
+        mu1_iso03 = ufloat('mu1_iso03'),
+        mu1_iso04 = ufloat('mu1_iso04'),
+        mu2_iso03 = ufloat('mu2_iso03'),
+        mu2_iso04 = ufloat('mu2_iso04'),
+        mu3_iso03  = ufloat('mu3_iso03'),
+        mu3_iso04  = ufloat('mu3_iso04'),
         b_iso03  = ufloat('b_iso03'),
         b_iso04  = ufloat('b_iso04'),
-        n_k_used = uint('n_k_used'),
-        n_l1_used = uint('n_l1_used'),
-        n_l2_used = uint('n_l2_used'),
+        n_mu3_used = uint('n_mu3_used'),
+        n_mu1_used = uint('n_mu1_used'),
+        n_mu2_used = uint('n_mu2_used'),
         #my variables
-        pass_3mu=uint('pass_3mu'),
+        #pass_3mu=uint('pass_3mu'),
         m_miss_sq=ufloat('m_miss_2'),
         Q_sq=ufloat('Q_2'),
         pt_miss=ufloat('pt_miss'),

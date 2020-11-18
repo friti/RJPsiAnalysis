@@ -9,11 +9,7 @@
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "TLorentzVector.h"
-#include "FWCore/Common/interface/TriggerNames.h"
-#include "DataFormats/Common/interface/TriggerResults.h"
-#include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "DataFormats/Math/interface/deltaR.h"
-
 
 #include <vector>
 #include <memory>
@@ -35,22 +31,15 @@ public:
   typedef std::vector<reco::TransientTrack> TransientTrackCollection;
 
   explicit BTo3MuBuilder(const edm::ParameterSet &cfg):
-    k_selection_{cfg.getParameter<std::string>("kaonSelection")},
+    mu3_selection_{cfg.getParameter<std::string>("muonSelection")},
     pre_vtx_selection_{cfg.getParameter<std::string>("preVtxSelection")},
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
-    dileptons_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("dileptons") )},
-    leptons_ttracks_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("leptonTransientTracks") )},
-    kaons_{consumes<pat::MuonCollection>( cfg.getParameter<edm::InputTag>("kaons") )},
-    kaons_ttracks_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("kaonsTransientTracks") )},
+    dimuons_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("dimuons") )},
+    muons_ttracks_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("muonTransientTracks") )},
+    muons_{consumes<pat::MuonCollection>( cfg.getParameter<edm::InputTag>("muons") )},
+    //kaons_ttracks_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("kaonsTransientTracks") )},
     isotracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("tracks"))),
     isolostTracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lostTracks"))),
-
-    //TRIGGER                       
-    triggerBits_(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>(\
-    "bits"))),                                                                      
-    triggerObjects_(consumes<std::vector<pat::TriggerObjectStandAlone>>(cfg.getParameter<edm::InputTag>("objects"))),                                                  
-
-
 
     isotrk_selection_{cfg.getParameter<std::string>("isoTracksSelection")},
     beamspot_{consumes<reco::BeamSpot>( cfg.getParameter<edm::InputTag>("beamSpot") )} 
@@ -65,22 +54,17 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions) {}
   
   private:
-  const StringCutObjectSelector<pat::Muon> k_selection_; 
-  const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; // cut on the di-lepton before the SV fit
-  const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; // cut on the di-lepton after the SV fit
+  const StringCutObjectSelector<pat::Muon> mu3_selection_; 
+  const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; // cut on the di-muon before the SV fit
+  const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; // cut on the di-muon after the SV fit
 
-  const edm::EDGetTokenT<pat::CompositeCandidateCollection> dileptons_;
-  const edm::EDGetTokenT<TransientTrackCollection> leptons_ttracks_;
-  const edm::EDGetTokenT<pat::MuonCollection> kaons_;
-  const edm::EDGetTokenT<TransientTrackCollection> kaons_ttracks_;
+  const edm::EDGetTokenT<pat::CompositeCandidateCollection> dimuons_;
+  const edm::EDGetTokenT<TransientTrackCollection> muons_ttracks_;
+  const edm::EDGetTokenT<pat::MuonCollection> muons_;
+  //const edm::EDGetTokenT<TransientTrackCollection> muons_ttracks_;
 
   const edm::EDGetTokenT<pat::PackedCandidateCollection> isotracksToken_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> isolostTracksToken_;
-
-  //TRIGGER                                                              
-
-  const edm::EDGetTokenT<edm::TriggerResults> triggerBits_;                         
-  const edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
 
   const StringCutObjectSelector<pat::PackedCandidate> isotrk_selection_; 
 
@@ -90,17 +74,17 @@ public:
 void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &) const {
 
   //input
-  edm::Handle<pat::CompositeCandidateCollection> dileptons;
-  evt.getByToken(dileptons_, dileptons);
+  edm::Handle<pat::CompositeCandidateCollection> dimuons;
+  evt.getByToken(dimuons_, dimuons);
   
-  edm::Handle<TransientTrackCollection> leptons_ttracks;
-  evt.getByToken(leptons_ttracks_, leptons_ttracks);
+  edm::Handle<TransientTrackCollection> muons_ttracks;
+  evt.getByToken(muons_ttracks_, muons_ttracks);
 
-  edm::Handle<pat::MuonCollection> kaons;
-  evt.getByToken(kaons_, kaons);
+  edm::Handle<pat::MuonCollection> muons;
+  evt.getByToken(muons_, muons);
   
-  edm::Handle<TransientTrackCollection> kaons_ttracks;
-  evt.getByToken(kaons_ttracks_, kaons_ttracks);  
+  //edm::Handle<TransientTrackCollection> kaons_ttracks;
+  //evt.getByToken(kaons_ttracks_, kaons_ttracks);  
 
   edm::Handle<reco::BeamSpot> beamspot;
   evt.getByToken(beamspot_, beamspot);  
@@ -111,343 +95,250 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   edm::Handle<pat::PackedCandidateCollection> iso_lostTracks;
   evt.getByToken(isolostTracksToken_, iso_lostTracks);
 
-  //TRIGGER                                                
-  edm::Handle<edm::TriggerResults> triggerBits;                                     
-  evt.getByToken(triggerBits_, triggerBits);               
-  const edm::TriggerNames &names = evt.triggerNames(*triggerBits);  
-  std::vector<pat::TriggerObjectStandAlone> triggeringMuons;        
-  edm::Handle<std::vector<pat::TriggerObjectStandAlone>> triggerObjects;   
-  evt.getByToken(triggerObjects_, triggerObjects);                              
-
 
   unsigned int nTracks     = iso_tracks->size();
   unsigned int totalTracks = nTracks + iso_lostTracks->size();
 
-  std::vector<int> used_lep1_id, used_lep2_id, used_trk_id;
+  std::vector<int> used_muon1_id, used_muon2_id, used_trk_id;
 
 
   // output
   std::unique_ptr<pat::CompositeCandidateCollection> ret_val(new pat::CompositeCandidateCollection());
-  //choose the HLT path
-  unsigned int index = names.triggerIndex("HLT_Dimuon0_Jpsi3p5_Muon2_v5"); 
-  
-  if(index==triggerBits->size())
-  {
-    //    std::cout<<"Non ha HLT path giusto"<<std::endl;
-    evt.put(std::move(ret_val));
-  }                                                                               
-  else if(index!=triggerBits->size())
-  {
-    //salvo gli oggetti di trigger che mi interessano
-    std::vector<pat::TriggerObjectStandAlone> pass_jpsi;
-    std::vector<pat::TriggerObjectStandAlone> pass_3mu;
-    //std::cout<<"ha HLT path giusto"<<std::endl;
-    bool pass_hlt=triggerBits->accept(index);
-    /*if(!pass_hlt) {
-      std::cout<<"non in pass_hlt"<<std::endl;
-      std::cout<<"ret_val size"<<ret_val->size()<<std::endl;
-      evt.put(std::move(ret_val));
-      }*/
-    if(pass_hlt){
-      //std::cout<<"entra in pass_hlt"<<std::endl;
-      for (pat::TriggerObjectStandAlone obj : *triggerObjects){
-	      obj.unpackFilterLabels(evt, *triggerBits);
-	      obj.unpackPathNames(names);
-	
-	      if(obj.hasFilterLabel("hltVertexmumuFilterJpsiMuon3p5")){
-	        pass_jpsi.push_back(obj);
-	        //  std::cout<<"filtro jpsi="<<obj.pt()<<std::endl;
-	      }
-	
-	      if (obj.hasFilterLabel("hltTripleMuL3PreFiltered222")){
-	        pass_3mu.push_back(obj);
-	        //std::cout<<"filtro 3mu="<<obj.pt()<<std::endl;
-	      }	
-      }
+  //Loop  on displaced muons    
+  for(size_t mu3_idx = 0; mu3_idx < muons->size(); ++mu3_idx) {
+    edm::Ptr<pat::Muon> mu3_ptr(muons, mu3_idx);
+    if( !mu3_selection_(*mu3_ptr) ) continue;
 
-      //riconoscere quale dei 3 muoni in pass_3mu e' quello displaced
-      std::vector<pat::TriggerObjectStandAlone> displaced;
-      int flag=0;
-      //      std::cout<<"pass_3mu size="<<pass_3mu.size()<<std::endl;    
-      for(unsigned int i=0;i<pass_3mu.size() ;i++){
-	      flag=0;
-	      for(unsigned int j=0;j<pass_jpsi.size();j++){
-	        if(pass_3mu[i].pt()==pass_jpsi[j].pt()){
-	          flag=1;
-	        }
-	      }
-	      if(flag==0){
-	        displaced.push_back(pass_3mu[i]);
-	      //  std::cout<<"il mu displaced e'="<<pass_3mu[i].pt()<<std::endl;
-	      }
-      }
+    //ha trovato il mu displaced
+    bool isDimuon0Trg = mu3_ptr->userInt("isDimuon0Trg");
+    bool isJpsiMuon = mu3_ptr->userInt("isJpsiMuon");
+    if(!(isDimuon0Trg && !isJpsiMuon)) continue;
+    math::PtEtaPhiMLorentzVector mu3_p4(
+              mu3_ptr->pt(), 
+              mu3_ptr->eta(),
+              mu3_ptr->phi(),
+              mu3_ptr->mass()
+              );
+
+    for(size_t ll_idx = 0; ll_idx < dimuons->size(); ++ll_idx) 
+    {
+      edm::Ptr<pat::CompositeCandidate> ll_prt(dimuons, ll_idx);
+      edm::Ptr<reco::Candidate> mu1_ptr = ll_prt->userCand("mu1");
+      edm::Ptr<reco::Candidate> mu2_ptr = ll_prt->userCand("mu2");
+      int mu1_idx = ll_prt->userInt("mu1_idx");
+      int mu2_idx = ll_prt->userInt("mu2_idx");
+
+      pat::CompositeCandidate cand;
+      cand.setP4(ll_prt->p4() + mu3_p4);
+      cand.setCharge(ll_prt->charge() + mu3_ptr->charge());
+      // Use UserCands as they should not use memory but keep the Ptr itself
+      // Put the muon passing the corresponding selection
+
+      cand.addUserCand("mu1", mu1_ptr);
+      cand.addUserCand("mu2", mu2_ptr);
+      cand.addUserCand("K", mu3_ptr);
+      cand.addUserCand("dimuon", ll_prt);
       
-      //      std::cout<<"all muons="<<kaons->size()<<std::endl;
-      //Loop  on displaced muons    
-      for(size_t k_idx = 0; k_idx < kaons->size(); ++k_idx) {
-	      edm::Ptr<pat::Muon> k_ptr(kaons, k_idx);
-	      if( !k_selection_(*k_ptr) ) continue;
+      cand.addUserInt("mu1_idx", mu1_idx);
+      cand.addUserInt("mu2_idx", mu2_idx);
+      cand.addUserInt("mu3_idx", mu3_idx);
+      
+      auto dr_info = min_max_dr({mu1_ptr, mu2_ptr, mu3_ptr});
 
-	      //matching online-offline del mu displaced                   
-	      int flag=0;                 
-	      for(pat::TriggerObjectStandAlone obj: displaced){
-	        if(deltaR(obj,*k_ptr)<0.02){
-	          flag=1;
-	        }
-	      }
-	
-	      if(flag==0){
-	        continue;
-	      }
-	      else
-        { //ha trovato il mu displaced
-	        //  std::cout<<"mu displaced triggerato="<<k_ptr->pt()<<std::endl;
-	        math::PtEtaPhiMLorentzVector k_p4(
-	      				    k_ptr->pt(), 
-	      				    k_ptr->eta(),
-	      				    k_ptr->phi(),
-	      				    k_ptr->mass()
-	      				    );
+      cand.addUserFloat("min_dr", dr_info.first);
+      cand.addUserFloat("max_dr", dr_info.second);
+      // TODO add meaningful variables
+      
+      if( !pre_vtx_selection_(cand) ) continue;
+      
+      //        std::cout<<"PRIMA"<<std::endl;
+      KinVtxFitter fitter(
+        {muons_ttracks->at(mu1_idx), muons_ttracks->at(mu2_idx), muons_ttracks->at(mu3_idx)},
+        {mu1_ptr->mass(), mu2_ptr->mass(), mu3_ptr->mass()},
+        {LEP_SIGMA, LEP_SIGMA, LEP_SIGMA} //some small sigma for the muon mass
+        );
+      //std::cout<<"DOPO"<<std::endl;
+      if(!fitter.success()) continue; // hardcoded, but do we need otherwise?
+      cand.setVertex( 
+          reco::Candidate::Point( 
+              fitter.fitted_vtx().x(),
+              fitter.fitted_vtx().y(),
+              fitter.fitted_vtx().z()
+               )  
+          );
+      used_muon1_id.emplace_back(mu1_idx);
+      used_muon2_id.emplace_back(mu2_idx);
+      used_trk_id.emplace_back(mu3_idx);
+      cand.addUserInt("sv_OK" , fitter.success());
+      cand.addUserFloat("sv_chi2", fitter.chi2());
+      cand.addUserFloat("sv_ndof", fitter.dof()); // float??
+      cand.addUserFloat("sv_prob", fitter.prob());
+      cand.addUserFloat("fitted_mll" , (fitter.daughter_p4(0) + fitter.daughter_p4(1)).mass());
+      auto fit_p4 = fitter.fitted_p4();
+      cand.addUserFloat("fitted_pt"  , fit_p4.pt()); 
+      cand.addUserFloat("fitted_eta" , fit_p4.eta());
+      cand.addUserFloat("fitted_phi" , fit_p4.phi());
+      cand.addUserFloat("fitted_mass", fitter.fitted_candidate().mass());      
+      cand.addUserFloat("fitted_massErr", sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)));      
+      cand.addUserFloat(
+          "cos_theta_2D", 
+          cos_theta_2D(fitter, *beamspot, cand.p4())
+          );
+      cand.addUserFloat(
+          "fitted_cos_theta_2D", 
+          cos_theta_2D(fitter, *beamspot, fit_p4)
+          );
+      auto lxy = l_xy(fitter, *beamspot);
+      cand.addUserFloat("l_xy", lxy.value());
+      cand.addUserFloat("l_xy_unc", lxy.error());
+      cand.addUserFloat("vtx_x", cand.vx());
+      cand.addUserFloat("vtx_y", cand.vy());
+      cand.addUserFloat("vtx_z", cand.vz());
+      cand.addUserFloat("vtx_ex", sqrt(fitter.fitted_vtx_uncertainty().cxx()));
+      cand.addUserFloat("vtx_ey", sqrt(fitter.fitted_vtx_uncertainty().cyy()));
+      cand.addUserFloat("vtx_ez", sqrt(fitter.fitted_vtx_uncertainty().czz()));
 
-	        for(size_t ll_idx = 0; ll_idx < dileptons->size(); ++ll_idx) 
-          {
-	          edm::Ptr<pat::CompositeCandidate> ll_prt(dileptons, ll_idx);
-	          edm::Ptr<reco::Candidate> l1_ptr = ll_prt->userCand("l1");
-	          edm::Ptr<reco::Candidate> l2_ptr = ll_prt->userCand("l2");
-	          int l1_idx = ll_prt->userInt("l1_idx");
-	          int l2_idx = ll_prt->userInt("l2_idx");
+      cand.addUserFloat("fitted_mu1_pt" , fitter.daughter_p4(0).pt()); 
+      cand.addUserFloat("fitted_mu1_eta", fitter.daughter_p4(0).eta());
+      cand.addUserFloat("fitted_mu1_phi", fitter.daughter_p4(0).phi());
+      cand.addUserFloat("fitted_mu2_pt" , fitter.daughter_p4(1).pt()); 
+      cand.addUserFloat("fitted_mu2_eta", fitter.daughter_p4(1).eta());
+      cand.addUserFloat("fitted_mu2_phi", fitter.daughter_p4(1).phi());
+      cand.addUserFloat("fitted_mu3_pt"  , fitter.daughter_p4(2).pt()); 
+      cand.addUserFloat("fitted_mu3_eta" , fitter.daughter_p4(2).eta());
+      cand.addUserFloat("fitted_mu3_phi" , fitter.daughter_p4(2).phi());
+      
+      //mie variabili                                                                                
+      //conto quanti mu totali aveva l'evento
+      //cand.addUserInt("pass_3mu",pass_3mu.size());                                 
+      
+      float B_pt=(Bc_MASS/cand.mass())*cand.pt();
+      
+      TLorentzVector P_b;
+      P_b.SetPtEtaPhiM(B_pt,cand.eta(),cand.phi(),Bc_MASS);
+      
+      TLorentzVector P_k;
+      P_k.SetPtEtaPhiM(mu3_ptr->pt(),mu3_ptr->eta(),mu3_ptr->phi(),mu3_ptr->mass());
+      
+      TLorentzVector P_mu1;
+      P_mu1.SetPtEtaPhiM(mu1_ptr->pt(),mu1_ptr->eta(),mu1_ptr->phi(),mu1_ptr->mass());
+      
+      TLorentzVector P_mu2;
+      P_mu2.SetPtEtaPhiM(mu2_ptr->pt(),mu2_ptr->eta(),mu2_ptr->phi(),mu2_ptr->mass());
+      
+      float m_miss_2=(P_b-P_k-P_mu1-P_mu2)*(P_b-P_k-P_mu1-P_mu2);
+      float Q_2=(P_b-P_mu1-P_mu2)*(P_b-P_mu1-P_mu2);
+      float pt_miss=(P_b.Pt()-P_k.Pt()-P_mu1.Pt()-P_mu2.Pt());
+      float pt_miss_vec=((P_b-P_k-P_mu1-P_mu2).Pt());
+      float pt_var=((P_mu1+P_mu2).Pt()-P_k.Pt());
+      float DR=deltaR(P_mu1.Eta(),P_mu1.Phi(),P_mu2.Eta(),P_mu2.Phi());
+      //float deta = P_mu1.Eta() - P_mu2.Eta();
+      //float dphi = P_mu1.Phi() - P_mu2.Phi();
+      //float DR_2=std::sqrt(deta * deta + dphi * dphi);        
+      float m_jpsi=sqrt((P_mu1+P_mu2)*(P_mu1+P_mu2));
+      cand.addUserFloat("m_miss_2", m_miss_2);
+      cand.addUserFloat("Q_2",Q_2);
+      cand.addUserFloat("pt_miss",pt_miss);
+      cand.addUserFloat("pt_miss_vec",pt_miss_vec);
+      cand.addUserFloat("pt_var",pt_var);
+      cand.addUserFloat("DR",DR);
+      cand.addUserFloat("m_jpsi",m_jpsi);
 
-	          //matching online-offline di jpsi                 
-	          std::vector<pat::TriggerObjectStandAlone> trig_obj_jpsi;
-	          std::vector<edm::Ptr<reco::Candidate>> muon_jpsi;
-	          flag=0;
-	          for(pat::TriggerObjectStandAlone obj: pass_jpsi){
-	            for(pat::TriggerObjectStandAlone obj2: pass_jpsi){  
-		            if((deltaR(obj,*l1_ptr)<0.02) && (deltaR(obj2,*l2_ptr)<0.02)){
-		              flag=1;
-		            }
-	            }
-	          }
-	    
-	          if(flag==0) continue;
-	          else
-            {
-	            //  std::cout<<"dileptons: 1="<<l1_ptr->pt()<<"; 2= "<<l2_ptr->pt()<<std::endl;
-	            pat::CompositeCandidate cand;
-	            cand.setP4(ll_prt->p4() + k_p4);
-	            cand.setCharge(ll_prt->charge() + k_ptr->charge());
-	            // Use UserCands as they should not use memory but keep the Ptr itself
-	            // Put the lepton passing the corresponding selection
-	            //std::cout<<cand.pt()<<" "<<std::endl;
-	            cand.addUserCand("l1", l1_ptr);
-	            cand.addUserCand("l2", l2_ptr);
-	            cand.addUserCand("K", k_ptr);
-	            cand.addUserCand("dilepton", ll_prt);
-	            
-	            cand.addUserInt("l1_idx", l1_idx);
-	            cand.addUserInt("l2_idx", l2_idx);
-	            cand.addUserInt("k_idx", k_idx);
-	            
-	            auto dr_info = min_max_dr({l1_ptr, l2_ptr, k_ptr});
-	            cand.addUserFloat("min_dr", dr_info.first);
-	            cand.addUserFloat("max_dr", dr_info.second);
-	            // TODO add meaningful variables
-	            
-	            if( !pre_vtx_selection_(cand) ) continue;
-	            
-	            //	      std::cout<<"PRIMA"<<std::endl;
-	            KinVtxFitter fitter(
-				        {leptons_ttracks->at(l1_idx), leptons_ttracks->at(l2_idx), kaons_ttracks->at(k_idx)},
-				        {l1_ptr->mass(), l2_ptr->mass(), k_ptr->mass()},
-				        {LEP_SIGMA, LEP_SIGMA, LEP_SIGMA} //some small sigma for the lepton mass
-				        );
-	            //std::cout<<"DOPO"<<std::endl;
-	            if(!fitter.success()) continue; // hardcoded, but do we need otherwise?
-	            cand.setVertex( 
-			            reco::Candidate::Point( 
-				      		    fitter.fitted_vtx().x(),
-				      		    fitter.fitted_vtx().y(),
-				      		    fitter.fitted_vtx().z()
-				      		     )  
-			            );
-	            used_lep1_id.emplace_back(l1_idx);
-	            used_lep2_id.emplace_back(l2_idx);
-	            used_trk_id.emplace_back(k_idx);
-	            cand.addUserInt("sv_OK" , fitter.success());
-	            cand.addUserFloat("sv_chi2", fitter.chi2());
-	            cand.addUserFloat("sv_ndof", fitter.dof()); // float??
-	            cand.addUserFloat("sv_prob", fitter.prob());
-	            cand.addUserFloat("fitted_mll" , (fitter.daughter_p4(0) + fitter.daughter_p4(1)).mass());
-	            auto fit_p4 = fitter.fitted_p4();
-	            cand.addUserFloat("fitted_pt"  , fit_p4.pt()); 
-	            cand.addUserFloat("fitted_eta" , fit_p4.eta());
-	            cand.addUserFloat("fitted_phi" , fit_p4.phi());
-	            cand.addUserFloat("fitted_mass", fitter.fitted_candidate().mass());      
-	            cand.addUserFloat("fitted_massErr", sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)));      
-	            cand.addUserFloat(
-				          "cos_theta_2D", 
-				          cos_theta_2D(fitter, *beamspot, cand.p4())
-				          );
-	            cand.addUserFloat(
-				          "fitted_cos_theta_2D", 
-				          cos_theta_2D(fitter, *beamspot, fit_p4)
-				          );
-	            auto lxy = l_xy(fitter, *beamspot);
-	            cand.addUserFloat("l_xy", lxy.value());
-	            cand.addUserFloat("l_xy_unc", lxy.error());
-	            cand.addUserFloat("vtx_x", cand.vx());
-	            cand.addUserFloat("vtx_y", cand.vy());
-	            cand.addUserFloat("vtx_z", cand.vz());
-	            cand.addUserFloat("vtx_ex", sqrt(fitter.fitted_vtx_uncertainty().cxx()));
-	            cand.addUserFloat("vtx_ey", sqrt(fitter.fitted_vtx_uncertainty().cyy()));
-	            cand.addUserFloat("vtx_ez", sqrt(fitter.fitted_vtx_uncertainty().czz()));
+      //energia del mu unpaired in diversi sistemi di riferimento                  
+      TLorentzVector P_mu=P_k;        
+      TVector3 mu_beta_lab=P_b.BoostVector();
 
-	            cand.addUserFloat("fitted_l1_pt" , fitter.daughter_p4(0).pt()); 
-	            cand.addUserFloat("fitted_l1_eta", fitter.daughter_p4(0).eta());
-	            cand.addUserFloat("fitted_l1_phi", fitter.daughter_p4(0).phi());
-	            cand.addUserFloat("fitted_l2_pt" , fitter.daughter_p4(1).pt()); 
-	            cand.addUserFloat("fitted_l2_eta", fitter.daughter_p4(1).eta());
-	            cand.addUserFloat("fitted_l2_phi", fitter.daughter_p4(1).phi());
-	            cand.addUserFloat("fitted_k_pt"  , fitter.daughter_p4(2).pt()); 
-	            cand.addUserFloat("fitted_k_eta" , fitter.daughter_p4(2).eta());
-	            cand.addUserFloat("fitted_k_phi" , fitter.daughter_p4(2).phi());
-	            
-	            //mie variabili                                                                                
-	            //conto quanti mu totali aveva l'evento
-	            cand.addUserInt("pass_3mu",pass_3mu.size());                                 
-	            
-	            float B_pt=(Bc_MASS/cand.mass())*cand.pt();
-	            
-	            TLorentzVector P_b;
-	            P_b.SetPtEtaPhiM(B_pt,cand.eta(),cand.phi(),Bc_MASS);
-	            
-	            TLorentzVector P_k;
-	            P_k.SetPtEtaPhiM(k_ptr->pt(),k_ptr->eta(),k_ptr->phi(),k_ptr->mass());
-	            
-	            TLorentzVector P_l1;
-	            P_l1.SetPtEtaPhiM(l1_ptr->pt(),l1_ptr->eta(),l1_ptr->phi(),l1_ptr->mass());
-	            
-	            TLorentzVector P_l2;
-	            P_l2.SetPtEtaPhiM(l2_ptr->pt(),l2_ptr->eta(),l2_ptr->phi(),l2_ptr->mass());
-	            
-	            float m_miss_2=(P_b-P_k-P_l1-P_l2)*(P_b-P_k-P_l1-P_l2);
-	            float Q_2=(P_b-P_l1-P_l2)*(P_b-P_l1-P_l2);
-	            float pt_miss=(P_b.Pt()-P_k.Pt()-P_l1.Pt()-P_l2.Pt());
-	            float pt_miss_vec=((P_b-P_k-P_l1-P_l2).Pt());
-	            float pt_var=((P_l1+P_l2).Pt()-P_k.Pt());
-	            float DR=deltaR(P_l1.Eta(),P_l1.Phi(),P_l2.Eta(),P_l2.Phi());
-	            //float deta = P_l1.Eta() - P_l2.Eta();
-	            //float dphi = P_l1.Phi() - P_l2.Phi();
-	            //float DR_2=std::sqrt(deta * deta + dphi * dphi);	      
-	            float m_jpsi=sqrt((P_l1+P_l2)*(P_l1+P_l2));
-	            cand.addUserFloat("m_miss_2", m_miss_2);
-	            cand.addUserFloat("Q_2",Q_2);
-	            cand.addUserFloat("pt_miss",pt_miss);
-	            cand.addUserFloat("pt_miss_vec",pt_miss_vec);
-	            cand.addUserFloat("pt_var",pt_var);
-	            cand.addUserFloat("DR",DR);
-	            cand.addUserFloat("m_jpsi",m_jpsi);
+      P_mu.Boost(-mu_beta_lab);
+      cand.addUserFloat("E_mu_star",P_mu.E());
+      P_mu=P_k;        
+      TLorentzVector jpsi=P_mu1+P_mu2;
+      TVector3 jpsi_beta_lab=jpsi.BoostVector();
+      P_mu.Boost(-jpsi_beta_lab);
+      cand.addUserFloat("E_mu_#",P_mu.E());
+      if( !post_vtx_selection_(cand) ) continue;        
 
-	            //energia del mu unpaired in diversi sistemi di riferimento                  
-	            TLorentzVector P_mu=P_k;	      
-	            TVector3 mu_beta_lab=P_b.BoostVector();
+      
 
-	            P_mu.Boost(-mu_beta_lab);
-	            cand.addUserFloat("E_mu_star",P_mu.E());
-	            P_mu=P_k;	      
-	            TLorentzVector jpsi=P_l1+P_l2;
-	            TVector3 jpsi_beta_lab=jpsi.BoostVector();
-	            P_mu.Boost(-jpsi_beta_lab);
-	            cand.addUserFloat("E_mu_#",P_mu.E());
-	            if( !post_vtx_selection_(cand) ) continue;        
-	            //std::cout<<"EHIIII"<<std::endl;
-
-	            //compute isolation
-	            float l1_iso03 = 0;
-	            float l1_iso04 = 0;
-	            float l2_iso03 = 0;
-	            float l2_iso04 = 0;
-	            float k_iso03  = 0;
-	            float k_iso04  = 0;
-	            float b_iso03  = 0;
-	            float b_iso04  = 0;
-	            
-	            for( unsigned int iTrk=0; iTrk<totalTracks; ++iTrk ) 
-              {
-		            const pat::PackedCandidate & trk = (iTrk < nTracks) ? (*iso_tracks)[iTrk] : (*iso_lostTracks)[iTrk-nTracks];
-		            // define selections for iso tracks (pT, eta, ...)
-		            if( !isotrk_selection_(trk) ) continue;
-		            // check if the track is the kaon
-		            /*if (k_ptr->userCand("cand") ==  edm::Ptr<reco::Candidate> ( iso_tracks, iTrk ) ) {
-		              
-		              std::cout<<"old"<<std::endl;
-		              continue;
-		            }*/
-		            
-		            if(track_to_lepton_match(k_ptr, iso_tracks.id(), iTrk)) 
-                {
-		              // std::cout<<"new"<<std::endl;
-		              continue;
-		            }
-		            // check if the track is one of the two leptons
-		            if (track_to_lepton_match(l1_ptr, iso_tracks.id(), iTrk) || 
-		                track_to_lepton_match(l2_ptr, iso_tracks.id(), iTrk) ) continue;
-		            
-		            // add to final particle iso if dR < cone
-		            float dr_to_l1 = deltaR(cand.userFloat("fitted_l1_eta"), cand.userFloat("fitted_l1_phi"), trk.eta(), trk.phi());
-		            float dr_to_l2 = deltaR(cand.userFloat("fitted_l2_eta"), cand.userFloat("fitted_l2_phi"), trk.eta(), trk.phi());
-		            float dr_to_k  = deltaR(cand.userFloat("fitted_k_eta") , cand.userFloat("fitted_k_phi") , trk.eta(), trk.phi());
-		            float dr_to_b  = deltaR(cand.userFloat("fitted_eta")   , cand.userFloat("fitted_phi") , trk.eta(), trk.phi());
-		            
-		            if (dr_to_l1 < 0.4)
-                {
-		              l1_iso04 += trk.pt();
-		              if ( dr_to_l1 < 0.3) l1_iso03 += trk.pt();
-		            }
-		            if (dr_to_l2 < 0.4)
-                {
-		              l2_iso04 += trk.pt();
-		              if (dr_to_l2 < 0.3)  l2_iso03 += trk.pt();
-		            }
-		            if (dr_to_k < 0.4)
-                {
-		              k_iso04 += trk.pt();
-		              if (dr_to_k < 0.3) k_iso03 += trk.pt();
-		            }
-		            if (dr_to_b < 0.4)
-                {
-		              b_iso04 += trk.pt();
-		              if (dr_to_b < 0.3) b_iso03 += trk.pt();
-		            }
-	            }
-	            cand.addUserFloat("l1_iso03", l1_iso03);
-	            cand.addUserFloat("l1_iso04", l1_iso04);
-	            cand.addUserFloat("l2_iso03", l2_iso03);
-	            cand.addUserFloat("l2_iso04", l2_iso04);
-	            cand.addUserFloat("k_iso03" , k_iso03 );
-	            cand.addUserFloat("k_iso04" , k_iso04 );
-	            cand.addUserFloat("b_iso03" , b_iso03 );
-	            cand.addUserFloat("b_iso04" , b_iso04 );
-
-	            //std::cout<<cand.pt()<<" cand"<<std::endl;	      
-	            //salvo il candidato
-	            ret_val->push_back(cand);
-	            //	      std::cout<<ret_val->size()<<" ret"<<std::endl;
-	          } //trigger dileptons 
-  	      }//for(size_t ll_idx = 0; ll_idx < dileptons->size(); ++ll_idx) 
-  	    } //trigger muon displaced 
-      }//for(size_t k_idx = 0; k_idx < kaons->size(); ++k_idx)
-	  
-      for (auto & cand: *ret_val){
-	      cand.addUserInt("n_k_used", std::count(used_trk_id.begin(),used_trk_id.end(),cand.userInt("k_idx")));
-	      cand.addUserInt("n_l1_used", std::count(used_lep1_id.begin(),used_lep1_id.end(),cand.userInt("l1_idx"))+std::count(used_lep2_id.begin(),used_lep2_id.end(),cand.userInt("l1_idx")));
-	      cand.addUserInt("n_l2_used", std::count(used_lep1_id.begin(),used_lep1_id.end(),cand.userInt("l2_idx"))+std::count(used_lep2_id.begin(),used_lep2_id.end(),cand.userInt("l2_idx")));
+      //compute isolation
+      float mu1_iso03 = 0;
+      float mu1_iso04 = 0;
+      float mu2_iso03 = 0;
+      float mu2_iso04 = 0;
+      float mu3_iso03  = 0;
+      float mu3_iso04  = 0;
+      float b_iso03  = 0;
+      float b_iso04  = 0;
+      
+      for( unsigned int iTrk=0; iTrk<totalTracks; ++iTrk ) 
+      {
+        const pat::PackedCandidate & trk = (iTrk < nTracks) ? (*iso_tracks)[iTrk] : (*iso_lostTracks)[iTrk-nTracks];
+        // define selections for iso tracks (pT, eta, ...)
+        if( !isotrk_selection_(trk) ) continue;
+        // check if the track is the muon
+        if (mu3_ptr->userCand("cand") ==  edm::Ptr<reco::Candidate> ( iso_tracks, iTrk ) ) {
+          
+          std::cout<<"old"<<std::endl;
+          continue;
+        }
+        
+        if(track_to_muon_match(mu3_ptr, iso_tracks.id(), iTrk)) 
+        {
+          // std::cout<<"new"<<std::endl;
+          continue;
+        }
+        // check if the track is one of the two muons
+        if (track_to_muon_match(mu1_ptr, iso_tracks.id(), iTrk) || 
+            track_to_muon_match(mu2_ptr, iso_tracks.id(), iTrk) ) continue;
+        
+        // add to final particle iso if dR < cone
+        float dr_to_mu1 = deltaR(cand.userFloat("fitted_mu1_eta"), cand.userFloat("fitted_mu1_phi"), trk.eta(), trk.phi());
+        float dr_to_mu2 = deltaR(cand.userFloat("fitted_mu2_eta"), cand.userFloat("fitted_mu2_phi"), trk.eta(), trk.phi());
+        float dr_to_k  = deltaR(cand.userFloat("fitted_mu3_eta") , cand.userFloat("fitted_mu3_phi") , trk.eta(), trk.phi());
+        float dr_to_b  = deltaR(cand.userFloat("fitted_eta")   , cand.userFloat("fitted_phi") , trk.eta(), trk.phi());
+        
+        if (dr_to_mu1 < 0.4)
+        {
+          mu1_iso04 += trk.pt();
+          if ( dr_to_mu1 < 0.3) mu1_iso03 += trk.pt();
+        }
+        if (dr_to_mu2 < 0.4)
+        {
+          mu2_iso04 += trk.pt();
+          if (dr_to_mu2 < 0.3)  mu2_iso03 += trk.pt();
+        }
+        if (dr_to_k < 0.4)
+        {
+          mu3_iso04 += trk.pt();
+          if (dr_to_k < 0.3) mu3_iso03 += trk.pt();
+        }
+        if (dr_to_b < 0.4)
+        {
+          b_iso04 += trk.pt();
+          if (dr_to_b < 0.3) b_iso03 += trk.pt();
+        }
       }
-    }//pass_hlt     
-      //    std::cout<<ret_val->size()<<std::endl;
-    evt.put(std::move(ret_val));
-  } //index ok
-}//produce	
+
+      cand.addUserFloat("mu1_iso03", mu1_iso03);
+      cand.addUserFloat("mu1_iso04", mu1_iso04);
+      cand.addUserFloat("mu2_iso03", mu2_iso03);
+      cand.addUserFloat("mu2_iso04", mu2_iso04);
+      cand.addUserFloat("mu3_iso03" , mu3_iso03 );
+      cand.addUserFloat("mu3_iso04" , mu3_iso04 );
+      cand.addUserFloat("b_iso03" , b_iso03 );
+      cand.addUserFloat("b_iso04" , b_iso04 );
+
+      //salvo il candidato
+      ret_val->push_back(cand);
+    }//for(size_t ll_idx = 0; ll_idx < dimuons->size(); ++ll_idx) 
+  }//for(size_t mu3_idx = 0; mu3_idx < muons->size(); ++mu3_idx)
+  
+  for (auto & cand: *ret_val){
+    cand.addUserInt("n_mu3_used", std::count(used_trk_id.begin(),used_trk_id.end(),cand.userInt("mu3_idx")));
+    cand.addUserInt("n_mu1_used", std::count(used_muon1_id.begin(),used_muon1_id.end(),cand.userInt("mu1_idx"))+std::count(used_muon2_id.begin(),used_muon2_id.end(),cand.userInt("mu1_idx")));
+    cand.addUserInt("n_mu2_used", std::count(used_muon1_id.begin(),used_muon1_id.end(),cand.userInt("mu2_idx"))+std::count(used_muon2_id.begin(),used_muon2_id.end(),cand.userInt("mu2_idx")));
+  }
+  evt.put(std::move(ret_val));
+}//produce  
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(BTo3MuBuilder);
