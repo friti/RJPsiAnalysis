@@ -24,14 +24,14 @@ options.register('reportEvery', 1000,
     VarParsing.varType.int,
     "report every N events"
 )
-options.register('skip', 0,
+options.register('skip', 774,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.int,
     "skip first N events"
 )
 
-options.setDefault('maxEvents',1000)
-options.setDefault('tag', '10614')
+options.setDefault('maxEvents',1)
+options.setDefault('tag', '10614_3')
 options.parseArguments()
 
 #globaltag = '102X_dataRun2_v11' if not options.isMC else '102X_upgrade2018_realistic_v15'

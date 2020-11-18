@@ -112,6 +112,7 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
     //ha trovato il mu displaced
     bool isDimuon0Trg = mu3_ptr->userInt("isDimuon0Trg");
     bool isJpsiMuon = mu3_ptr->userInt("isJpsiMuon");
+    if(!isDimuon0Trg) continue;
     if(!(isDimuon0Trg && !isJpsiMuon)) continue;
     math::PtEtaPhiMLorentzVector mu3_p4(
               mu3_ptr->pt(), 

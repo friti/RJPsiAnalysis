@@ -128,6 +128,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   if(index_jpsiTrk != triggerBits->size()) 
     pass_jpsiTrk = triggerBits->accept(index_jpsiTrk);
 
+  if(pass_dimuon0) std::cout << "Passed trigger dimuon0" << std::endl;
+
   std::vector<bool> jpsiMuonFlags;
   std::vector<bool> dimuon0Flags;
   std::vector<bool> jpsiTrkFlags;
