@@ -32,9 +32,12 @@ BTo3Mu = cms.EDProducer(
     postVtxSelection = cms.string(
         #'userInt("sv_OK") == 1 && userFloat("sv_prob") > 0.001 '
         #'&& userFloat("fitted_cos_theta_2D") >= 0'
-        'userFloat("fitted_cos_theta_2D") >= 0'
+        'userFloat("fitted_cos_theta_2D") >= 0.'
         #'&& userFloat("fitted_mass") > 4.5 && userFloat("fitted_mass") < 6.'
     ),
+    #GEN
+
+    srcGen = cms.InputTag("prunedGenParticles"),
 )
 
 BTo3MuTable = cms.EDProducer(
@@ -47,11 +50,11 @@ BTo3MuTable = cms.EDProducer(
     extension=cms.bool(False),
     variables=cms.PSet(
         # pre-fit quantities                                                      
-        CandVars,
+        RJpsiCandVars,
         #nome branch= nome variabile del .cc
         mu1Idx = uint('mu1_idx'),
         mu2Idx = uint('mu2_idx'),
-        mu3dx = uint('mu3_idx'),
+        mu3Idx = uint('mu3_idx'),
         minDR = ufloat('min_dr'),
         maxDR = ufloat('max_dr'),
         # fit and vtx info                                                                                                    
@@ -120,6 +123,21 @@ BTo3MuTable = cms.EDProducer(
         E_mu_canc=ufloat('E_mu_#'),
         m_jpsi=ufloat('m_jpsi'),
         #jPsi_mass_online=ufloat('jPsi_mass_online')                                                         
+
+        #Gen Variables
+        is_jpsi_mu=uint("is_jpsi_mu"),
+        is_psi2s_mu=uint("is_psi2s_mu"),
+        is_chic0_mu=uint("is_chic0_mu"),
+        is_chic1_mu=uint("is_chic1_mu"),
+        is_chic2_mu=uint("is_chic2_mu"),
+        is_hc_mu=uint("is_hc_mu"),
+        is_jpsi_tau=uint("is_jpsi_tau"),
+        is_psi2s_tau=uint("is_psi2s_tau"),
+        is_jpsi_pi=uint("is_jpsi_pi"),
+        is_jpsi_3pi=uint("is_jpsi_3pi"),
+        is_jpsi_hc=uint("is_jpsi_hc"),
+        is_error=uint("is_error"),
+        weightGen= ufloat("weightGen")
     )
 )
 

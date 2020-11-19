@@ -69,7 +69,7 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
     edm::Ptr<pat::Muon> mu1_ptr(muons, mu1_idx);
     if(!mu1_selection_(*mu1_ptr)) continue; 
     int isJpsiMuon1 = mu1_ptr->userInt("isJpsiMuon");
-    //int isDimuon0Trg1 = mu1_ptr->userInt("isDimuon0Trg");
+    int isDimuon0Trg1 = mu1_ptr->userInt("isDimuon0Trg");
     int isJpsiTrkTrg1 = mu1_ptr->userInt("isJpsiTrkTrg");
     
     for(size_t mu2_idx = mu1_idx + 1; mu2_idx < muons->size(); ++mu2_idx) {
@@ -77,14 +77,13 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       if(!mu2_selection_(*mu2_ptr)) continue;
       // Form pairs only with triggered muons
       int isJpsiMuon2 = mu2_ptr->userInt("isJpsiMuon");
-      //int isDimuon0Trg2 = mu2_ptr->userInt("isDimuon0Trg");
+      int isDimuon0Trg2 = mu2_ptr->userInt("isDimuon0Trg");
       int isJpsiTrkTrg2 = mu2_ptr->userInt("isJpsiTrkTrg");
       bool trg1 = (isJpsiTrkTrg1 && isJpsiTrkTrg2);
       bool trg2 = (isJpsiMuon1 && isJpsiMuon2);
 
       //if(!trg1 && !trg2) continue;
       if(!trg2) continue;
-      //std::cout << isDimuon0Trg1 
 
       pat::CompositeCandidate muon_pair;
       muon_pair.setP4(mu1_ptr->p4() + mu2_ptr->p4());

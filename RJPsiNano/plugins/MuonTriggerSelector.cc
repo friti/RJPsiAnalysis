@@ -128,8 +128,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   if(index_jpsiTrk != triggerBits->size()) 
     pass_jpsiTrk = triggerBits->accept(index_jpsiTrk);
 
-  if(pass_dimuon0) std::cout << "Passed trigger dimuon0" << std::endl;
-
+  //if(pass_dimuon0) std::cout << "pass_dimuuon0" << std::endl;
   std::vector<bool> jpsiMuonFlags;
   std::vector<bool> dimuon0Flags;
   std::vector<bool> jpsiTrkFlags;
@@ -160,6 +159,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
       if(isTripleMuon)
       {
+        //if(pass_dimuon0) std::cout << "pt: " << obj.pt() << std::endl;
         jpsiMuonFlags.push_back(isMuonFromJpsi);
         dimuon0Flags.push_back(pass_dimuon0);
         jpsiTrkFlags.push_back(pass_jpsiTrk);
@@ -191,30 +191,35 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   {
     //this is for triggering muon not really need to be configurable
     unsigned int iMuo(&muon - &(muons->at(0)) );
-    if(!(muon.isLooseMuon() && muon.isSoftMuon(PV))) continue;
+    //if(!(muon.isLooseMuon() && muon.isSoftMuon(PV))) continue;
     if(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v5")==nullptr) continue;// &&  muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v15")==nullptr) continue;
 
     float dRMuonMatching = -1.;
     int recoMuonMatching_index = -1;
     int trgMuonMatching_index = -1;
-    for(unsigned int iTrg=0; iTrg<triggeringMuons.size(); ++iTrg)
+    //std::cout << " ---- reco = " << muon.pt() << " " << muon.eta() << " " << muon.phi() << std::endl; 
+    for(unsigned int iTrg=0; iTrg<triggeringMuons.size(); iTrg++)
     {
 	    float dR = reco::deltaR(triggeringMuons[iTrg], muon);
-	    if((dR < dRMuonMatching || dRMuonMatching == -1)) // && dR < maxdR_)
+	    //std::cout << " dR (before) = " << dR << std::endl;
+	    if((dR < dRMuonMatching || dRMuonMatching == -1)  && dR < maxdR_)
       {
 	      dRMuonMatching = dR;
 	      recoMuonMatching_index = iMuo;
 	      trgMuonMatching_index = iTrg;
-	      if(debug) std::cout << " dR = " << dR 
-		              << " reco = " << muon.pt() << " " << muon.eta() << " " << muon.phi() << " " 
-		              << " HLT = " << triggeringMuons[iTrg].pt() << " " << triggeringMuons[iTrg].eta() << " " << triggeringMuons[iTrg].phi()
-		              << std::endl;
+	      //std::cout << " dR = " << dR 
+        //std::cout << " HLT = " << triggeringMuons[iTrg].pt() << " " << triggeringMuons[iTrg].eta() << " " << triggeringMuons[iTrg].phi()
+		    //          << std::endl;
 	    }
     }
 
     //save reco muon 
     if(recoMuonMatching_index != -1)
     {
+
+	    //std::cout  << " reco = " << muon.pt() << " " << muon.eta() << " " << muon.phi() << " " 
+		  //            << " HLT = " << triggeringMuons[trgMuonMatching_index].pt() << " " << triggeringMuons[trgMuonMatching_index].eta() << " " << triggeringMuons[trgMuonMatching_index].phi()
+		   //           << std::endl;
 	    pat::Muon recoTriggerMuonCand(muon);
 	    recoTriggerMuonCand.addUserInt("trgMuonIndex", trgMuonMatching_index);
 	    trgmuons_out->emplace_back(recoTriggerMuonCand);
