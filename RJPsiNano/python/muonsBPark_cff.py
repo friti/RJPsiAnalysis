@@ -38,15 +38,22 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     extension = cms.bool(False), # this is the main table for the muons
     variables = cms.PSet(CandVars,
         ptErr   = Var("bestTrack().ptError()", float, doc = "ptError of the muon track", precision=6),
-        dz = Var("dB('PVDZ')",float,doc="dz (with sign) wrt first PV, in cm",precision=10),
-        dzErr = Var("abs(edB('PVDZ'))",float,doc="dz uncertainty, in cm",precision=6),
-        dxy = Var("dB('PV2D')",float,doc="dxy (with sign) wrt first PV, in cm",precision=10),
-        dxyErr = Var("edB('PV2D')",float,doc="dxy uncertainty, in cm",precision=6),
-        vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
-        vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
-        vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6),
-        ip3d = Var("abs(dB('PV3D'))",float,doc="3D impact parameter wrt first PV, in cm",precision=10),
-        sip3d = Var("abs(dB('PV3D')/edB('PV3D'))",float,doc="3D impact parameter significance wrt first PV",precision=10),
+        xErr = Var("bestTrack().covariance(0,0)", float, doc = "xError of the muon track", precision=10),
+        yErr = Var("bestTrack().covariance(1,1)", float, doc = "xError of the muon track", precision=10),
+        zErr = Var("bestTrack().covariance(2,2)", float, doc = "xError of the muon track", precision=10),
+        xyErr = Var("bestTrack().covariance(0,1)", float, doc = "xError of the muon track", precision=10),
+        yzErr = Var("bestTrack().covariance(0,2)", float, doc = "xError of the muon track", precision=10),
+        xzErr = Var("bestTrack().covariance(1,2)", float, doc = "xError of the muon track", precision=10),
+        ## All the following properties will be calculated later with the PV we select.
+        #G: dz = Var("dB('PVDZ')",float,doc="dz (with sign) wrt first PV, in cm",precision=10),
+        #G: dzErr = Var("abs(edB('PVDZ'))",float,doc="dz uncertainty, in cm",precision=6),
+        #G: dxy = Var("dB('PV2D')",float,doc="dxy (with sign) wrt first PV, in cm",precision=10),
+        #G: dxyErr = Var("edB('PV2D')",float,doc="dxy uncertainty, in cm",precision=6),
+        #G: vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
+        #G: vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
+        #G: vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6),
+        #G: ip3d = Var("abs(dB('PV3D'))",float,doc="3D impact parameter wrt first PV, in cm",precision=10),
+        #G: sip3d = Var("abs(dB('PV3D')/edB('PV3D'))",float,doc="3D impact parameter significance wrt first PV",precision=10),
 #        segmentComp   = Var("segmentCompatibility()", float, doc = "muon segment compatibility", precision=14), # keep higher precision since people have cuts with 3 digits on this
 #        nStations = Var("numberOfMatchedStations", int, doc = "number of matched stations with default arbitration (segment & track)"),
         #nTrackerLayers = Var("innerTrack().hitPattern().trackerLayersWithMeasurement()", int, doc = "number of layers in the tracker"),
@@ -70,6 +77,7 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 #        multiIsoId = Var("?passed('MultiIsoMedium')?2:passed('MultiIsoLoose')","uint8",doc="MultiIsoId from miniAOD selector (1=MultiIsoLoose, 2=MultiIsoMedium)"),
         triggerIdLoose = Var("passed('TriggerIdLoose')",bool,doc="TriggerIdLoose ID"),
 #        inTimeMuon = Var("passed('InTimeMuon')",bool,doc="inTimeMuon ID"),
+
         isTriggering = Var("userInt('isTriggering')", int,doc="flag the reco muon is also triggering"),
         isJpsiMuon = Var("userInt('isJpsiMuon')", int,doc="flag if the muon triggered is comming from a JPsi"),
         isDimuon0Trg = Var("userInt('isDimuon0Trg')", int,doc="flag if the Dimuon0 path was triggered"),
@@ -117,7 +125,7 @@ muonTriggerMatchedTable = muonBParkTable.clone(
    )
 )
 
-muonBParkSequence = cms.Sequence(muonTrgSelector * countTrgMuons)
+#muonBParkSequence = cms.Sequence(muonTrgSelector * countTrgMuons)
 muonBParkSequence = cms.Sequence(muonTrgSelector)
 muonBParkMC = cms.Sequence(muonBParkSequence + muonsBParkMCMatchForTable + selectedMuonsMCMatchEmbedded + muonBParkMCTable)
 #muonBParkMC = cms.Sequence(muonBParkSequence + muonsBParkMCMatchForTable + muonBParkMCTable)

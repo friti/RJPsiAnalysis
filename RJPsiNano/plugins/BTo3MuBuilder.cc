@@ -7,10 +7,16 @@
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "TLorentzVector.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "RecoTauTag/ImpactParameter/interface/ImpactParameterAlgorithm.h"
+#include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
+#include <RecoBTag/BTagTools/interface/SignedImpactParameter3D.h>
+#include "DataFormats/GeometryVector/interface/GlobalVector.h"
 
 #include <vector>
 #include <memory>
@@ -40,6 +46,7 @@ public:
     pre_vtx_selection_{cfg.getParameter<std::string>("preVtxSelection")},
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
     dimuons_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("dimuons") )},
+    pvSelected_{consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("pvSelected"))},
     muons_ttracks_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("muonTransientTracks") )},
     muons_{consumes<pat::MuonCollection>( cfg.getParameter<edm::InputTag>("muons") )},
     //kaons_ttracks_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("kaonsTransientTracks") )},
@@ -57,6 +64,7 @@ public:
   ~BTo3MuBuilder() override {}
   
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
+  Measurement1D getIP(KinVtxFitter fitter, reco::TransientTrack transientTrackMu) const;
 
   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions) {}
   
@@ -66,6 +74,7 @@ public:
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; // cut on the di-muon after the SV fit
 
   const edm::EDGetTokenT<pat::CompositeCandidateCollection> dimuons_;
+  const edm::EDGetTokenT<reco::VertexCollection> pvSelected_;
   const edm::EDGetTokenT<TransientTrackCollection> muons_ttracks_;
   const edm::EDGetTokenT<pat::MuonCollection> muons_;
   //const edm::EDGetTokenT<TransientTrackCollection> muons_ttracks_;
@@ -86,6 +95,9 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   //input
   edm::Handle<pat::CompositeCandidateCollection> dimuons;
   evt.getByToken(dimuons_, dimuons);
+
+  edm::Handle<reco::VertexCollection> pvSelected;
+  evt.getByToken(pvSelected_, pvSelected);
   
   edm::Handle<TransientTrackCollection> muons_ttracks;
   evt.getByToken(muons_ttracks_, muons_ttracks);
@@ -139,97 +151,91 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
     
       if(abs(gen.pdgId()) == 443){  // looking for jpsi      
 
-  if(debugGen) std::cout<<"There is a jpsi and she has "<<gen.numberOfDaughters()<<" daughters"<<std::endl;
-  for(unsigned int dau = 0; dau < gen.numberOfDaughters(); dau++){  //loop of jpsi daughters
-    if(debugGen) std::cout<<"Jpsi daughter: "<<gen.daughter(dau)->pdgId()<<std::endl;
-    is_b = 0;
-    if (abs(gen.daughter(dau)->pdgId())==13){
-      is_doublemu += 1;
-    }
-  } //end loop on daughters
-  if(is_doublemu>=2){  // jpsi -> mu mu
-    if(debugGen) std::cout<<"The daughters are muons"<<std::endl;
-    the_b = gen.mother(0); // jpsi mother
-    if(abs(the_b->pdgId()) == 541){ //Bc->jpsi
-      if(debugGen) std::cout<<"The direct mother is a Bc"<<std::endl;
-      is_b = 1;
-    }  
-    else if(the_b->numberOfMothers() > 0){
-      the_b = gen.mother(0)->mother(0); // Bc->X->jpsi
-      if(abs(the_b->pdgId()) == 541 ){
-        if(debugGen) std::cout<<"The non direct mother is a Bc"<<std::endl;
-        is_b = 1;
-      }
-    }
-    if(is_b == 1){
-      
-      if(debugGen) std::cout<<"The Bc has "<<the_b->numberOfDaughters()<<"daughters"<<std::endl;
-
-      for(unsigned int bdau=0; bdau < the_b->numberOfDaughters(); bdau ++){
-        daughter = the_b->daughter(bdau);
-        if(abs(daughter->pdgId())!= 541 and abs(daughter->pdgId())!= 22){    //not gamma
-    final_daus.push_back(abs(daughter->pdgId()));
-    //        cout<<daughter->pdgId()<<endl;
-    if(debugGen) std::cout<<"The Bc daughters are "<< daughter->pdgId()<<std::endl;
-
+      if(debugGen) std::cout<<"There is a jpsi and she has "<<gen.numberOfDaughters()<<" daughters"<<std::endl;
+      for(unsigned int dau = 0; dau < gen.numberOfDaughters(); dau++){  //loop of jpsi daughters
+        if(debugGen) std::cout<<"Jpsi daughter: "<<gen.daughter(dau)->pdgId()<<std::endl;
+        is_b = 0;
+        if (abs(gen.daughter(dau)->pdgId())==13){
+          is_doublemu += 1;
         }
-      }
-      
-      std::sort(final_daus.begin(), final_daus.end());  //sort the pdgIds of the daughters
-      /*
-      for(unsigned int item=0; item< final_daus.size(); item ++){
-        if(debugGen) std::cout<<final_daus[item]<<std::endl;
-        if(item == final_daus.size() -1) if(debugGen) std::cout<<" "<<std::endl;
-      }
-      */
+      } //end loop on daughters
+      if(is_doublemu>=2){  // jpsi -> mu mu
+        if(debugGen) std::cout<<"The daughters are muons"<<std::endl;
+        the_b = gen.mother(0); // jpsi mother
+        if(abs(the_b->pdgId()) == 541){ //Bc->jpsi
+          if(debugGen) std::cout<<"The direct mother is a Bc"<<std::endl;
+          is_b = 1;
+        }  
+        else if(the_b->numberOfMothers() > 0)
+        {
+          the_b = gen.mother(0)->mother(0); // Bc->X->jpsi
+          if(abs(the_b->pdgId()) == 541 ){
+            if(debugGen) std::cout<<"The non direct mother is a Bc"<<std::endl;
+            is_b = 1;
+          }
+        }
+        if(is_b == 1){
+          if(debugGen) std::cout<<"The Bc has "<<the_b->numberOfDaughters()<<"daughters"<<std::endl;
 
-      flag_jpsi_mu = 0;
-      flag_psi2s_mu = 0;
-      flag_chic0_mu = 0;
-      flag_chic1_mu = 0;
-      flag_chic2_mu = 0;
-      flag_hc_mu = 0;
-      flag_jpsi_tau = 0;
-      flag_psi2s_tau = 0;
-      flag_jpsi_pi = 0;
-      flag_jpsi_3pi = 0;
-      flag_jpsi_hc = 0;
-      flag_error = 0;
-      
-      if(final_daus[0] == 13){  //muon
-        if(final_daus[1] == 14){
-    if(final_daus[2] == 443)  flag_jpsi_mu=1;
-    else if (final_daus[2] == 100443) flag_psi2s_mu = 1;
-    else if (final_daus[2] == 10441) flag_chic0_mu = 1;
-    else if (final_daus[2] == 20443) flag_chic1_mu = 1;
-    else if (final_daus[2] == 445) flag_chic2_mu = 1;
-    else if (final_daus[2] == 10443) flag_hc_mu = 1;
-        }
-        
-      }
-      else if(final_daus[0] == 15){ //tau
-        if (final_daus[1] == 16){
-    if(final_daus[2] == 443) flag_jpsi_tau = 1;
-    else if(final_daus[2] == 100443) flag_psi2s_tau = 1;
-        }
-      }
-      
-      else if(final_daus[0] == 211){
-        if (final_daus[1] == 443) flag_jpsi_pi = 1;
-        if (final_daus[1] == 211 && final_daus[2] ==211 && final_daus[1] == 443) flag_jpsi_3pi = 1;
-      }
-      
-      else if ((final_daus[0] == 431 && final_daus[1] == 443) || (final_daus[0] == 433 && final_daus[1] == 443)) flag_jpsi_hc = 1;  
-      else{
-        flag_error = 1;
-      }
-  
-    } // if(is_b == 1)
-    
-  } //if(is_doublemu>=2)
-      }//if(abs(gen.pdgId()) == 443)
-    }//for(unsigned int  i = 0; i < n; ++i)
-  }//if(evt.eventAuxiliary().run() == 1)
+          for(unsigned int bdau=0; bdau < the_b->numberOfDaughters(); bdau ++){
+            daughter = the_b->daughter(bdau);
+            if(abs(daughter->pdgId())!= 541 and abs(daughter->pdgId())!= 22){    //not gamma
+              final_daus.push_back(abs(daughter->pdgId()));
+              //        cout<<daughter->pdgId()<<endl;
+              if(debugGen) std::cout<<"The Bc daughters are "<< daughter->pdgId()<<std::endl;
+            }
+          }
+          
+          std::sort(final_daus.begin(), final_daus.end());  //sort the pdgIds of the daughters
+          /*
+          for(unsigned int item=0; item< final_daus.size(); item ++){
+            if(debugGen) std::cout<<final_daus[item]<<std::endl;
+            if(item == final_daus.size() -1) if(debugGen) std::cout<<" "<<std::endl;
+          }
+          */
+
+          flag_jpsi_mu = 0;
+          flag_psi2s_mu = 0;
+          flag_chic0_mu = 0;
+          flag_chic1_mu = 0;
+          flag_chic2_mu = 0;
+          flag_hc_mu = 0;
+          flag_jpsi_tau = 0;
+          flag_psi2s_tau = 0;
+          flag_jpsi_pi = 0;
+          flag_jpsi_3pi = 0;
+          flag_jpsi_hc = 0;
+          flag_error = 0;
+          
+          if(final_daus[0] == 13){  //muon
+            if(final_daus[1] == 14){
+              if(final_daus[2] == 443)  flag_jpsi_mu=1;
+              else if (final_daus[2] == 100443) flag_psi2s_mu = 1;
+              else if (final_daus[2] == 10441) flag_chic0_mu = 1;
+              else if (final_daus[2] == 20443) flag_chic1_mu = 1;
+              else if (final_daus[2] == 445) flag_chic2_mu = 1;
+              else if (final_daus[2] == 10443) flag_hc_mu = 1;
+            }
+          }
+          else if(final_daus[0] == 15){ //tau
+            if (final_daus[1] == 16){
+              if(final_daus[2] == 443) flag_jpsi_tau = 1;
+              else if(final_daus[2] == 100443) flag_psi2s_tau = 1;
+            }
+          }
+          else if(final_daus[0] == 211){
+            if (final_daus[1] == 443) flag_jpsi_pi = 1;
+            if (final_daus[1] == 211 && final_daus[2] ==211 && final_daus[1] == 443) flag_jpsi_3pi = 1;
+          }
+          else if ((final_daus[0] == 431 && final_daus[1] == 443) || (final_daus[0] == 433 && final_daus[1] == 443)) flag_jpsi_hc = 1;  
+          else{
+            flag_error = 1;
+          }
+        } // if(is_b == 1)
+      } //if(is_doublemu>=2)
+    }//if(abs(gen.pdgId()) == 443)
+  }//for(unsigned int  i = 0; i < n; ++i)
+}//if(evt.eventAuxiliary().run() == 1)
 
 //////
 
@@ -238,40 +244,49 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 
   std::vector<int> used_muon1_id, used_muon2_id, used_trk_id;
 
-
-  // output
   std::unique_ptr<pat::CompositeCandidateCollection> ret_val(new pat::CompositeCandidateCollection());
-  //Loop  on displaced muons    
-  for(size_t mu3_idx = 0; mu3_idx < muons->size(); ++mu3_idx) {
-    edm::Ptr<pat::Muon> mu3_ptr(muons, mu3_idx);
-    if( !mu3_selection_(*mu3_ptr) ) continue;
 
-    //ha trovato il mu displaced
-    bool isDimuon0Trg3 = mu3_ptr->userInt("isDimuon0Trg");
-    bool isJpsiMuon3 = mu3_ptr->userInt("isJpsiMuon");
-    if(!isDimuon0Trg3) continue;
-    if(!(isDimuon0Trg3 && !isJpsiMuon3)) continue;
-    math::PtEtaPhiMLorentzVector mu3_p4(
-              mu3_ptr->pt(), 
-              mu3_ptr->eta(),
-              mu3_ptr->phi(),
-              mu3_ptr->mass()
-              );
+  const reco::VertexCollection* vertices = pvSelected.product();
+  // output
+  for(size_t ll_idx = 0; ll_idx < dimuons->size(); ++ll_idx) 
+  {
+    //std::cout << "PV " << ll_idx << ": " << vertices->at(ll_idx).position() << std::endl;
+    reco::Vertex bestVertex = vertices->at(ll_idx);
+    edm::Ptr<pat::CompositeCandidate> ll_prt(dimuons, ll_idx);
+    edm::Ptr<reco::Candidate> mu1_ptr = ll_prt->userCand("mu1");
+    edm::Ptr<reco::Candidate> mu2_ptr = ll_prt->userCand("mu2");
+    size_t mu1_idx = abs(ll_prt->userInt("mu1_idx"));
+    size_t mu2_idx = abs(ll_prt->userInt("mu2_idx"));
+    size_t isDimuon_dimuon0Trg = abs(ll_prt->userInt("isDimuon0Trg"));
+    size_t isDimuon_jpsiTrkTrg = abs(ll_prt->userInt("isJpsiTrkTrg"));
 
-    for(size_t ll_idx = 0; ll_idx < dimuons->size(); ++ll_idx) 
-    {
-      edm::Ptr<pat::CompositeCandidate> ll_prt(dimuons, ll_idx);
-      edm::Ptr<reco::Candidate> mu1_ptr = ll_prt->userCand("mu1");
-      edm::Ptr<reco::Candidate> mu2_ptr = ll_prt->userCand("mu2");
-      int mu1_idx = ll_prt->userInt("mu1_idx");
-      int mu2_idx = ll_prt->userInt("mu2_idx");
-      //std::cout << "here1" << std::endl;
+
+    //Loop  on displaced muons    
+    for(size_t mu3_idx = 0; mu3_idx < muons->size(); ++mu3_idx) {
+      edm::Ptr<pat::Muon> mu3_ptr(muons, mu3_idx);
+      if((mu1_idx == mu3_idx) || (mu2_idx == mu3_idx)) continue;
+      if( !mu3_selection_(*mu3_ptr) ) continue;
+  
+      //ha trovato il mu displaced
+      bool isDimuon0Trg = mu3_ptr->userInt("isDimuon0Trg");
+      bool isJpsiTrkTrg = mu3_ptr->userInt("isJpsiTrkTrg");
+      bool isJpsiMuon = mu3_ptr->userInt("isJpsiMuon");
+      bool isUnpairedMuon = isDimuon0Trg && !isJpsiMuon;
+      if(!(isDimuon_jpsiTrkTrg || isUnpairedMuon)) continue;
+      
+      math::PtEtaPhiMLorentzVector mu3_p4(
+                mu3_ptr->pt(), 
+                mu3_ptr->eta(),
+                mu3_ptr->phi(),
+                mu3_ptr->mass()
+                );
+  
+      // Use UserCands as they should not use memory but keep the Ptr itself
+      // Put the muon passing the corresponding selection
 
       pat::CompositeCandidate cand;
       cand.setP4(ll_prt->p4() + mu3_p4);
       cand.setCharge(ll_prt->charge() + mu3_ptr->charge());
-      // Use UserCands as they should not use memory but keep the Ptr itself
-      // Put the muon passing the corresponding selection
 
       cand.addUserCand("mu1", mu1_ptr);
       cand.addUserCand("mu2", mu2_ptr);
@@ -338,6 +353,10 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
               fitter.fitted_vtx().z()
                )  
           );
+      Measurement1D ip3D = getIP(fitter, muons_ttracks->at(mu3_idx));
+      cand.addUserFloat("ip3D", ip3D.value());
+      cand.addUserFloat("ip3D_e", ip3D.error());
+
       used_muon1_id.emplace_back(mu1_idx);
       used_muon2_id.emplace_back(mu2_idx);
       used_trk_id.emplace_back(mu3_idx);
@@ -369,6 +388,27 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("vtx_ex", sqrt(fitter.fitted_vtx_uncertainty().cxx()));
       cand.addUserFloat("vtx_ey", sqrt(fitter.fitted_vtx_uncertainty().cyy()));
       cand.addUserFloat("vtx_ez", sqrt(fitter.fitted_vtx_uncertainty().czz()));
+      cand.addUserFloat("vtx_chi2", ChiSquaredProbability(fitter.chi2(), fitter.dof()));
+
+      cand.addUserFloat("jpsi_vtx_x", ll_prt->userFloat("vtx_x"));
+      cand.addUserFloat("jpsi_vtx_y", ll_prt->userFloat("vtx_y"));
+      cand.addUserFloat("jpsi_vtx_z", ll_prt->userFloat("vtx_z"));
+      cand.addUserFloat("jpsi_vtx_ex", ll_prt->userFloat("vtx_ex"));
+      cand.addUserFloat("jpsi_vtx_ey", ll_prt->userFloat("vtx_ey"));
+      cand.addUserFloat("jpsi_vtx_ez", ll_prt->userFloat("vtx_ez"));
+      cand.addUserFloat("jpsi_vtx_chi2", ll_prt->userFloat("vtx_chi2"));
+
+      cand.addUserFloat("pv_x", bestVertex.position().x());
+      cand.addUserFloat("pv_y", bestVertex.position().y());
+      cand.addUserFloat("pv_z", bestVertex.position().z());
+      cand.addUserFloat("pv_ex", bestVertex.covariance(0,0));
+      cand.addUserFloat("pv_ey", bestVertex.covariance(1,1));
+      cand.addUserFloat("pv_ez", bestVertex.covariance(2,2));
+      cand.addUserFloat("pv_exy", bestVertex.covariance(0,1));
+      cand.addUserFloat("pv_eyz", bestVertex.covariance(0,2));
+      cand.addUserFloat("pv_exz", bestVertex.covariance(1,2));
+      cand.addUserFloat("pv_chi2", ChiSquaredProbability(bestVertex.chi2(), bestVertex.ndof()));
+      
 
       cand.addUserFloat("fitted_mu1_pt" , fitter.daughter_p4(0).pt()); 
       cand.addUserFloat("fitted_mu1_eta", fitter.daughter_p4(0).eta());
@@ -511,5 +551,36 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   evt.put(std::move(ret_val));
 }//produce  
 
+Measurement1D BTo3MuBuilder::getIP(KinVtxFitter fitter,reco::TransientTrack transientTrackMu) const
+{
+  // computing 3d impact parameter
+  GlobalVector jpsiDirection(fitter.fitted_p4().x(), fitter.fitted_p4().y(), fitter.fitted_p4().z());
+  reco::Vertex::Point jpsiVertexPosition(fitter.fitted_vtx().x(),fitter.fitted_vtx().y(),fitter.fitted_vtx().z());
+
+  const double err00 = fitter.fitted_candidate().kinematicParametersError().matrix()(0,0);
+  const double err11 = fitter.fitted_candidate().kinematicParametersError().matrix()(1,1);
+  const double err22 = fitter.fitted_candidate().kinematicParametersError().matrix()(2,2);
+  const double err01 = fitter.fitted_candidate().kinematicParametersError().matrix()(0,1);
+  const double err02 = fitter.fitted_candidate().kinematicParametersError().matrix()(0,2);
+  const double err12 = fitter.fitted_candidate().kinematicParametersError().matrix()(1,2);
+  reco::Vertex::Error jpsiVertexError;
+
+  jpsiVertexError(0,0) = err00;
+  jpsiVertexError(0,1) = err01;
+  jpsiVertexError(0,2) = err02;
+  jpsiVertexError(1,0) = err01;
+  jpsiVertexError(1,1) = err11;
+  jpsiVertexError(1,2) = err12;
+  jpsiVertexError(2,0) = err02;
+  jpsiVertexError(2,1) = err12;
+  jpsiVertexError(2,2) = err22;
+
+  GlobalVector jpsiGlobalVector(fitter.fitted_p4().x(), fitter.fitted_p4().y(), fitter.fitted_p4().z());
+  const reco::Vertex jpsiVertex(jpsiVertexPosition, jpsiVertexError, fitter.chi2(), fitter.dof(), 2);
+
+  SignedImpactParameter3D signed_ip3D;
+  Measurement1D ip3D = signed_ip3D.apply(transientTrackMu,jpsiGlobalVector,jpsiVertex).second;
+  return ip3D;
+}
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(BTo3MuBuilder);

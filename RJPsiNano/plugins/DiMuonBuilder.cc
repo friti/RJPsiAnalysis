@@ -35,7 +35,8 @@ public:
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
     src_{consumes<MuonCollection>( cfg.getParameter<edm::InputTag>("src") )},
     ttracks_src_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("transientTracksSrc") )} {
-       produces<pat::CompositeCandidateCollection>();
+       produces<pat::CompositeCandidateCollection>("muonPairsForBTo3Mu");
+       produces<TransientTrackCollection>("dimuonTransientTracks");
     }
 
   ~DiMuonBuilder() override {}
@@ -64,6 +65,7 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 
   // output
   std::unique_ptr<pat::CompositeCandidateCollection> ret_value(new pat::CompositeCandidateCollection());
+  std::unique_ptr<TransientTrackCollection> dimuon_tt(new TransientTrackCollection);
   
   for(size_t mu1_idx = 0; mu1_idx < muons->size(); ++mu1_idx) {
     edm::Ptr<pat::Muon> mu1_ptr(muons, mu1_idx);
@@ -71,7 +73,6 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
     int isJpsiMuon1 = mu1_ptr->userInt("isJpsiMuon");
     int isDimuon0Trg1 = mu1_ptr->userInt("isDimuon0Trg");
     int isJpsiTrkTrg1 = mu1_ptr->userInt("isJpsiTrkTrg");
-    
     for(size_t mu2_idx = mu1_idx + 1; mu2_idx < muons->size(); ++mu2_idx) {
       edm::Ptr<pat::Muon> mu2_ptr(muons, mu2_idx);
       if(!mu2_selection_(*mu2_ptr)) continue;
@@ -80,10 +81,10 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       int isDimuon0Trg2 = mu2_ptr->userInt("isDimuon0Trg");
       int isJpsiTrkTrg2 = mu2_ptr->userInt("isJpsiTrkTrg");
       bool trg1 = (isJpsiTrkTrg1 && isJpsiTrkTrg2);
-      bool trg2 = (isJpsiMuon1 && isJpsiMuon2);
+      bool trg2 = ((isDimuon0Trg1 && isJpsiMuon1) && (isDimuon0Trg2 && isJpsiMuon2));
 
-      //if(!trg1 && !trg2) continue;
-      if(!trg2) continue;
+      if(!trg1 && !trg2) continue;
+      //if(!trg2) continue;
 
       pat::CompositeCandidate muon_pair;
       muon_pair.setP4(mu1_ptr->p4() + mu2_ptr->p4());
@@ -92,6 +93,8 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       // Put the muon passing the corresponding selection
       muon_pair.addUserInt("mu1_idx", mu1_idx );
       muon_pair.addUserInt("mu2_idx", mu2_idx );
+      muon_pair.addUserInt("isJpsiTrkTrg", trg1);
+      muon_pair.addUserInt("isDimuon0Trg", trg2);
       // Use UserCands as they should not use memory but keep the Ptr itself
       muon_pair.addUserCand("mu1", mu1_ptr );
       muon_pair.addUserCand("mu2", mu2_ptr );
@@ -104,28 +107,34 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
         );
 
       muon_pair.addUserFloat("sv_chi2", fitter.chi2());
+      //std::cout << "vx_: " << fitter.fitted_candidate() << std::endl;
+      muon_pair.addUserFloat("sv_position", fitter.fitted_vtx().x()); // float??
       muon_pair.addUserFloat("sv_ndof", fitter.dof()); // float??
       muon_pair.addUserFloat("sv_prob", fitter.prob());
       muon_pair.addUserFloat("fitted_mass", fitter.success() ? fitter.fitted_candidate().mass() : -1);
       muon_pair.addUserFloat("fitted_massErr", fitter.success() ? sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)) : -1);
-      muon_pair.addUserFloat("vtx_ex",1.0);
-      /* muon_pair.addUserFloat("vtx_x",muon_pair.vx());
+      muon_pair.addUserFloat("vtx_x",muon_pair.vx());
       muon_pair.addUserFloat("vtx_y",muon_pair.vy());
       muon_pair.addUserFloat("vtx_z",muon_pair.vz());
       muon_pair.addUserFloat("vtx_ex",sqrt(fitter.fitted_vtx_uncertainty().cxx()));
       muon_pair.addUserFloat("vtx_ey",sqrt(fitter.fitted_vtx_uncertainty().cyy()));
       muon_pair.addUserFloat("vtx_ez",sqrt(fitter.fitted_vtx_uncertainty().czz()));
-      */
+      muon_pair.addUserFloat("vtx_chi2", fitter.chi2());
      
       // if needed, add here more stuff
 
       // cut on the SV info
+      // const reco::TransientTrack& fitted_candidate_ttrk()
       if( !post_vtx_selection_(muon_pair) ) continue;
-      ret_value->push_back(muon_pair);
+      if(!fitter.fitted_candidate_ttrk().isValid()) continue;
+      dimuon_tt->emplace_back(fitter.fitted_candidate_ttrk());
+      //ret_value->push_back(muon_pair);
+      ret_value->emplace_back(muon_pair);
     }
   }
   
-  evt.put(std::move(ret_value));
+  evt.put(std::move(ret_value), "muonPairsForBTo3Mu");
+  evt.put(std::move(dimuon_tt), "dimuonTransientTracks");
 }
 
 DEFINE_FWK_MODULE(DiMuonBuilder);

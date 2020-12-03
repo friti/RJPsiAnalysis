@@ -24,14 +24,14 @@ options.register('reportEvery', 1000,
     VarParsing.varType.int,
     "report every N events"
 )
-options.register('skip', 774,
+options.register('skip',0,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.int,
     "skip first N events"
 )
 
-options.setDefault('maxEvents',1)
-options.setDefault('tag', '10614_3')
+options.setDefault('maxEvents',1000)
+options.setDefault('tag', '10614')
 options.parseArguments()
 
 #globaltag = '102X_dataRun2_v11' if not options.isMC else '102X_upgrade2018_realistic_v15'
@@ -47,8 +47,9 @@ outputFileNANO = cms.untracked.string('_'.join(['RJPsi', extension[options.isMC]
 #input files (it can be a list of files)
 if not options.inputFiles:
     options.inputFiles = ['root://cms-xrd-global.cern.ch//store/data/Run2018C/Charmonium/MINIAOD/17Sep2018-v1/60000/5865682B-91E0-F047-969B-C52A2FCB241F.root'] if not options.isMC else \
-                         ['root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL18MiniAOD/BcToJPsiTauNu_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/MINIAODSIM/106X_upgrade2018_realistic_v11_L1v1_ext1-v2/100000/02F13381-1D94-CC43-948A-2EFFB8572949.root']
-                         #['root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL16MiniAOD/BcToJPsiTauNu_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/MINIAODSIM/106X_mcRun2_asymptotic_v13-v2/00000/1C9BA089-BFA5-E54B-BF1A-288035067E66.root']
+                         ['file:/afs/cern.ch/user/g/garamire/work/private/CMSPisa/RJPsiAnalysis/ulBcReconstruction/CMSSW_10_6_14/src/PhysicsTools/RJPsiNano/test/02F13381-1D94-CC43-948A-2EFFB8572949.root']
+                         #['root://cms-xrd-global.cern.ch//store/user/manzoni/RJPsi_Bc_PMX_HLT_RECO_MINI_28oct20_v5/RJpsi-BcToXToJpsiMuMuSelected-RunIISummer19UL18MiniAOD_1000.root']
+                         #['root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL18MiniAOD/BcToJPsiTauNu_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/MINIAODSIM/106X_upgrade2018_realistic_v11_L1v1_ext1-v2/100000/02F13381-1D94-CC43-948A-2EFFB8572949.root']
 
 
 #what's the purpose of this 

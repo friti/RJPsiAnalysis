@@ -134,8 +134,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   std::vector<bool> jpsiTrkFlags;
 
   bool isMuonFromJpsi = false;
-  bool isTripleMuon = false;
-  //if(pass_jpsiTrk || pass_dimuon0) {  
   if(pass_dimuon0) {  
     for (pat::TriggerObjectStandAlone obj : *triggerObjects) 
     { // note: not "const &" since we want to call unpackPathNames
@@ -143,21 +141,10 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       obj.unpackPathNames(names);
 
 	    isMuonFromJpsi = false;
-	    isTripleMuon = false;
-      if(pass_dimuon0)
-      {
-        if(obj.hasFilterLabel("hltVertexmumuFilterJpsiMuon3p5"))
-        {
-          isMuonFromJpsi = true;
-        }
-        if(obj.hasFilterLabel("hltTripleMuL3PreFiltered222"))
-        {
-          isTripleMuon = true;
-        }
-      }
+      if(obj.hasFilterLabel("hltVertexmumuFilterJpsiMuon3p5"))
+        isMuonFromJpsi = true;
 
-
-      if(isTripleMuon)
+      if(obj.hasFilterLabel("hltTripleMuL3PreFiltered222") || obj.hasFilterLabel("hltJpsiTkVertexFilter"))
       {
         //if(pass_dimuon0) std::cout << "pt: " << obj.pt() << std::endl;
         jpsiMuonFlags.push_back(isMuonFromJpsi);
@@ -169,7 +156,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 	        // Print trigger object collection and type
 	        std::cout << "\t   Collection: " << obj.collection() << std::endl;
         }
-      }
+      } 
     }//trigger objects
   }
 
@@ -192,7 +179,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     //this is for triggering muon not really need to be configurable
     unsigned int iMuo(&muon - &(muons->at(0)) );
     //if(!(muon.isLooseMuon() && muon.isSoftMuon(PV))) continue;
-    if(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v5")==nullptr) continue;// &&  muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v15")==nullptr) continue;
+    if(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v5")==nullptr &&  muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v15")==nullptr) continue;
 
     float dRMuonMatching = -1.;
     int recoMuonMatching_index = -1;

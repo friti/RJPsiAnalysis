@@ -26,9 +26,9 @@ from PhysicsTools.RJPsiNano.BTo3Mu_cff import *
 #G: nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)  #purpose?
 
 # from PhysiscsTools.NanoAOD
-nanoSequence = cms.Sequence(nanoMetadata + 
-                            vertexSequence +           
-                            vertexTables)# + 
+nanoSequence = cms.Sequence(nanoMetadata)# + 
+                            #vertexSequence)# +           
+                            #vertexTables)# + 
                             #globalTables + vertexTables)# + 
                             #l1bits)
                             #triggerObjectBParkTables + l1bits)

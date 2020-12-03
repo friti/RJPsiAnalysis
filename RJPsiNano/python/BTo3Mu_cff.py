@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.RJPsiNano.common_cff import *
+from PhysicsTools.RJPsiNano.primaryVertices_cff import *
 
 
 muonPairsForBTo3Mu = cms.EDProducer(
@@ -15,7 +16,8 @@ muonPairsForBTo3Mu = cms.EDProducer(
 
 BTo3Mu = cms.EDProducer(
     'BTo3MuBuilder',
-    dimuons = cms.InputTag('muonPairsForBTo3Mu'),
+    dimuons = cms.InputTag('muonPairsForBTo3Mu', 'muonPairsForBTo3Mu'),
+    pvSelected = cms.InputTag('pvSelector', 'bestVertex'),
     muonTransientTracks = muonPairsForBTo3Mu.transientTracksSrc,
     muons = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
     #kaonsTransientTracks = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'),
@@ -59,6 +61,8 @@ BTo3MuTable = cms.EDProducer(
         maxDR = ufloat('max_dr'),
         # fit and vtx info                                                                                                    
         #chi2 = ufloat('sv_chi2'),
+        ip3D = ufloat('ip3D'),
+        ip3D_e = ufloat('ip3D'),
                          
         svprob = ufloat('sv_prob'),
         l_xy = ufloat('l_xy'),
@@ -69,6 +73,26 @@ BTo3MuTable = cms.EDProducer(
         vtx_ex = ufloat('vtx_ex'), ## only saving diagonal elements of the cov matrix                                         
         vtx_ey = ufloat('vtx_ey'),
         vtx_ez = ufloat('vtx_ez'),
+        vtx_chi2 = ufloat('vtx_chi2'),
+
+        jpsi_vtx_x = ufloat('jpsi_vtx_x'),
+        jpsi_vtx_y = ufloat('jpsi_vtx_y'),
+        jpsi_vtx_z = ufloat('jpsi_vtx_z'),
+        jpsi_vtx_ex = ufloat('jpsi_vtx_ex'),
+        jpsi_vtx_ey = ufloat('jpsi_vtx_ey'),
+        jpsi_vtx_ez = ufloat('jpsi_vtx_ez'),
+        jpsi_vtx_chi2 = ufloat('jpsi_vtx_chi2'),
+
+        pv_x = ufloat('pv_x'),
+        pv_y = ufloat('pv_y'),
+        pv_z = ufloat('pv_z'),
+        pv_ex = ufloat('pv_ex'),
+        pv_ey = ufloat('pv_ey'),
+        pv_ez = ufloat('pv_ez'),
+        pv_exy = ufloat('pv_exz'),
+        pv_eyz = ufloat('pv_eyz'),
+        pv_exz = ufloat('pv_exz'),
+        pv_chi2 = ufloat('pv_chi2'),
         # Mll                                                                                                                 
         mll_raw = Var('userCand("dimuon").mass()', float),
         mll_llfit = Var('userCand("dimuon").userFloat("fitted_mass")', float), # this might not work                        
@@ -150,7 +174,7 @@ CountBTo3Mu = cms.EDFilter("PATCandViewCountFilter",
 
 
 BTo3MuSequence = cms.Sequence(
-    (muonPairsForBTo3Mu * BTo3Mu)
+    (muonPairsForBTo3Mu * pvSelector * BTo3Mu)
 )
 
 BToKLLTables = cms.Sequence(BTo3MuTable)
