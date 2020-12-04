@@ -144,6 +144,8 @@ TrgBitTableProducer::produce( edm::Event &evt, edm::EventSetup const &stp)
         TString TrigPath = trigName.triggerName( itrg );
         if ( TrigPath.Contains( hltpath ) ){
            fire=true; 
+           //std::cout << "--- Trigger: " << TrigPath << std::endl;
+           //std::cout << "--- Trigger index: " << itrg << std::endl;
            break; 
         }
       } 

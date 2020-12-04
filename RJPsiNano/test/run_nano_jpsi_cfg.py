@@ -24,17 +24,20 @@ options.register('reportEvery', 1000,
     VarParsing.varType.int,
     "report every N events"
 )
-options.register('skip', 0,
+options.register('skip',0,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.int,
     "skip first N events"
 )
 
 options.setDefault('maxEvents',1000)
-options.setDefault('tag', '10215')
+options.setDefault('tag', '10614')
 options.parseArguments()
 
-globaltag = '102X_dataRun2_v11' if not options.isMC else '102X_upgrade2018_realistic_v15'
+#globaltag = '102X_dataRun2_v11' if not options.isMC else '102X_upgrade2018_realistic_v15'
+globaltag = '106X_dataRun2_v28' if not options.isMC else '106X_upgrade2018_realistic_v11_L1v1'
+
+
 if options._beenSet['globalTag']:
     globaltag = options.globalTag
 
@@ -44,7 +47,9 @@ outputFileNANO = cms.untracked.string('_'.join(['RJPsi', extension[options.isMC]
 #input files (it can be a list of files)
 if not options.inputFiles:
     options.inputFiles = ['root://cms-xrd-global.cern.ch//store/data/Run2018C/Charmonium/MINIAOD/17Sep2018-v1/60000/5865682B-91E0-F047-969B-C52A2FCB241F.root'] if not options.isMC else \
-                         ['root://cms-xrd-global.cern.ch///store/mc/RunIIAutumn18MiniAOD/BcToJpsiMuNu_JpsiToMuMu_13TeV-TuneCP5-evtgen-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/230000/A9DE66AD-7301-004C-8D87-3FBE21CA63BD.root']
+                         ['file:/afs/cern.ch/user/g/garamire/work/private/CMSPisa/RJPsiAnalysis/ulBcReconstruction/CMSSW_10_6_14/src/PhysicsTools/RJPsiNano/test/02F13381-1D94-CC43-948A-2EFFB8572949.root']
+                         #['root://cms-xrd-global.cern.ch//store/user/manzoni/RJPsi_Bc_PMX_HLT_RECO_MINI_28oct20_v5/RJpsi-BcToXToJpsiMuMuSelected-RunIISummer19UL18MiniAOD_1000.root']
+                         #['root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL18MiniAOD/BcToJPsiTauNu_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/MINIAODSIM/106X_upgrade2018_realistic_v11_L1v1_ext1-v2/100000/02F13381-1D94-CC43-948A-2EFFB8572949.root']
 
 
 #what's the purpose of this 
@@ -60,7 +65,7 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load("Configuration.StandardSequences.MagneticField_cff")
-process.load('PhysicsTools.BParkingNano.nanoRJPsi_3Mu_cff')
+process.load('PhysicsTools.RJPsiNano.nanoRJPsi_3Mu_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -123,9 +128,8 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 
-from PhysicsTools.BParkingNano.nanoRJPsi_3Mu_cff import *
+from PhysicsTools.RJPsiNano.nanoRJPsi_3Mu_cff import *
 process = nanoAOD_customizeMuonTriggerBPark(process)  #delete?
-#process = nanoAOD_customizeElectronFilteredBPark(process)  #not needed now, but prob in the future
 process = nanoAOD_customizeBTo3Mu(process)
 process = nanoAOD_customizeTriggerBitsBPark(process)  #? delete?
 
@@ -137,7 +141,7 @@ process.nanoAOD_3Mu_step = cms.Path(process.nanoSequence + process.nanoBTo3MuSeq
 
 # customisation of the process.
 if options.isMC:
-    from PhysicsTools.BParkingNano.nanoRJPsi_3Mu_cff import nanoAOD_customizeMC
+    from PhysicsTools.RJPsiNano.nanoRJPsi_3Mu_cff import nanoAOD_customizeMC
     nanoAOD_customizeMC(process)
 
 process.endjob_step = cms.EndPath(process.endOfProcess)

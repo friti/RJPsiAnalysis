@@ -96,7 +96,7 @@ inline std::pair<double,double> computeDCA(const reco::TransientTrack& trackTT,
 }
 
 
-inline bool track_to_lepton_match(edm::Ptr<reco::Candidate> l_ptr, auto iso_tracks_id, unsigned int iTrk)
+inline bool track_to_muon_match(edm::Ptr<reco::Candidate> l_ptr, auto iso_tracks_id, unsigned int iTrk)
 {
   for (unsigned int i = 0; i < l_ptr->numberOfSourceCandidatePtrs(); ++i) {
     if (! ((l_ptr->sourceCandidatePtr(i)).isNonnull() && 
