@@ -179,6 +179,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     //this is for triggering muon not really need to be configurable
     unsigned int iMuo(&muon - &(muons->at(0)) );
     //if(!(muon.isLooseMuon() && muon.isSoftMuon(PV))) continue;
+    //if(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v5")==nullptr &&  muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v15")==nullptr) continue;
     if(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v5")==nullptr &&  muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v15")==nullptr) continue;
 
     float dRMuonMatching = -1.;

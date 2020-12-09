@@ -34,26 +34,27 @@
 constexpr bool debugGen = false;
 
 
-class BTo3MuBuilder : public edm::global::EDProducer<> {
+class BTo2MuTkBuilder : public edm::global::EDProducer<> {
 
   // perhaps we need better structure here (begin run etc)
 public:
   typedef std::vector<reco::TransientTrack> TransientTrackCollection;
   typedef std::vector<reco::GenParticle> GenParticleCollection;
 
-  explicit BTo3MuBuilder(const edm::ParameterSet &cfg):
-    k_selection_{cfg.getParameter<std::string>("muonSelection")},
+  explicit BTo2MuTkBuilder(const edm::ParameterSet &cfg):
+    particle_selection_{cfg.getParameter<std::string>("particleSelection")},
     pre_vtx_selection_{cfg.getParameter<std::string>("preVtxSelection")},
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
     dimuons_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("dimuons") )},
     pvSelected_{consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("pvSelected"))},
+    particles_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("particles") )},
+    particles_ttracks_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("particlesTransientTracks") )},
     muons_ttracks_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("muonsTransientTracks") )},
-    muons_{consumes<pat::MuonCollection>( cfg.getParameter<edm::InputTag>("muons") )},
     //kaons_ttracks_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("kaonsTransientTracks") )},
     isotracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("tracks"))),
     isolostTracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lostTracks"))),
-
     isotrk_selection_{cfg.getParameter<std::string>("isoTracksSelection")},
+    particle_mass{cfg.getParameter<double>("particle_mass")},
    //GEN
     srcToken_(consumes<GenParticleCollection>(cfg.getParameter<edm::InputTag>("srcGen"))), 
     beamspot_{consumes<reco::BeamSpot>( cfg.getParameter<edm::InputTag>("beamSpot") )} 
@@ -61,7 +62,7 @@ public:
       produces<pat::CompositeCandidateCollection>();
   }
 
-  ~BTo3MuBuilder() override {}
+  ~BTo2MuTkBuilder() override {}
   
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
   Measurement1D getIP(KinVtxFitter fitter, reco::TransientTrack transientTrackMu) const;
@@ -69,20 +70,21 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions) {}
   
   private:
-  const StringCutObjectSelector<pat::Muon> k_selection_; 
+  const StringCutObjectSelector<pat::CompositeCandidate> particle_selection_; 
   const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; // cut on the di-muon before the SV fit
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; // cut on the di-muon after the SV fit
 
   const edm::EDGetTokenT<pat::CompositeCandidateCollection> dimuons_;
   const edm::EDGetTokenT<reco::VertexCollection> pvSelected_;
+  const edm::EDGetTokenT<pat::CompositeCandidateCollection> particles_;
+  const edm::EDGetTokenT<TransientTrackCollection> particles_ttracks_;
   const edm::EDGetTokenT<TransientTrackCollection> muons_ttracks_;
-  const edm::EDGetTokenT<pat::MuonCollection> muons_;
-  //const edm::EDGetTokenT<TransientTrackCollection> muons_ttracks_;
 
   const edm::EDGetTokenT<pat::PackedCandidateCollection> isotracksToken_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> isolostTracksToken_;
 
   const StringCutObjectSelector<pat::PackedCandidate> isotrk_selection_; 
+  const double particle_mass;
 
   //GEN
   edm::EDGetTokenT<reco::GenParticleCollection> srcToken_;
@@ -90,7 +92,7 @@ public:
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_;  
 };
 
-void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &) const {
+void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &) const {
 
   //input
   edm::Handle<pat::CompositeCandidateCollection> dimuons;
@@ -99,14 +101,14 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   edm::Handle<reco::VertexCollection> pvSelected;
   evt.getByToken(pvSelected_, pvSelected);
   
-  edm::Handle<TransientTrackCollection> muons_ttracks;
-  evt.getByToken(muons_ttracks_, muons_ttracks);
+  edm::Handle<TransientTrackCollection> particles_ttracks;
+  evt.getByToken(particles_ttracks_, particles_ttracks);
 
-  edm::Handle<pat::MuonCollection> muons;
-  evt.getByToken(muons_, muons);
+  edm::Handle<pat::CompositeCandidateCollection> particles;
+  evt.getByToken(particles_, particles);
   
-  //edm::Handle<TransientTrackCollection> kaons_ttracks;
-  //evt.getByToken(kaons_ttracks_, kaons_ttracks);  
+  edm::Handle<TransientTrackCollection> muons_ttracks;
+  evt.getByToken(muons_ttracks_, muons_ttracks);  
 
   edm::Handle<reco::BeamSpot> beamspot;
   evt.getByToken(beamspot_, beamspot);  
@@ -262,23 +264,17 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 
 
     //Loop  on displaced muons    
-    for(size_t k_idx = 0; k_idx < muons->size(); ++k_idx) {
-      edm::Ptr<pat::Muon> k_ptr(muons, k_idx);
-      if((mu1_idx == k_idx) || (mu2_idx == k_idx)) continue;
-      if( !k_selection_(*k_ptr) ) continue;
+    for(size_t k_idx = 0; k_idx < particles->size(); ++k_idx) {
+      edm::Ptr<pat::CompositeCandidate> k_ptr(particles, k_idx);
+      if( !particle_selection_(*k_ptr) ) continue;
   
       //ha trovato il mu displaced
-      bool isDimuon0Trg = k_ptr->userInt("isDimuon0Trg");
-      bool isJpsiTrkTrg = k_ptr->userInt("isJpsiTrkTrg");
-      bool isJpsiMuon = k_ptr->userInt("isJpsiMuon");
-      bool isUnpairedMuon = isDimuon0Trg && !isJpsiMuon;
-      if(!(isDimuon_jpsiTrkTrg || isUnpairedMuon)) continue;
       
       math::PtEtaPhiMLorentzVector k_p4(
                 k_ptr->pt(), 
                 k_ptr->eta(),
                 k_ptr->phi(),
-                k_ptr->mass()
+                particle_mass 
                 );
   
       // Use UserCands as they should not use memory but keep the Ptr itself
@@ -339,8 +335,8 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       
       //        std::cout<<"PRIMA"<<std::endl;
       KinVtxFitter fitter(
-        {muons_ttracks->at(mu1_idx), muons_ttracks->at(mu2_idx), muons_ttracks->at(k_idx)},
-        {mu1_ptr->mass(), mu2_ptr->mass(), k_ptr->mass()},
+        {muons_ttracks->at(mu1_idx), muons_ttracks->at(mu2_idx), particles_ttracks->at(k_idx)},
+        {mu1_ptr->mass(), mu2_ptr->mass(), particle_mass},
         {LEP_SIGMA, LEP_SIGMA, LEP_SIGMA} //some small sigma for the muon mass
         );
       //std::cout<<"DOPO"<<std::endl;
@@ -353,7 +349,7 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
               fitter.fitted_vtx().z()
                )  
           );
-      Measurement1D ip3D = getIP(fitter, muons_ttracks->at(k_idx));
+      Measurement1D ip3D = getIP(fitter, particles_ttracks->at(k_idx));
       cand.addUserFloat("ip3D", ip3D.value());
       cand.addUserFloat("ip3D_e", ip3D.error());
 
@@ -551,7 +547,7 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   evt.put(std::move(ret_val));
 }//produce  
 
-Measurement1D BTo3MuBuilder::getIP(KinVtxFitter fitter,reco::TransientTrack transientTrackMu) const
+Measurement1D BTo2MuTkBuilder::getIP(KinVtxFitter fitter,reco::TransientTrack transientTrackMu) const
 {
   // computing 3d impact parameter
   GlobalVector jpsiDirection(fitter.fitted_p4().x(), fitter.fitted_p4().y(), fitter.fitted_p4().z());
@@ -583,4 +579,4 @@ Measurement1D BTo3MuBuilder::getIP(KinVtxFitter fitter,reco::TransientTrack tran
   return ip3D;
 }
 #include "FWCore/Framework/interface/MakerMacros.h"
-DEFINE_FWK_MODULE(BTo3MuBuilder);
+DEFINE_FWK_MODULE(BTo2MuTkBuilder);
