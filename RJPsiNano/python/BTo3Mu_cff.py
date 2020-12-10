@@ -5,8 +5,8 @@ from PhysicsTools.RJPsiNano.rjpsi_common_cff import JpsiMuonPairs, BuilderDefaul
 from PhysicsTools.RJPsiNano.primaryVertices_cff import *
 
 BTo3MuCfg = BuilderDefaultCfg.clone()
-BTo3MuCfg.dileptons             = cms.InputTag('JpsiMuonPairs')
-BTo3MuCfg.leptonTransientTracks = JpsiMuonPairs.transientTracksSrc
+#BTo3MuCfg.dileptons             = cms.InputTag('JpsiMuonPairs')
+#BTo3MuCfg.leptonTransientTracks = JpsiMuonPairs.transientTracksSrc
 
 BTo3Mu = cms.EDProducer(
     'BTo3MuBuilder',
@@ -20,8 +20,11 @@ BTo3MuTableVariables = Final3PartTableVariables.clone()
 
 BTo3MuTable = TableDefault.clone()
 BTo3MuTable.src       = cms.InputTag("BTo3Mu")
+BTo3MuTable.cut       = cms.string("")
 BTo3MuTable.name      = cms.string("BTo3Mu")
 BTo3MuTable.doc       = cms.string("BTo3Mu Variable")
+BTo3MuTable.singleton = cms.bool(False)
+BTo3MuTable.extension = cms.bool(False)
 BTo3MuTable.variables = BTo3MuTableVariables
 
 BTo3MuSequence = cms.Sequence(
