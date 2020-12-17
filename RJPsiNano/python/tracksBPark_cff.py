@@ -15,7 +15,9 @@ tracksBPark = cms.EDProducer('TrackMerger',
                              drTrg_Cleaning = cms.double(0.03),
                              dcaSig = cms.double(-100000),
                              trkNormChiMin = cms.int32(-1),
-                             trkNormChiMax = cms.int32(-1)
+                             trkNormChiMax = cms.int32(-1),
+                             bits = cms.InputTag("TriggerResults","","HLT"),
+                             objects = cms.InputTag("slimmedPatTrigger")
                             )
 
 

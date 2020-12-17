@@ -134,28 +134,23 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   std::vector<bool> jpsiTrkFlags;
 
   bool isMuonFromJpsi = false;
-  if(pass_dimuon0) {  
+  if(pass_dimuon0 || pass_jpsiTrk) {  //is it trigger by the Dimuon0 trigger?
     for (pat::TriggerObjectStandAlone obj : *triggerObjects) 
     { // note: not "const &" since we want to call unpackPathNames
       obj.unpackFilterLabels(iEvent, *triggerBits);
       obj.unpackPathNames(names);
 
       isMuonFromJpsi = false;
-      if(obj.hasFilterLabel("hltVertexmumuFilterJpsiMuon3p5"))
+      if(obj.hasFilterLabel("hltVertexmumuFilterJpsiMuon3p5") )
         isMuonFromJpsi = true;
 
-      if(obj.hasFilterLabel("hltTripleMuL3PreFiltered222") )
-      {
-        dimuon0Flags.push_back(pass_dimuon0);
-      }
-      if(obj.hasFilterLabel("hltJpsiTkVertexFilter"))
-      {
-        jpsiTrkFlags.push_back(pass_jpsiTrk);
-      }
-      if(obj.hasFilterLabel("hltTripleMuL3PreFiltered222") || obj.hasFilterLabel("hltJpsiTkVertexFilter"))
+      
+      if(obj.hasFilterLabel("hltTripleMuL3PreFiltered222") || obj.hasFilterLabel("hltJpsiTkVertexFilter")) //unpaired muons 
 
-      {
-        //if(pass_dimuon0) std::cout << "pt: " << obj.pt() << std::endl;
+      { 
+        dimuon0Flags.push_back(pass_dimuon0); 
+        jpsiTrkFlags.push_back(pass_jpsiTrk);
+	//if(pass_dimuon0) std::cout << "pt: " << obj.pt() << std::endl;
         jpsiMuonFlags.push_back(isMuonFromJpsi);
         triggeringMuons.push_back(obj);
         if(debug){ 

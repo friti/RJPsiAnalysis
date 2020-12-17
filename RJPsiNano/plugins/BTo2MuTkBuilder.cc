@@ -261,15 +261,17 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
     size_t mu2_idx = abs(ll_prt->userInt("mu2_idx"));
     size_t isDimuon_dimuon0Trg = abs(ll_prt->userInt("isDimuon0Trg"));
     size_t isDimuon_jpsiTrkTrg = abs(ll_prt->userInt("isJpsiTrkTrg"));
-
+    if(!(isDimuon_jpsiTrkTrg)) continue;
 
     //Loop  on displaced muons    
     for(size_t k_idx = 0; k_idx < particles->size(); ++k_idx) {
       edm::Ptr<pat::CompositeCandidate> k_ptr(particles, k_idx);
       if( !particle_selection_(*k_ptr) ) continue;
-  
-      //ha trovato il mu displaced
       
+      bool isPartTrg = k_ptr->userInt("isTriggering");
+      //ha trovato il mu displaced
+      if(!(isPartTrg)) continue;
+
       math::PtEtaPhiMLorentzVector k_p4(
                 k_ptr->pt(), 
                 k_ptr->eta(),
