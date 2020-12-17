@@ -24,13 +24,13 @@ options.register('reportEvery', 1000,
     VarParsing.varType.int,
     "report every N events"
 )
-options.register('skip',1861,
+options.register('skip',0,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.int,
     "skip first N events"
 )
 
-options.setDefault('maxEvents',1)
+options.setDefault('maxEvents',-1)
 options.setDefault('tag', '10614')
 options.parseArguments()
 
@@ -47,8 +47,8 @@ outputFileNANO = cms.untracked.string('_'.join(['RJPsi', extension[options.isMC]
 #input files (it can be a list of files)
 if not options.inputFiles:
     options.inputFiles = ['root://cms-xrd-global.cern.ch//store/data/Run2018C/Charmonium/MINIAOD/17Sep2018-v1/60000/5865682B-91E0-F047-969B-C52A2FCB241F.root'] if not options.isMC else \
-        ['root://cms-xrd-global.cern.ch///store/user/manzoni/RJPsi_Bc_PMX_HLT_RECO_MINI_28oct20_v5/RJpsi-BcToXToJpsiMuMuSelected-RunIISummer19UL18MiniAOD_0.root']
-                         #['file:/afs/cern.ch/user/g/garamire/work/private/CMSPisa/RJPsiAnalysis/ulBcReconstruction/CMSSW_10_6_14/src/PhysicsTools/RJPsiNano/test/02F13381-1D94-CC43-948A-2EFFB8572949.root']
+                         ['file:/afs/cern.ch/user/g/garamire/work/private/CMSPisa/RJPsiAnalysis/ulBcReconstruction/CMSSW_10_6_14/src/PhysicsTools/RJPsiNano/test/02F13381-1D94-CC43-948A-2EFFB8572949.root']
+        #['root://cms-xrd-global.cern.ch///store/user/manzoni/RJPsi_Bc_PMX_HLT_RECO_MINI_28oct20_v5/RJpsi-BcToXToJpsiMuMuSelected-RunIISummer19UL18MiniAOD_0.root']
                          #['root://cms-xrd-global.cern.ch//store/mc/RunIIAutumn18MiniAOD/OniaAndX_ToMuMu_MuFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/260000/AACF29A5-3793-7843-80B9-3396383C32EC.root']
                          #['root://cms-xrd-global.cern.ch//store/user/manzoni/RJPsi_Bc_PMX_HLT_RECO_MINI_28oct20_v5/RJpsi-BcToXToJpsiMuMuSelected-RunIISummer19UL18MiniAOD_1000.root']
                          #['root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL18MiniAOD/BcToJPsiTauNu_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/MINIAODSIM/106X_upgrade2018_realistic_v11_L1v1_ext1-v2/100000/02F13381-1D94-CC43-948A-2EFFB8572949.root']
@@ -158,8 +158,8 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 # Schedule definition
 process.schedule = cms.Schedule(
                                 process.nanoAOD_3Mu_step,
-                                process.nanoAOD_2MuK_step,
-                                process.nanoAOD_2MuP_step,
+                                #process.nanoAOD_2MuK_step,
+                                #process.nanoAOD_2MuP_step,
                                 process.endjob_step, 
                                 process.NANOAODoutput_step
                                )
@@ -170,8 +170,8 @@ associatePatAlgosToolsTask(process)
 process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
         SelectEvents = cms.vstring(
                                    'nanoAOD_3Mu_step', 
-                                   'nanoAOD_2MuK_step', 
-                                   'nanoAOD_2MuP_step', 
+                                   #'nanoAOD_2MuK_step', 
+                                   #'nanoAOD_2MuP_step', 
                                    )
 )
 

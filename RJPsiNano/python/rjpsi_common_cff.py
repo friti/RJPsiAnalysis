@@ -38,7 +38,7 @@ BuilderDefaultCfg = cms.PSet(
     preVtxSelection       = cms.string(''),
     postVtxSelection      = cms.string(' && '.join([
         'userFloat("fitted_cos_theta_2D") >= 0',
-        #'userInt("sv_OK") == 1',
+        'userInt("sv_OK") == 1',
         #'userFloat("sv_prob") > 1e-8',
 #         'userFloat("fitted_mass") > 4.5',
 #         'userFloat("fitted_mass") < 8.',
@@ -155,20 +155,6 @@ TableDefaultVariables = cms.PSet(
   m_jpsi=ufloat('m_jpsi'),
   #jPsi_mass_online=ufloat('jPsi_mass_online')                                                         
 
-  #Gen Variables
-  is_jpsi_mu=uint("is_jpsi_mu"),
-  is_psi2s_mu=uint("is_psi2s_mu"),
-  is_chic0_mu=uint("is_chic0_mu"),
-  is_chic1_mu=uint("is_chic1_mu"),
-  is_chic2_mu=uint("is_chic2_mu"),
-  is_hc_mu=uint("is_hc_mu"),
-  is_jpsi_tau=uint("is_jpsi_tau"),
-  is_psi2s_tau=uint("is_psi2s_tau"),
-  is_jpsi_pi=uint("is_jpsi_pi"),
-  is_jpsi_3pi=uint("is_jpsi_3pi"),
-  is_jpsi_hc=uint("is_jpsi_hc"),
-  is_error=uint("is_error"),
-  weightGen= ufloat("weightGen")
 )
 Final3PartTableVariables = TableDefaultVariables.clone(
     kIdx     = uint('k_idx'),

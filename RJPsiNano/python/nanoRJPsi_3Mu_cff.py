@@ -12,6 +12,7 @@ from PhysicsTools.RJPsiNano.trgbits_cff import *
 ##for gen and trigger muon
 from PhysicsTools.RJPsiNano.genparticlesBPark_cff import *
 from PhysicsTools.RJPsiNano.particlelevelBPark_cff import *
+from PhysicsTools.RJPsiNano.decayFlags_cff import *
 #G: from PhysicsTools.RJPsiNano.triggerObjectsBPark_cff import *
 from PhysicsTools.RJPsiNano.muonsBPark_cff import * 
 
@@ -36,7 +37,7 @@ nanoSequence = cms.Sequence(nanoMetadata)# +
                             #triggerObjectBParkTables + l1bits)
 
 nanoSequenceMC = cms.Sequence(particleLevelBParkSequence + genParticleBParkSequence + 
-                              genParticleBParkTables) # + lheInfoTable) 
+                              genParticleBParkTables + decayFlagsTables) # + lheInfoTable) 
 #                              globalTablesMC + genWeightsTable + genParticleBParkTables) # + lheInfoTable) 
 
 

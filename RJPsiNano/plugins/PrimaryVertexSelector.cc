@@ -78,7 +78,7 @@ void PrimaryVertexSelector::produce(edm::Event& iEvent, const edm::EventSetup& i
         dzMin = dimuonTT.track().dz(primVertex->position());
       }
     }   
-    cout<< "Best vertex: " << bestVertex.x() << endl;
+    //cout<< "Best vertex: " << bestVertex.x() << endl;
     bestVertex_out->emplace_back(bestVertex);
   }
   iEvent.put(std::move(bestVertex_out), "bestVertex");
