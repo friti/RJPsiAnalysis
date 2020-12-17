@@ -6,20 +6,22 @@ JpsiMuonPairs = cms.EDProducer(
     'DiMuonBuilder',
     src                = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
     transientTracksSrc = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'),
-    muon1Selection      = cms.string('pt > 2.5'),
+    muon1Selection      = cms.string('pt > 1.5'),
     muon2Selection      = cms.string(''),
     preVtxSelection    = cms.string(' && '.join([
-#         'abs(userCand("l1").dz - userCand("l2").dz) <= 0.4 ',
         'abs(userCand("mu1").bestTrack.dz - userCand("mu2").bestTrack.dz) <= 0.4 ',
         'mass() > 2',
         'mass() < 4',
         'userFloat("muons12_deltaR") > 0.01',
+        #'mass() > 0.0',
+        #'mass() < 5.0',
+        #'userFloat("muons12_deltaR") > 0.03',
         ])
     ),
     postVtxSelection   = cms.string(
-        'pt > 3 '
-#         '&& userFloat("sv_chi2") < 998 ' 
-        '&& userFloat("sv_prob") > 1.e-5 '
+        'userFloat("sv_prob") > 1.e-5 '
+        '&& pt > 3 '
+        #        '&& userFloat("sv_chi2") < 998 ' 
     ),
 )
 
@@ -37,10 +39,10 @@ BuilderDefaultCfg = cms.PSet(
     isoTracksSelection    = cms.string('pt > 0.5 && abs(eta)<2.5'),
     preVtxSelection       = cms.string(''),
     postVtxSelection      = cms.string(' && '.join([
-        'userInt("sv_OK") == 1',
-        'userFloat("sv_prob") > 1e-8',
         'userFloat("fitted_cos_theta_2D") >= 0',
         'mass < 8.',
+        'userInt("sv_OK") == 1',
+        'userFloat("sv_prob") > 1e-8',
         ])
     ),
     bits                  = cms.InputTag("TriggerResults","","HLT"),               
@@ -61,28 +63,25 @@ TableDefault = cms.EDProducer(
 TableDefaultVariables = cms.PSet(
   # pre-fit quantities                                                      
   RJpsiCandVars,
-  #nome branch= nome variabile del .cc
   mu1Idx = uint('mu1_idx'),
   mu2Idx = uint('mu2_idx'),
   kIdx = uint('k_idx'),
   minDR = ufloat('min_dr'),
   maxDR = ufloat('max_dr'),
-  # fit and vtx info                                                                                                    
   #chi2 = ufloat('sv_chi2'),
   ip3D = ufloat('ip3D'),
   ip3D_e = ufloat('ip3D'),
-                   
+  svOK = uint('sv_OK'),
   svprob = ufloat('sv_prob'),
   l_xy = ufloat('l_xy'),
   l_xy_unc = ufloat('l_xy_unc'),
   vtx_x = ufloat('vtx_x'),
   vtx_y = ufloat('vtx_y'),
   vtx_z = ufloat('vtx_z'),
-  vtx_ex = ufloat('vtx_ex'), ## only saving diagonal elements of the cov matrix                                         
+  vtx_ex = ufloat('vtx_ex'), 
   vtx_ey = ufloat('vtx_ey'),
   vtx_ez = ufloat('vtx_ez'),
   vtx_chi2 = ufloat('vtx_chi2'),
-
   jpsi_vtx_x = ufloat('jpsi_vtx_x'),
   jpsi_vtx_y = ufloat('jpsi_vtx_y'),
   jpsi_vtx_z = ufloat('jpsi_vtx_z'),
@@ -90,7 +89,6 @@ TableDefaultVariables = cms.PSet(
   jpsi_vtx_ey = ufloat('jpsi_vtx_ey'),
   jpsi_vtx_ez = ufloat('jpsi_vtx_ez'),
   jpsi_vtx_chi2 = ufloat('jpsi_vtx_chi2'),
-
   pv_x = ufloat('pv_x'),
   pv_y = ufloat('pv_y'),
   pv_z = ufloat('pv_z'),

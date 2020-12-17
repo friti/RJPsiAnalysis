@@ -50,7 +50,6 @@ public:
     pvSelected_{consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("pvSelected"))},
     muons_ttracks_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("muonsTransientTracks") )},
     muons_{consumes<pat::MuonCollection>( cfg.getParameter<edm::InputTag>("muons") )},
-    //kaons_ttracks_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("kaonsTransientTracks") )},
     isotracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("tracks"))),
     isolostTracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lostTracks"))),
 
@@ -106,9 +105,6 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   edm::Handle<pat::MuonCollection> muons;
   evt.getByToken(muons_, muons);
   
-  //edm::Handle<TransientTrackCollection> kaons_ttracks;
-  //evt.getByToken(kaons_ttracks_, kaons_ttracks);  
-
   edm::Handle<reco::BeamSpot> beamspot;
   evt.getByToken(beamspot_, beamspot);  
 
@@ -284,6 +280,7 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
                 k_ptr->mass()
                 );
   
+      //std::cout << "Here" << std::endl;
       // Use UserCands as they should not use memory but keep the Ptr itself
       // Put the muon passing the corresponding selection
 
@@ -350,9 +347,9 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
         {mu1_ptr->mass(), mu2_ptr->mass(), k_ptr->mass()},
         {LEP_SIGMA, LEP_SIGMA, LEP_SIGMA} //some small sigma for the muon mass
         );
-      //if(debug) std::cout<<"DOPO"<<std::endl;
+
       if(!fitter.success()) continue; // hardcoded, but do we need otherwise?
-      //if(debug) std::cout << "here3" << std::endl;
+
       cand.setVertex( 
           reco::Candidate::Point( 
               fitter.fitted_vtx().x(),
@@ -478,6 +475,7 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("E_mu_#",P_mu.E());
       if( !post_vtx_selection_(cand) ) continue;        
       if(debug) std::cout<<"pass post vertx sel"<<std::endl;
+
       //compute isolation
       float mu1_iso03 = 0;
       float mu1_iso04 = 0;
