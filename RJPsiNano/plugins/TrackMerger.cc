@@ -1,7 +1,7 @@
 // Merges the PFPackedCandidates and Lost tracks
 // beam spot readout in case dcasig to be calculated wrt beam spot
 // currently computed wrt triggeringMuon vertex
-
+#include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/global/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -44,8 +44,12 @@ public:
     drTrg_Cleaning_(cfg.getParameter<double>("drTrg_Cleaning")),
     dcaSig_(cfg.getParameter<double>("dcaSig")),
     trkNormChiMin_(cfg.getParameter<int>("trkNormChiMin")),
-    trkNormChiMax_(cfg.getParameter<int>("trkNormChiMax")) 
-{
+    trkNormChiMax_(cfg.getParameter<int>("trkNormChiMax")),
+
+    //TRIGGER
+    triggerBits_(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("bits"))),
+    triggerObjects_(consumes<std::vector<pat::TriggerObjectStandAlone>>(cfg.getParameter<edm::InputTag>("objects"))) {
+
     produces<pat::CompositeCandidateCollection>("SelectedTracks");  
     produces<TransientTrackCollection>("SelectedTransientTracks");  
 }
@@ -58,7 +62,7 @@ public:
   
 
 private:
-  const edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
+const edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> tracksToken_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> lostTracksToken_;
   const edm::EDGetTokenT<pat::MuonCollection> trgMuonToken_;
@@ -74,6 +78,10 @@ private:
   const double dcaSig_;
   const int trkNormChiMin_;
   const int trkNormChiMax_;
+
+//TRIGGER
+const edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
+const edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
 };
 
 
@@ -108,6 +116,14 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   evt.getByToken(vertexToken_, vertexHandle);
   const reco::Vertex & PV = vertexHandle->front();
 
+  //TRIGGER
+  edm::Handle<edm::TriggerResults> triggerBits;
+  evt.getByToken(triggerBits_, triggerBits);
+  const edm::TriggerNames &names = evt.triggerNames(*triggerBits);
+  std::vector<pat::TriggerObjectStandAlone> triggeringMuons;
+  edm::Handle<std::vector<pat::TriggerObjectStandAlone>> triggerObjects;
+  evt.getByToken(triggerObjects_, triggerObjects);
+
   //for lost tracks / pf discrimination
   unsigned int nTracks = tracks->size();
   unsigned int totalTracks = nTracks + lostTracks->size();
@@ -123,21 +139,58 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
    std::vector<pat::PackedCandidate> totalTracks(*tracks);
    totalTracks.insert(totalTracks.end(),lostTracks->begin(),lostTracks->end());
   */
- 
-  // for loop is better to be range based - especially for large ensembles  
-  for( unsigned int iTrk=0; iTrk<totalTracks; ++iTrk ) {
-    const pat::PackedCandidate & trk = (iTrk < nTracks) ? (*tracks)[iTrk] : (*lostTracks)[iTrk-nTracks];
 
-    //arranging cuts for speed
-    if(!trk.hasTrackDetails()) continue;
-    if(abs(trk.pdgId()) != 211) continue; //do we want also to keep muons?
-    if(trk.pt() < trkPtCut_ ) continue;
-    if(fabs(trk.eta()) > trkEtaCut_) continue;
 
-    if( (trk.bestTrack()->normalizedChi2() < trkNormChiMin_ &&
-         trkNormChiMin_>=0 ) ||
-        (trk.bestTrack()->normalizedChi2() > trkNormChiMax_ &&
-         trkNormChiMax_>0)  )    continue; 
+
+   //TRIGGER -- 
+   unsigned int index = names.triggerIndex("HLT_DoubleMu4_JpsiTrk_Displaced_v14");
+   unsigned int index2 = names.triggerIndex("HLT_DoubleMu4_JpsiTrk_Displaced_v15");
+   bool pass_hlt = false;
+   std::vector<pat::TriggerObjectStandAlone> pass_trk;
+   if(index!=triggerBits->size() || index2!=triggerBits->size()){
+     //    std::cout<<"Non ha HLT path giusto"<<std::endl;
+     if(index!=triggerBits->size()){
+       pass_hlt=triggerBits->accept(index);
+     }
+     else if (index2!=triggerBits->size()){
+       pass_hlt=triggerBits->accept(index2);
+     }
+     if(pass_hlt){         
+       for (pat::TriggerObjectStandAlone obj : *triggerObjects){
+	 obj.unpackFilterLabels(evt, *triggerBits);
+	 obj.unpackPathNames(names);
+	 
+	 if(obj.hasFilterLabel("hltJpsiTkVertexFilter")) {
+	   pass_trk.push_back(obj);
+	 }
+	 
+       }
+     }
+   }
+       
+   std::vector<int> trackIsTrigger(totalTracks, 0);
+   
+   // for loop is better to be range based - especially for large ensembles  
+   for( unsigned int iTrk=0; iTrk<totalTracks; ++iTrk ) {
+     const pat::PackedCandidate & trk = (iTrk < nTracks) ? (*tracks)[iTrk] : (*lostTracks)[iTrk-nTracks];
+     
+     for(pat::TriggerObjectStandAlone obj: pass_trk){
+       if(deltaR(obj,trk)<0.02) {
+	 trackIsTrigger[iTrk] = 1;
+       }
+     }
+     //if(flag == 0) continue;
+     
+     //arranging cuts for speed
+     if(!trk.hasTrackDetails()) continue;
+     if(abs(trk.pdgId()) != 211) continue; //do we want also to keep muons?
+     if(trk.pt() < trkPtCut_ ) continue;
+     if(fabs(trk.eta()) > trkEtaCut_) continue;
+     
+     if( (trk.bestTrack()->normalizedChi2() < trkNormChiMin_ &&
+	  trkNormChiMin_>=0 ) ||
+	 (trk.bestTrack()->normalizedChi2() > trkNormChiMax_ &&
+	  trkNormChiMax_>0)  )    continue; 
 
     bool skipTrack=true;
     for (const pat::Muon & mu: *trgMuons){
@@ -150,6 +203,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
       skipTrack=false;
       break; // at least for one trg muon to pass this cuts
     }
+    if (drTrg_Cleaning_<=0 && dzTrg_cleaning_<0) skipTrack=false;
     // if track is closer to at least a triggering muon keep it
     if (skipTrack) continue;
 
@@ -227,11 +281,18 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
       pcand.addUserCand( "cand", edm::Ptr<pat::PackedCandidate> ( lostTracks, iTrk-nTracks ));   
  
   //in order to avoid revoking the sxpensive ttrack builder many times and still have everything sorted, we add them to vector of pairs
-   vectrk_ttrk.emplace_back( std::make_pair(pcand,trackTT ) );   
-  }
 
-  // sort to be uniform with leptons
-  std::sort( vectrk_ttrk.begin(), vectrk_ttrk.end(), 
+
+
+    vectrk_ttrk.emplace_back( std::make_pair(pcand,trackTT ) );   
+    tracks_out -> emplace_back(pcand);
+    tracks_out->back().addUserInt("isTriggering", trackIsTrigger[iTrk]);
+    trans_tracks_out -> emplace_back(trackTT);
+   }//track loop
+
+
+   // sort to be uniform with leptons
+   /*std::sort( vectrk_ttrk.begin(), vectrk_ttrk.end(), 
              [] ( auto & trk1, auto & trk2) -> 
                   bool {return (trk1.first).pt() > (trk2.first).pt();} 
            );
@@ -239,11 +300,13 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   // finnaly save ttrks and trks to the correct _out vectors
   for ( auto & trk: vectrk_ttrk){
     tracks_out -> emplace_back( trk.first);
+    tracks_out->back().addUserInt("isTriggering", trackIsTrigger[iTrk]);
     trans_tracks_out -> emplace_back(trk.second);
   }
-
+   */
   evt.put(std::move(tracks_out),       "SelectedTracks");
   evt.put(std::move(trans_tracks_out), "SelectedTransientTracks");
+
 }
 
 

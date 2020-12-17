@@ -9,17 +9,19 @@ JpsiMuonPairs = cms.EDProducer(
     muon1Selection      = cms.string('pt > 1.5'),
     muon2Selection      = cms.string(''),
     preVtxSelection    = cms.string(' && '.join([
-#         'abs(userCand("l1").dz - userCand("l2").dz) <= 0.4 ',
         'abs(userCand("mu1").bestTrack.dz - userCand("mu2").bestTrack.dz) <= 0.4 ',
-        'mass() > 0.0',
-        'mass() < 5.0',
-        'userFloat("muons12_deltaR") > 0.03',
+        'mass() > 2',
+        'mass() < 4',
+        'userFloat("muons12_deltaR") > 0.01',
+        #'mass() > 0.0',
+        #'mass() < 5.0',
+        #'userFloat("muons12_deltaR") > 0.03',
         ])
     ),
     postVtxSelection   = cms.string(
         'userFloat("sv_prob") > 1.e-5 '
-#        'pt > 3 '
-        '&& userFloat("sv_chi2") < 998 ' 
+        '&& pt > 3 '
+        #        '&& userFloat("sv_chi2") < 998 ' 
     ),
 )
 
@@ -38,12 +40,9 @@ BuilderDefaultCfg = cms.PSet(
     preVtxSelection       = cms.string(''),
     postVtxSelection      = cms.string(' && '.join([
         'userFloat("fitted_cos_theta_2D") >= 0',
+        'mass < 8.',
         'userInt("sv_OK") == 1',
-        #'userFloat("sv_prob") > 1e-8',
-#         'userFloat("fitted_mass") > 4.5',
-#         'userFloat("fitted_mass") < 8.',
-        #'mass > 4.5',
-        #'mass < 8.',
+        'userFloat("sv_prob") > 1e-8',
         ])
     ),
     bits                  = cms.InputTag("TriggerResults","","HLT"),               
