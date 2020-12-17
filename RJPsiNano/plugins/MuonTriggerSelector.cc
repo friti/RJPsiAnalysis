@@ -144,12 +144,18 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       if(obj.hasFilterLabel("hltVertexmumuFilterJpsiMuon3p5"))
         isMuonFromJpsi = true;
 
+      if(obj.hasFilterLabel("hltTripleMuL3PreFiltered222") )
+      {
+        dimuon0Flags.push_back(pass_dimuon0);
+      }
+      if(obj.hasFilterLabel("hltJpsiTkVertexFilter"))
+      {
+        jpsiTrkFlags.push_back(pass_jpsiTrk);
+      }
       if(obj.hasFilterLabel("hltTripleMuL3PreFiltered222") || obj.hasFilterLabel("hltJpsiTkVertexFilter"))
       {
         //if(pass_dimuon0) std::cout << "pt: " << obj.pt() << std::endl;
         jpsiMuonFlags.push_back(isMuonFromJpsi);
-        dimuon0Flags.push_back(pass_dimuon0);
-        jpsiTrkFlags.push_back(pass_jpsiTrk);
         triggeringMuons.push_back(obj);
         if(debug){ 
           std::cout << "\tTrigger object:  pt " << obj.pt() << ", eta " << obj.eta() << ", phi " << obj.phi() << std::endl;
@@ -180,14 +186,15 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     unsigned int iMuo(&muon - &(muons->at(0)) );
     //if(!(muon.isLooseMuon() && muon.isSoftMuon(PV))) continue;
     //if(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v5")==nullptr &&  muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v15")==nullptr) continue;
-    if(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v5")==nullptr &&  muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v15")==nullptr) continue;
+    if(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v5")==nullptr) continue;// &&  muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v15")==nullptr) continue;
+
 
     float dRMuonMatching = -1.;
     int recoMuonMatching_index = -1;
     int trgMuonMatching_index = -1;
-    //std::cout << " ---- reco = " << muon.pt() << " " << muon.eta() << " " << muon.phi() << std::endl; 
-    for(unsigned int iTrg=0; iTrg<triggeringMuons.size(); iTrg++)
+    for(unsigned int iTrg=0; iTrg<triggeringMuons.size(); ++iTrg)
     {
+      if(!dimuon0Flags[iTrg] && !jpsiTrkFlags[iTrg]) continue;
 	    float dR = reco::deltaR(triggeringMuons[iTrg], muon);
 	    //std::cout << " dR (before) = " << dR << std::endl;
 	    if((dR < dRMuonMatching || dRMuonMatching == -1)  && dR < maxdR_)
@@ -195,9 +202,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 	      dRMuonMatching = dR;
 	      recoMuonMatching_index = iMuo;
 	      trgMuonMatching_index = iTrg;
-	      //std::cout << " dR = " << dR 
-        //std::cout << " HLT = " << triggeringMuons[iTrg].pt() << " " << triggeringMuons[iTrg].eta() << " " << triggeringMuons[iTrg].phi()
-		    //          << std::endl;
 	    }
     }
 
@@ -205,9 +209,14 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     if(recoMuonMatching_index != -1)
     {
 
-	    //std::cout  << " reco = " << muon.pt() << " " << muon.eta() << " " << muon.phi() << " " 
-		  //            << " HLT = " << triggeringMuons[trgMuonMatching_index].pt() << " " << triggeringMuons[trgMuonMatching_index].eta() << " " << triggeringMuons[trgMuonMatching_index].phi()
-		   //           << std::endl;
+      std::cout << "HERE" << std::endl;
+      std::cout << "trgMuonMatching_index: " << trgMuonMatching_index << std::endl;
+      std::cout << "jpsiMuonFlags.push_back(isMuonFromJpsi)"<< jpsiMuonFlags[trgMuonMatching_index] << std::endl;
+      std::cout << "dimuon0Flags.push_back(pass_dimuon0)"<< dimuon0Flags[trgMuonMatching_index] << std::endl;
+      std::cout << "jpsiTrkFlags.push_back(pass_jpsiTrk)"<< jpsiTrkFlags[trgMuonMatching_index] << std::endl;
+	    std::cout  << "----- reco = " << muon.pt() << " " << muon.eta() << " " << muon.phi() << " " 
+		              << " HLT = " << triggeringMuons[trgMuonMatching_index].pt() << " " << triggeringMuons[trgMuonMatching_index].eta() << " " << triggeringMuons[trgMuonMatching_index].phi()
+		              << std::endl;
 	    pat::Muon recoTriggerMuonCand(muon);
 	    recoTriggerMuonCand.addUserInt("trgMuonIndex", trgMuonMatching_index);
 	    trgmuons_out->emplace_back(recoTriggerMuonCand);
@@ -229,7 +238,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     if (fabs(mu.eta()) > absEtaMax_) continue;
     //following ID is needed for trigger muons not here
     // anyway it is off in the configuration
-    if (softMuonsOnly_ && !mu.isSoftMuon(PV)) continue;
+    //G: if (softMuonsOnly_ && !mu.isSoftMuon(PV)) continue;
 
     /* // same PV as the tag muon, both tag and probe only dz selection
     bool SkipMuon=true;
