@@ -93,7 +93,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
   edm::Handle<reco::VertexCollection> vertexHandle;
   iEvent.getByToken(vertexSrc_, vertexHandle);
-  const reco::Vertex & PV = vertexHandle->front();
+  //const reco::Vertex & PV = vertexHandle->front();
 
   if(debug) std::cout << " MuonTriggerSelector::produce " << std::endl;
 
@@ -144,13 +144,13 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       if(obj.hasFilterLabel("hltVertexmumuFilterJpsiMuon3p5") )
         isMuonFromJpsi = true;
 
+
       
       if(obj.hasFilterLabel("hltTripleMuL3PreFiltered222") || obj.hasFilterLabel("hltJpsiTkVertexFilter")) //unpaired muons 
 
       { 
         dimuon0Flags.push_back(pass_dimuon0); 
         jpsiTrkFlags.push_back(pass_jpsiTrk);
-	//if(pass_dimuon0) std::cout << "pt: " << obj.pt() << std::endl;
         jpsiMuonFlags.push_back(isMuonFromJpsi);
         triggeringMuons.push_back(obj);
         if(debug){ 
@@ -210,6 +210,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     if(recoMuonMatching_index != -1)
     {
 
+
       if(debug)      std::cout << "HERE" << std::endl;
       if(debug) std::cout << "trgMuonMatching_index: " << trgMuonMatching_index << std::endl;
       if(debug) std::cout << "jpsiMuonFlags.push_back(isMuonFromJpsi)"<< jpsiMuonFlags[trgMuonMatching_index] << std::endl;
@@ -218,6 +219,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       if(debug)    std::cout  << "----- reco = " << muon.pt() << " " << muon.eta() << " " << muon.phi() << " " 
 		              << " HLT = " << triggeringMuons[trgMuonMatching_index].pt() << " " << triggeringMuons[trgMuonMatching_index].eta() << " " << triggeringMuons[trgMuonMatching_index].phi()
 		              << std::endl;
+
 	    pat::Muon recoTriggerMuonCand(muon);
 	    recoTriggerMuonCand.addUserInt("trgMuonIndex", trgMuonMatching_index);
 	    trgmuons_out->emplace_back(recoTriggerMuonCand);

@@ -24,12 +24,11 @@ options.register('reportEvery', 1000,
     VarParsing.varType.int,
     "report every N events"
 )
-options.register('skip',1861,
+options.register('skip',0,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.int,
     "skip first N events"
 )
-
 
 options.setDefault('maxEvents',-1)
 options.setDefault('tag', '10614')
@@ -50,6 +49,7 @@ if not options.inputFiles:
     options.inputFiles = ['root://cms-xrd-global.cern.ch//store/data/Run2018D/Charmonium/MINIAOD/12Nov2019_UL2018-v1/00000/00AC5CFC-5390-F947-911B-2074A7DFF23D.root'] if not options.isMC else \
                          ['file:RJpsi-BcToXToJpsiMuMuSelected-RunIISummer19UL18MiniAOD_0.root']
                          
+
                          #['root://cms-xrd-global.cern.ch//store/user/manzoni/RJPsi_Bc_PMX_HLT_RECO_MINI_28oct20_v5/RJpsi-BcToXToJpsiMuMuSelected-RunIISummer19UL18MiniAOD_1000.root']
                          #['root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL18MiniAOD/BcToJPsiTauNu_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/MINIAODSIM/106X_upgrade2018_realistic_v11_L1v1_ext1-v2/100000/02F13381-1D94-CC43-948A-2EFFB8572949.root']
 

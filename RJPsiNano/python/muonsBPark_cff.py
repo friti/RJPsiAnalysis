@@ -81,7 +81,8 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         isTriggering = Var("userInt('isTriggering')", int,doc="flag the reco muon is also triggering"),
         isJpsiMuon = Var("userInt('isJpsiMuon')", int,doc="flag if the muon triggered is comming from a JPsi"),
         isDimuon0Trg = Var("userInt('isDimuon0Trg')", int,doc="flag if the Dimuon0 path was triggered"),
-        isJpsiTrkTrg = Var("userInt('isJpsiTrkTrg')", int,doc="flag if the JpsiTrkTrg path was triggered")
+        isJpsiTrkTrg = Var("userInt('isJpsiTrkTrg')", int,doc="flag if the JpsiTrkTrg path was triggered"),
+        isMCMatch = Var("userInt('mcMatch')", int, doc="truth match muon")
     ),
 )
 
@@ -128,6 +129,6 @@ muonTriggerMatchedTable = muonBParkTable.clone(
 #muonBParkSequence = cms.Sequence(muonTrgSelector * countTrgMuons)
 muonBParkSequence = cms.Sequence(muonTrgSelector)
 muonBParkMC = cms.Sequence(muonBParkSequence + muonsBParkMCMatchForTable + selectedMuonsMCMatchEmbedded + muonBParkMCTable)
-#muonBParkMC = cms.Sequence(muonBParkSequence + muonsBParkMCMatchForTable + muonBParkMCTable)
+#muonBParkMC = cms.Sequence(muonBParkSequence + muonsBParkMCMatchForTable + muonMCMatchSequence + muonBParkMCTable)
 muonBParkTables = cms.Sequence(muonBParkTable)
 #muonTriggerMatchedTables = cms.Sequence(muonTriggerMatchedTable)
