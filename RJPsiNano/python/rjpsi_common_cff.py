@@ -10,7 +10,7 @@ JpsiMuonPairs = cms.EDProducer(
     muon2Selection      = cms.string(''),
     preVtxSelection    = cms.string(' && '.join([
 #         'abs(userCand("l1").dz - userCand("l2").dz) <= 0.4 ',
-        'abs(userCand("l1").bestTrack.dz - userCand("l2").bestTrack.dz) <= 0.4 ',
+        'abs(userCand("mu1").bestTrack.dz - userCand("mu2").bestTrack.dz) <= 0.4 ',
         'mass() > 2',
         'mass() < 4',
         'userFloat("muons12_deltaR") > 0.01',
@@ -40,9 +40,6 @@ BuilderDefaultCfg = cms.PSet(
         'userInt("sv_OK") == 1',
         'userFloat("sv_prob") > 1e-8',
         'userFloat("fitted_cos_theta_2D") >= 0',
-#         'userFloat("fitted_mass") > 4.5',
-#         'userFloat("fitted_mass") < 8.',
-        'mass > 4.5',
         'mass < 8.',
         ])
     ),

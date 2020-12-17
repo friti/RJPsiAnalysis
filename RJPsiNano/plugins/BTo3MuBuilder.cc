@@ -32,6 +32,7 @@
 #include "KinVtxFitter.h"
 
 constexpr bool debugGen = false;
+constexpr bool debug = false;
 
 
 class BTo3MuBuilder : public edm::global::EDProducer<> {
@@ -259,8 +260,9 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
     size_t mu2_idx = abs(ll_prt->userInt("mu2_idx"));
     size_t isDimuon_dimuon0Trg = abs(ll_prt->userInt("isDimuon0Trg"));
     size_t isDimuon_jpsiTrkTrg = abs(ll_prt->userInt("isJpsiTrkTrg"));
-
-
+    if(!(isDimuon_dimuon0Trg)) continue;
+    
+    
     //Loop  on displaced muons    
     for(size_t k_idx = 0; k_idx < muons->size(); ++k_idx) {
       edm::Ptr<pat::Muon> k_ptr(muons, k_idx);
@@ -272,7 +274,8 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       bool isJpsiTrkTrg = k_ptr->userInt("isJpsiTrkTrg");
       bool isJpsiMuon = k_ptr->userInt("isJpsiMuon");
       bool isUnpairedMuon = isDimuon0Trg && !isJpsiMuon;
-      if(!(isDimuon_jpsiTrkTrg || isUnpairedMuon)) continue;
+      //if(!(isDimuon_jpsiTrkTrg || isUnpairedMuon)) continue;
+      if(!(isUnpairedMuon)) continue;
       
       math::PtEtaPhiMLorentzVector k_p4(
                 k_ptr->pt(), 
@@ -296,7 +299,11 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserInt("mu1_idx", mu1_idx);
       cand.addUserInt("mu2_idx", mu2_idx);
       cand.addUserInt("k_idx", k_idx);
-      
+      if(debug) std::cout<<"cand pt "<<cand.pt()<<std::endl;
+      if(debug) std::cout<<"displ mu "<<k_ptr->pt()<<std::endl;
+      if(debug) std::cout<<"displ m1 "<<mu1_ptr->pt()<<std::endl;
+      if(debug) std::cout<<"displ m2 "<<mu2_ptr->pt()<<std::endl;
+
       auto dr_info = min_max_dr({mu1_ptr, mu2_ptr, k_ptr});
 
       cand.addUserFloat("min_dr", dr_info.first);
@@ -335,17 +342,17 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("weightGen", weight);
       
       if( !pre_vtx_selection_(cand) ) continue;
-      //std::cout << "here2" << std::endl;
+      //if(debug) std::cout << "here2" << std::endl;
       
-      //        std::cout<<"PRIMA"<<std::endl;
+      //        if(debug) std::cout<<"PRIMA"<<std::endl;
       KinVtxFitter fitter(
         {muons_ttracks->at(mu1_idx), muons_ttracks->at(mu2_idx), muons_ttracks->at(k_idx)},
         {mu1_ptr->mass(), mu2_ptr->mass(), k_ptr->mass()},
         {LEP_SIGMA, LEP_SIGMA, LEP_SIGMA} //some small sigma for the muon mass
         );
-      //std::cout<<"DOPO"<<std::endl;
+      //if(debug) std::cout<<"DOPO"<<std::endl;
       if(!fitter.success()) continue; // hardcoded, but do we need otherwise?
-      //std::cout << "here3" << std::endl;
+      //if(debug) std::cout << "here3" << std::endl;
       cand.setVertex( 
           reco::Candidate::Point( 
               fitter.fitted_vtx().x(),
@@ -379,6 +386,8 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
           "fitted_cos_theta_2D", 
           cos_theta_2D(fitter, *beamspot, fit_p4)
           );
+
+      if(debug) std::cout << "postvtx" <<fitter.success()<<" "<<fitter.prob()<<" "<<cos_theta_2D(fitter, *beamspot, fit_p4)<<" "<<cand.mass()<< std::endl;
       auto lxy = l_xy(fitter, *beamspot);
       cand.addUserFloat("l_xy", lxy.value());
       cand.addUserFloat("l_xy_unc", lxy.error());
@@ -468,8 +477,7 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       P_mu.Boost(-jpsi_beta_lab);
       cand.addUserFloat("E_mu_#",P_mu.E());
       if( !post_vtx_selection_(cand) ) continue;        
-      //std::cout << "here4" << std::endl;
-
+      if(debug) std::cout<<"pass post vertx sel"<<std::endl;
       //compute isolation
       float mu1_iso03 = 0;
       float mu1_iso04 = 0;
@@ -488,13 +496,13 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
         // check if the track is the muon
         if (k_ptr->userCand("cand") ==  edm::Ptr<reco::Candidate> ( iso_tracks, iTrk ) ) {
           
-          std::cout<<"old"<<std::endl;
+          if(debug) std::cout<<"old"<<std::endl;
           continue;
         }
         
         if(track_to_muon_match(k_ptr, iso_tracks.id(), iTrk)) 
         {
-          // std::cout<<"new"<<std::endl;
+          // if(debug) std::cout<<"new"<<std::endl;
           continue;
         }
         // check if the track is one of the two muons

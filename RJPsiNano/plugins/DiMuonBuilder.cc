@@ -20,6 +20,7 @@
 #include <limits>
 #include <algorithm>
 #include "KinVtxFitter.h"
+constexpr bool debug = false;
 
 class DiMuonBuilder : public edm::global::EDProducer<> {
 
@@ -83,8 +84,8 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       bool trg1 = (isJpsiTrkTrg1 && isJpsiTrkTrg2);
       bool trg2 = ((isDimuon0Trg1 && isJpsiMuon1) && (isDimuon0Trg2 && isJpsiMuon2));
 
-      if(!trg1 && !trg2) continue;
-      //if(!trg2) continue;
+      //if(!trg1 && !trg2) continue;
+      if(!trg2) continue;
 
       pat::CompositeCandidate muon_pair;
       muon_pair.setP4(mu1_ptr->p4() + mu2_ptr->p4());
@@ -98,8 +99,12 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       // Use UserCands as they should not use memory but keep the Ptr itself
       muon_pair.addUserCand("mu1", mu1_ptr );
       muon_pair.addUserCand("mu2", mu2_ptr );
-           if( !pre_vtx_selection_(muon_pair) ) continue; // before making the SV, cut on the info we have
+      if(debug) std::cout<<"l1 "<<mu1_ptr->pt()<<" l2 "<<mu2_ptr->pt()<<" mass "<<muon_pair.mass()<<" deltaR"<<reco::deltaR(*mu1_ptr, *mu2_ptr)<<" dz "<<mu1_ptr->bestTrack()->dz()-mu2_ptr->bestTrack()->dz()<<std::endl;
+      if( !pre_vtx_selection_(muon_pair) ) {
+	if(debug) std::cout<<"pre vtx selection dies"<<std::endl;
 
+	continue; // before making the SV, cut on the info we have
+      }
       KinVtxFitter fitter(
         {ttracks->at(mu1_idx), ttracks->at(mu2_idx)},
         {mu1_ptr->mass(), mu2_ptr->mass()},
@@ -107,7 +112,7 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
         );
 
       muon_pair.addUserFloat("sv_chi2", fitter.chi2());
-      //std::cout << "vx_: " << fitter.fitted_candidate() << std::endl;
+      //if(debug) std::cout << "vx_: " << fitter.fitted_candidate() << std::endl;
       muon_pair.addUserFloat("sv_position", fitter.fitted_vtx().x()); // float??
       muon_pair.addUserFloat("sv_ndof", fitter.dof()); // float??
       muon_pair.addUserFloat("sv_prob", fitter.prob());

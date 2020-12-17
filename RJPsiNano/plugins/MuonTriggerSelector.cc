@@ -140,11 +140,11 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       obj.unpackFilterLabels(iEvent, *triggerBits);
       obj.unpackPathNames(names);
 
-	    isMuonFromJpsi = false;
+      isMuonFromJpsi = false;
       if(obj.hasFilterLabel("hltVertexmumuFilterJpsiMuon3p5"))
         isMuonFromJpsi = true;
 
-      if(obj.hasFilterLabel("hltTripleMuL3PreFiltered222") || obj.hasFilterLabel("hltJpsiTkVertexFilter"))
+      if(obj.hasFilterLabel("hltTripleMuL3PreFiltered222"))// || obj.hasFilterLabel("hltJpsiTkVertexFilter"))
       {
         //if(pass_dimuon0) std::cout << "pt: " << obj.pt() << std::endl;
         jpsiMuonFlags.push_back(isMuonFromJpsi);
@@ -195,9 +195,9 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 	      dRMuonMatching = dR;
 	      recoMuonMatching_index = iMuo;
 	      trgMuonMatching_index = iTrg;
-	      //std::cout << " dR = " << dR 
-        //std::cout << " HLT = " << triggeringMuons[iTrg].pt() << " " << triggeringMuons[iTrg].eta() << " " << triggeringMuons[iTrg].phi()
-		    //          << std::endl;
+	      if(debug) std::cout << " dR = " << dR <<std::endl;
+	      if(debug) std::cout << " HLT = " << triggeringMuons[iTrg].pt() << " " << triggeringMuons[iTrg].eta() << " " << triggeringMuons[iTrg].phi()          << std::endl;
+	      if(debug) std::cout << " reco = " << muon.pt() << " " << muon.eta() << " " << muon.phi()          << std::endl;
 	    }
     }
 
