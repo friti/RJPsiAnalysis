@@ -144,7 +144,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       obj.unpackPathNames(names);
 
       isMuonFromJpsi = false;
-      if(obj.hasFilterLabel("hltVertexmumuFilterJpsiMuon3p5") )
+      //      if(obj.hasFilterLabel("hltVertexmumuFilterJpsiMuon3p5") )
+      if(obj.hasFilterLabel("hltDisplacedmumuFilterDoubleMu4Jpsi") )
         isMuonFromJpsi = true;
 
 
@@ -194,7 +195,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     unsigned int iMuo(&muon - &(muons->at(0)) );
     //if(!(muon.isLooseMuon() && muon.isSoftMuon(PV))) continue;
     //if(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v5")==nullptr &&  muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v15")==nullptr) continue;
-    if(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v5")==nullptr) continue;// &&  muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v15")==nullptr) continue;
+    //    if(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v5")==nullptr) continue;
+    if(muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v15")==nullptr) continue;
 
 
     float dRMuonMatching = -1.;
@@ -208,7 +210,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       //it passes the dimuon0 trigger
 
       //If I don't do this, it mixes the triggers
-      if(dimuon0Flags[iTrg] && (dR < dRMuonMatching || dRMuonMatching == -1)  && dR < maxdR_)
+      if(jpsiTrkFlags[iTrg] && (dR < dRMuonMatching || dRMuonMatching == -1)  && dR < maxdR_)
       {
 	      dRMuonMatching = dR;
 	      recoMuonMatching_index = iMuo;

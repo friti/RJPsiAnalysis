@@ -32,7 +32,7 @@
 #include "KinVtxFitter.h"
 
 constexpr bool debugGen = false;
-constexpr bool debug = true;
+constexpr bool debug = false;
 
 
 class BTo3MuBuilder : public edm::global::EDProducer<> {
