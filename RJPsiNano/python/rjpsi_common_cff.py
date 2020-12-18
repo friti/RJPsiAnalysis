@@ -6,7 +6,7 @@ JpsiMuonPairs = cms.EDProducer(
     'DiMuonBuilder',
     src                = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
     transientTracksSrc = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'),
-    muon1Selection      = cms.string('pt > 1.5'),
+    muon1Selection      = cms.string('pt > 2.5'),
     muon2Selection      = cms.string(''),
     preVtxSelection    = cms.string(' && '.join([
         'abs(userCand("mu1").bestTrack.dz - userCand("mu2").bestTrack.dz) <= 0.4 ',
