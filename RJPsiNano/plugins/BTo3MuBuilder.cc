@@ -32,7 +32,7 @@
 #include "KinVtxFitter.h"
 
 constexpr bool debugGen = false;
-constexpr bool debug = false;
+constexpr bool debug = true;
 
 
 class BTo3MuBuilder : public edm::global::EDProducer<> {
@@ -130,10 +130,15 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
     edm::Ptr<reco::Candidate> mu2_ptr = ll_prt->userCand("mu2");
     size_t mu1_idx = abs(ll_prt->userInt("mu1_idx"));
     size_t mu2_idx = abs(ll_prt->userInt("mu2_idx"));
-    size_t isDimuon_dimuon0Trg = abs(ll_prt->userInt("isDimuon0Trg"));
-    size_t isDimuon_jpsiTrkTrg = abs(ll_prt->userInt("isJpsiTrkTrg"));
-    if(!(isDimuon_dimuon0Trg)) continue;
     
+    size_t isDimuon_dimuon0Trg = abs(ll_prt->userInt("muonpair_fromdimuon0"));
+    size_t isDimuon_jpsiTrkTrg = abs(ll_prt->userInt("muonpair_fromjpsitrk"));
+    //size_t isDimuon_jpsiTrkTrg = abs(ll_prt->userInt("isJpsiTrkTrg"));
+    //size_t isDimuon_dimuon0Trg = abs(ll_prt->userInt("isDimuon0Trg"));
+    if(!(isDimuon_dimuon0Trg)) {
+      if(debug) std::cout<<"Not dimuon0 trigger couple"<<std::endl;
+      continue;
+    }
     
     //Loop  on displaced muons    
     for(size_t k_idx = 0; k_idx < muons->size(); ++k_idx) {
@@ -196,13 +201,13 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       used_muon1_id.emplace_back(mu1_idx);
       used_muon2_id.emplace_back(mu2_idx);
       used_trk_id.emplace_back(k_idx);
-      if(fitter.success()) 
-      {
-        cand.setVertex( 
-          reco::Candidate::Point( 
-            fitter.fitted_vtx().x(),
-            fitter.fitted_vtx().y(),
-            fitter.fitted_vtx().z()
+      if(fitter.success()) {
+      
+	cand.setVertex( 
+		       reco::Candidate::Point( 
+					      fitter.fitted_vtx().x(),
+					      fitter.fitted_vtx().y(),
+					      fitter.fitted_vtx().z()
              )  
           );
         Measurement1D ip3D = getIP(fitter, muons_ttracks->at(k_idx));
@@ -348,7 +353,11 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       TVector3 jpsi_beta_lab=jpsi.BoostVector();
       P_mu.Boost(-jpsi_beta_lab);
       cand.addUserFloat("E_mu_#",P_mu.E());
-      if( !post_vtx_selection_(cand) ) continue;        
+      //if(debug) std::cout<<"post vertex features "<<std::cout << "postvtx" <<fitter.success()<<" "<<fitter.prob()<<" "<<cos_theta_2D(fitter, *beamspot, fit_p4)<<" "<<cand.mass()<< std::endl;
+      if( !post_vtx_selection_(cand) ) {
+	if(debug) std::cout<<"post vertx sel dies"<<std::endl;
+	continue;        
+      }
       if(debug) std::cout<<"pass post vertx sel"<<std::endl;
 
       //compute isolation

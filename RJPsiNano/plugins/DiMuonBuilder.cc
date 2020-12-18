@@ -81,12 +81,16 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       int isJpsiMuon2 = mu2_ptr->userInt("isJpsiMuon");
       int isDimuon0Trg2 = mu2_ptr->userInt("isDimuon0Trg");
       int isJpsiTrkTrg2 = mu2_ptr->userInt("isJpsiTrkTrg");
-      bool trg1 = (isJpsiTrkTrg1 && isJpsiTrkTrg2);
+      bool trg1 = ((isJpsiTrkTrg1 && isJpsiMuon1) && (isJpsiTrkTrg2 && isJpsiMuon2));
       bool trg2 = ((isDimuon0Trg1 && isJpsiMuon1) && (isDimuon0Trg2 && isJpsiMuon2));
 
-      //if(!trg1 && !trg2) continue;
-      if(!trg2) continue;
-
+      int dimuon0_trigger = 0;
+      int jpsitrk_trigger = 0;
+      if(!trg1 && !trg2) continue;
+      //if(!trg2) continue;
+      if(trg1) jpsitrk_trigger = 1;
+      if(trg2) dimuon0_trigger = 1;
+      
       pat::CompositeCandidate muon_pair;
       muon_pair.setP4(mu1_ptr->p4() + mu2_ptr->p4());
       muon_pair.setCharge(mu1_ptr->charge() + mu2_ptr->charge());
@@ -135,6 +139,8 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       dimuon_tt->emplace_back(fitter.fitted_candidate_ttrk());
       //ret_value->push_back(muon_pair);
       ret_value->emplace_back(muon_pair);
+      ret_value->back().addUserInt("muonpair_fromdimuon0", dimuon0_trigger);
+      ret_value->back().addUserInt("muonpair_fromjpsitrk", jpsitrk_trigger);
     }
   }
   
