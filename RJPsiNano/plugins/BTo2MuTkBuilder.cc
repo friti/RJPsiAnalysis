@@ -32,6 +32,7 @@
 #include "KinVtxFitter.h"
 
 constexpr bool debugGen = false;
+constexpr bool debug = true;
 
 
 class BTo2MuTkBuilder : public edm::global::EDProducer<> {
@@ -136,18 +137,25 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
     edm::Ptr<reco::Candidate> mu2_ptr = ll_prt->userCand("mu2");
     size_t mu1_idx = abs(ll_prt->userInt("mu1_idx"));
     size_t mu2_idx = abs(ll_prt->userInt("mu2_idx"));
-    size_t isDimuon_dimuon0Trg = abs(ll_prt->userInt("isDimuon0Trg"));
-    size_t isDimuon_jpsiTrkTrg = abs(ll_prt->userInt("isJpsiTrkTrg"));
+    size_t isDimuon_dimuon0Trg = abs(ll_prt->userInt("muonpair_fromdimuon0"));
+    size_t isDimuon_jpsiTrkTrg = abs(ll_prt->userInt("muonpair_fromjpsitrk"));
+    //size_t isDimuon_jpsiTrkTrg = abs(ll_prt->userInt("isJpsiTrkTrg"));
+    //size_t isDimuon_dimuon0Trg = abs(ll_prt->userInt("isDimuon0Trg"));
     if(!(isDimuon_jpsiTrkTrg)) continue;
 
     //Loop  on displaced muons    
+    if(debug) std::cout<<"paerticles size "<<particles->size()<<std::endl;
     for(size_t k_idx = 0; k_idx < particles->size(); ++k_idx) {
       edm::Ptr<pat::CompositeCandidate> k_ptr(particles, k_idx);
       if( !particle_selection_(*k_ptr) ) continue;
       
       bool isPartTrg = k_ptr->userInt("isTriggering");
       //ha trovato il mu displaced
-      if(!(isPartTrg)) continue;
+      if(!(isPartTrg)) {
+	//if(debug) std::cout<<"is NOT track triggered "<<k_ptr->pt()<<std::endl;
+	continue;
+      }
+      
 
       math::PtEtaPhiMLorentzVector k_p4(
                 k_ptr->pt(), 
@@ -162,6 +170,10 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
       pat::CompositeCandidate cand;
       cand.setP4(ll_prt->p4() + k_p4);
       cand.setCharge(ll_prt->charge() + k_ptr->charge());
+      if(debug) std::cout<<"cand pt "<<cand.pt()<<std::endl;
+      if(debug) std::cout<<"displ mu "<<k_ptr->pt()<<std::endl;
+      if(debug) std::cout<<"displ m1 "<<mu1_ptr->pt()<<std::endl;
+      if(debug) std::cout<<"displ m2 "<<mu2_ptr->pt()<<std::endl;
 
       cand.addUserCand("mu1", mu1_ptr);
       cand.addUserCand("mu2", mu2_ptr);
@@ -311,9 +323,12 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
       TVector3 jpsi_beta_lab=jpsi.BoostVector();
       P_mu.Boost(-jpsi_beta_lab);
       cand.addUserFloat("E_mu_#",P_mu.E());
-      if( !post_vtx_selection_(cand) ) continue;        
+      if( !post_vtx_selection_(cand) ) {
+	if(debug) std::cout<<"post vrxt dies "<<std::endl;
+	continue;        
+      }
       //std::cout << "here4" << std::endl;
-
+      if(debug) std::cout<<"post vrxt Survives!! "<<std::endl;
       //compute isolation
       float mu1_iso03 = 0;
       float mu1_iso04 = 0;
