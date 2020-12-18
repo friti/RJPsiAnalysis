@@ -23,6 +23,7 @@
 #include "DataFormats/Common/interface/AssociationVector.h"
 
 #include "helper.h"
+constexpr bool debug = false;
 
 class TrackMerger : public edm::global::EDProducer<> {
 
@@ -167,7 +168,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
        }
      }
    }
-       
+   if (debug) std::cout<<"trks that pass the trigger : "<<pass_trk.size()<<std::endl;
    std::vector<int> trackIsTrigger(totalTracks, 0);
    
    // for loop is better to be range based - especially for large ensembles  
@@ -177,6 +178,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
      for(pat::TriggerObjectStandAlone obj: pass_trk){
        if(deltaR(obj,trk)<0.02) {
 	 trackIsTrigger[iTrk] = 1;
+	 if (debug) std::cout<<"trk trigger matched : HLT: "<<obj.pt()<<" reco: "<<trk.pt()<<std::endl;
        }
      }
      //if(flag == 0) continue;

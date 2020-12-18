@@ -33,7 +33,7 @@
 
 using namespace std;
 
-constexpr bool debug = false;
+constexpr bool debug = true;
 
 class MuonTriggerSelector : public edm::EDProducer {
     
@@ -122,12 +122,15 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   
   bool pass_dimuon0= false;
   bool pass_jpsiTrk = false;
+  int from_dimuon0 = 0;
+  int from_jpsitrk = 0;
   if(index_dimuon0 != triggerBits->size()) 
     pass_dimuon0 = triggerBits->accept(index_dimuon0);
 
   if(index_jpsiTrk != triggerBits->size()) 
     pass_jpsiTrk = triggerBits->accept(index_jpsiTrk);
 
+  if(debug) std::cout << "pass_dimuuon0 " << pass_dimuon0<<" pass_trk "<<pass_jpsiTrk<<std::endl;
   //if(pass_dimuon0) std::cout << "pass_dimuuon0" << std::endl;
   std::vector<bool> jpsiMuonFlags;
   std::vector<bool> dimuon0Flags;
@@ -145,19 +148,28 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         isMuonFromJpsi = true;
 
 
-      
-      if(obj.hasFilterLabel("hltTripleMuL3PreFiltered222") || obj.hasFilterLabel("hltJpsiTkVertexFilter")) //unpaired muons 
+      from_dimuon0 = 0;
+      from_jpsitrk = 0;
+      if(obj.hasFilterLabel("hltTripleMuL3PreFiltered222")){
+	from_dimuon0 = 1;
+      }
+      if(obj.hasFilterLabel("hltJpsiTkVertexFilter")){
+	from_jpsitrk =1;
+      }
 
       { 
-        dimuon0Flags.push_back(pass_dimuon0); 
-        jpsiTrkFlags.push_back(pass_jpsiTrk);
-        jpsiMuonFlags.push_back(isMuonFromJpsi);
+	//for each triggered muon I know which trigger it passes
+        dimuon0Flags.push_back(from_dimuon0); //unpaired muon passes the dimuon0
+	jpsiTrkFlags.push_back(from_jpsitrk); //unpaired muon passes the jpsitrk
+        jpsiMuonFlags.push_back(isMuonFromJpsi); //the muon is from the jpsi
         triggeringMuons.push_back(obj);
         if(debug){ 
+	  if(from_dimuon0 == 1){ // print only muons that pass the from dimuon0
           std::cout << "\tTrigger object:  pt " << obj.pt() << ", eta " << obj.eta() << ", phi " << obj.phi() << std::endl;
 	        // Print trigger object collection and type
 	        std::cout << "\t   Collection: " << obj.collection() << std::endl;
-        }
+	  }
+	}
       } 
     }//trigger objects
   }
@@ -191,19 +203,23 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     for(unsigned int iTrg=0; iTrg<triggeringMuons.size(); ++iTrg)
     {
       if(!dimuon0Flags[iTrg] && !jpsiTrkFlags[iTrg]) continue;
-	    float dR = reco::deltaR(triggeringMuons[iTrg], muon);
-	    //std::cout << " dR (before) = " << dR << std::endl;
-	    if((dR < dRMuonMatching || dRMuonMatching == -1)  && dR < maxdR_)
+      float dR = reco::deltaR(triggeringMuons[iTrg], muon);
+
+      //it passes the dimuon0 trigger
+
+      //If I don't do this, it mixes the triggers
+      if(dimuon0Flags[iTrg] && (dR < dRMuonMatching || dRMuonMatching == -1)  && dR < maxdR_)
       {
 	      dRMuonMatching = dR;
 	      recoMuonMatching_index = iMuo;
 	      trgMuonMatching_index = iTrg;
-
+	      if(debug) std::cout<<"trigger dimuon0 "<< dimuon0Flags[iTrg]<<std::endl;
 	      if(debug) std::cout << " dR = " << dR <<std::endl;
 	      if(debug) std::cout << " HLT = " << triggeringMuons[iTrg].pt() << " " << triggeringMuons[iTrg].eta() << " " << triggeringMuons[iTrg].phi()          << std::endl;
 	      if(debug) std::cout << " reco = " << muon.pt() << " " << muon.eta() << " " << muon.phi()          << std::endl;
 
-	    }
+      }
+	    
     }
 
     //save reco muon 
@@ -230,7 +246,12 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 	    muonIsDimuon0Trg[iMuo] = (int)dimuon0Flags[trgMuonMatching_index];
 	    muonIsJpsiTrkTrg[iMuo] = (int)jpsiTrkFlags[trgMuonMatching_index];
     }
+
+
   }
+
+
+ 
   // now produce output for analysis (code simplified loop of trg inside)
   // trigger muon + all compatible in dz with any tag
   for(unsigned int muIdx=0; muIdx<muons->size(); ++muIdx) 
