@@ -79,10 +79,11 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 #        inTimeMuon = Var("passed('InTimeMuon')",bool,doc="inTimeMuon ID"),
 
         isTriggering = Var("userInt('isTriggering')", int,doc="flag the reco muon is also triggering"),
-        isJpsiMuon = Var("userInt('isJpsiMuon')", int,doc="flag if the muon triggered is comming from a JPsi"),
+        isMuonFromJpsi_dimuon0Trg = Var("userInt('isMuonFromJpsi_dimuon0Trg')", int,doc="flag if the muon triggered is comming from a JPsi"),
+        isMuonFromJpsi_jpsiTrkTrg = Var("userInt('isMuonFromJpsi_jpsiTrkTrg')", int,doc="flag if the muon triggered is comming from a JPsi"),
         isDimuon0Trg = Var("userInt('isDimuon0Trg')", int,doc="flag if the Dimuon0 path was triggered"),
         isJpsiTrkTrg = Var("userInt('isJpsiTrkTrg')", int,doc="flag if the JpsiTrkTrg path was triggered"),
-        #isMCMatch = Var("userInt('mcMatch')", int, doc="truth match muon")
+        isMCMatch = Var("userInt('mcMatch')", int, doc="truth match muon")
     ),
 )
 
@@ -122,7 +123,8 @@ muonTriggerMatchedTable = muonBParkTable.clone(
         vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
         vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
         vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6),
-        trgMuonIndex = Var("userInt('trgMuonIndex')", int,doc="index in trigger muon collection")
+        trgMuonDimuon0_index = Var("userInt('trgMuonDimuon0_index')", int,doc="index in trigger muon collection"),
+        trgMuonJpsiTrk_index = Var("userInt('trgMuonJpsiTrk_index')", int,doc="index in trigger muon collection")
    )
 )
 

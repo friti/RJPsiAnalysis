@@ -71,25 +71,22 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   for(size_t mu1_idx = 0; mu1_idx < muons->size(); ++mu1_idx) {
     edm::Ptr<pat::Muon> mu1_ptr(muons, mu1_idx);
     if(!mu1_selection_(*mu1_ptr)) continue; 
-    int isJpsiMuon1 = mu1_ptr->userInt("isJpsiMuon");
+    int isMuonFromJpsi_dimuon0_1 = mu1_ptr->userInt("isMuonFromJpsi_dimuon0Trg");
+    int isMuonFromJpsi_jpsiTrk_1 = mu1_ptr->userInt("isMuonFromJpsi_jpsiTrkTrg");
     int isDimuon0Trg1 = mu1_ptr->userInt("isDimuon0Trg");
     int isJpsiTrkTrg1 = mu1_ptr->userInt("isJpsiTrkTrg");
     for(size_t mu2_idx = mu1_idx + 1; mu2_idx < muons->size(); ++mu2_idx) {
       edm::Ptr<pat::Muon> mu2_ptr(muons, mu2_idx);
       if(!mu2_selection_(*mu2_ptr)) continue;
       // Form pairs only with triggered muons
-      int isJpsiMuon2 = mu2_ptr->userInt("isJpsiMuon");
+      int isMuonFromJpsi_dimuon0_2 = mu2_ptr->userInt("isMuonFromJpsi_dimuon0Trg");
+      int isMuonFromJpsi_jpsiTrk_2 = mu2_ptr->userInt("isMuonFromJpsi_jpsiTrkTrg");
       int isDimuon0Trg2 = mu2_ptr->userInt("isDimuon0Trg");
       int isJpsiTrkTrg2 = mu2_ptr->userInt("isJpsiTrkTrg");
-      bool trg1 = ((isJpsiTrkTrg1 && isJpsiMuon1) && (isJpsiTrkTrg2 && isJpsiMuon2));
-      bool trg2 = ((isDimuon0Trg1 && isJpsiMuon1) && (isDimuon0Trg2 && isJpsiMuon2));
+      int dimuon0_trigger = (isDimuon0Trg1 && isMuonFromJpsi_dimuon0_1) && (isDimuon0Trg2 && isMuonFromJpsi_dimuon0_2);
+      int jpsitrk_trigger = (isJpsiTrkTrg1 && isMuonFromJpsi_jpsiTrk_1) && (isJpsiTrkTrg2 && isMuonFromJpsi_jpsiTrk_2);
 
-      int dimuon0_trigger = 0;
-      int jpsitrk_trigger = 0;
-      if(!trg1 && !trg2) continue;
-      //if(!trg2) continue;
-      if(trg1) jpsitrk_trigger = 1;
-      if(trg2) dimuon0_trigger = 1;
+      if(!jpsitrk_trigger && !dimuon0_trigger) continue;
       
       pat::CompositeCandidate muon_pair;
       muon_pair.setP4(mu1_ptr->p4() + mu2_ptr->p4());
@@ -98,8 +95,8 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       // Put the muon passing the corresponding selection
       muon_pair.addUserInt("mu1_idx", mu1_idx );
       muon_pair.addUserInt("mu2_idx", mu2_idx );
-      muon_pair.addUserInt("isJpsiTrkTrg", trg1);
-      muon_pair.addUserInt("isDimuon0Trg", trg2);
+      muon_pair.addUserInt("isJpsiTrkTrg", jpsitrk_trigger);
+      muon_pair.addUserInt("isDimuon0Trg", dimuon0_trigger);
       // Use UserCands as they should not use memory but keep the Ptr itself
       muon_pair.addUserCand("mu1", mu1_ptr );
       muon_pair.addUserCand("mu2", mu2_ptr );
