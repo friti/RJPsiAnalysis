@@ -23,7 +23,7 @@
 #include "DataFormats/Common/interface/AssociationVector.h"
 
 #include "helper.h"
-constexpr bool debug = false;
+constexpr bool debug = true;
 
 class TrackMerger : public edm::global::EDProducer<> {
 
@@ -161,7 +161,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
 	 obj.unpackFilterLabels(evt, *triggerBits);
 	 obj.unpackPathNames(names);
 	 
-	 if(obj.hasFilterLabel("hltJpsiTkVertexFilter")) {
+	 if(obj.hasFilterLabel("hltJpsiTkVertexFilter") && !(obj.hasFilterLabel("hltDisplacedmumuFilterDoubleMu4Jpsi"))) {
 	   pass_trk.push_back(obj);
 	 }
 	 
@@ -171,13 +171,18 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
    if (debug) std::cout<<"trks that pass the trigger : "<<pass_trk.size()<<std::endl;
    std::vector<int> trackIsTrigger(totalTracks, 0);
    
+   int flag = 0;
+   int index_trig = -99;
    // for loop is better to be range based - especially for large ensembles  
+   if(debug) std::cout<<"Number of total tracks in TRACK MERGER "<<totalTracks<<std::endl;
    for( unsigned int iTrk=0; iTrk<totalTracks; ++iTrk ) {
      const pat::PackedCandidate & trk = (iTrk < nTracks) ? (*tracks)[iTrk] : (*lostTracks)[iTrk-nTracks];
      
      for(pat::TriggerObjectStandAlone obj: pass_trk){
        if(deltaR(obj,trk)<0.02) {
-	 trackIsTrigger[iTrk] = 1;
+	 flag = 1;
+	 index_trig = iTrk;
+	   //	 trackIsTrigger[iTrk] = 1;
 	 if (debug) std::cout<<"trk trigger matched : HLT: "<<obj.pt()<<" reco: "<<trk.pt()<<std::endl;
        }
      }
@@ -194,6 +199,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
 	 (trk.bestTrack()->normalizedChi2() > trkNormChiMax_ &&
 	  trkNormChiMax_>0)  )    continue; 
 
+     /*
     bool skipTrack=true;
     for (const pat::Muon & mu: *trgMuons){
       //remove tracks inside trg muons jet
@@ -208,7 +214,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     if (drTrg_Cleaning_<=0 && dzTrg_cleaning_<0) skipTrack=false;
     // if track is closer to at least a triggering muon keep it
     if (skipTrack) continue;
-
+     */
     // high purity requirment applied only in packedCands
     if( iTrk < nTracks && !trk.trackHighPurity()) continue;
     const reco::TransientTrack trackTT( (*trk.bestTrack()) , &(*bFieldHandle));
@@ -284,7 +290,9 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
  
   //in order to avoid revoking the sxpensive ttrack builder many times and still have everything sorted, we add them to vector of pairs
 
+    if(debug)std::cout<<"the track survived "<<trk.pt()<<std::endl;
 
+    if(flag == 1)    trackIsTrigger[index_trig] = 1;
 
     vectrk_ttrk.emplace_back( std::make_pair(pcand,trackTT ) );   
     tracks_out -> emplace_back(pcand);
