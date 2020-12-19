@@ -235,6 +235,7 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
             "fitted_cos_theta_2D", 
             cos_theta_2D(fitter, *beamspot, fit_p4)
             );
+
         cand.addUserFloat("vtx_ex", sqrt(fitter.fitted_vtx_uncertainty().cxx()));
         cand.addUserFloat("vtx_ey", sqrt(fitter.fitted_vtx_uncertainty().cyy()));
         cand.addUserFloat("vtx_ez", sqrt(fitter.fitted_vtx_uncertainty().czz()));
@@ -286,6 +287,8 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("vtx_y", cand.vy());
       cand.addUserFloat("vtx_z", cand.vz());
 
+      //alredy defined in dimuon builder
+      /*
       cand.addUserFloat("jpsi_vtx_x", ll_prt->userFloat("vtx_x"));
       cand.addUserFloat("jpsi_vtx_y", ll_prt->userFloat("vtx_y"));
       cand.addUserFloat("jpsi_vtx_z", ll_prt->userFloat("vtx_z"));
@@ -293,7 +296,7 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("jpsi_vtx_ey", ll_prt->userFloat("vtx_ey"));
       cand.addUserFloat("jpsi_vtx_ez", ll_prt->userFloat("vtx_ez"));
       cand.addUserFloat("jpsi_vtx_chi2", ll_prt->userFloat("vtx_chi2"));
-
+      */
       cand.addUserFloat("pv_x", bestVertex.position().x());
       cand.addUserFloat("pv_y", bestVertex.position().y());
       cand.addUserFloat("pv_z", bestVertex.position().z());
@@ -304,7 +307,11 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("pv_eyz", bestVertex.covariance(0,2));
       cand.addUserFloat("pv_exz", bestVertex.covariance(1,2));
       cand.addUserFloat("pv_chi2", ChiSquaredProbability(bestVertex.chi2(), bestVertex.ndof()));
-      
+      const reco::BeamSpot &bm = *beamspot;
+
+      cand.addUserFloat("beamspot_x", bm.x0());
+      cand.addUserFloat("beamspot_y", bm.y0());
+      cand.addUserFloat("beamspot_z", bm.z0());
 
       //mie variabili                                                                                
       //conto quanti mu totali aveva l'evento

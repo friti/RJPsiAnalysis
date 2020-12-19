@@ -246,6 +246,7 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
       cand.addUserFloat("vtx_ez", sqrt(fitter.fitted_vtx_uncertainty().czz()));
       cand.addUserFloat("vtx_chi2", ChiSquaredProbability(fitter.chi2(), fitter.dof()));
 
+      /*
       cand.addUserFloat("jpsi_vtx_x", ll_prt->userFloat("vtx_x"));
       cand.addUserFloat("jpsi_vtx_y", ll_prt->userFloat("vtx_y"));
       cand.addUserFloat("jpsi_vtx_z", ll_prt->userFloat("vtx_z"));
@@ -253,6 +254,7 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
       cand.addUserFloat("jpsi_vtx_ey", ll_prt->userFloat("vtx_ey"));
       cand.addUserFloat("jpsi_vtx_ez", ll_prt->userFloat("vtx_ez"));
       cand.addUserFloat("jpsi_vtx_chi2", ll_prt->userFloat("vtx_chi2"));
+      */
 
       cand.addUserFloat("pv_x", bestVertex.position().x());
       cand.addUserFloat("pv_y", bestVertex.position().y());
@@ -275,7 +277,13 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
       cand.addUserFloat("fitted_k_pt"  , fitter.daughter_p4(2).pt()); 
       cand.addUserFloat("fitted_k_eta" , fitter.daughter_p4(2).eta());
       cand.addUserFloat("fitted_k_phi" , fitter.daughter_p4(2).phi());
-      
+
+
+      const reco::BeamSpot &bm = *beamspot;
+
+      cand.addUserFloat("beamspot_x", bm.x0());
+      cand.addUserFloat("beamspot_y", bm.y0());
+      cand.addUserFloat("beamspot_z", bm.z0());      
       //mie variabili                                                                                
       //conto quanti mu totali aveva l'evento
       //cand.addUserInt("pass_3mu",pass_3mu.size());                                 

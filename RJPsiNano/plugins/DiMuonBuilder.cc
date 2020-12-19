@@ -20,7 +20,7 @@
 #include <limits>
 #include <algorithm>
 #include "KinVtxFitter.h"
-constexpr bool debug = false;
+constexpr bool debug = true;
 
 class DiMuonBuilder : public edm::global::EDProducer<> {
 
@@ -35,7 +35,8 @@ public:
     pre_vtx_selection_{cfg.getParameter<std::string>("preVtxSelection")},
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
     src_{consumes<MuonCollection>( cfg.getParameter<edm::InputTag>("src") )},
-    ttracks_src_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("transientTracksSrc") )} {
+    ttracks_src_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("transientTracksSrc") )},
+    beamspot_{consumes<reco::BeamSpot>( cfg.getParameter<edm::InputTag>("beamSpot") )}{
        produces<pat::CompositeCandidateCollection>("muonPairsForBTo3Mu");
        produces<TransientTrackCollection>("dimuonTransientTracks");
     }
@@ -53,6 +54,7 @@ private:
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; // cut on the di-muon after the SV fit
   const edm::EDGetTokenT<MuonCollection> src_;
   const edm::EDGetTokenT<TransientTrackCollection> ttracks_src_;
+  const edm::EDGetTokenT<reco::BeamSpot> beamspot_;
 };
 
 void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &) const {
@@ -63,7 +65,8 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   
   edm::Handle<TransientTrackCollection> ttracks;
   evt.getByToken(ttracks_src_, ttracks);
-
+  edm::Handle<reco::BeamSpot> beamspot;
+  evt.getByToken(beamspot_, beamspot);
   // output
   std::unique_ptr<pat::CompositeCandidateCollection> ret_value(new pat::CompositeCandidateCollection());
   std::unique_ptr<TransientTrackCollection> dimuon_tt(new TransientTrackCollection);
@@ -117,6 +120,7 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       muon_pair.addUserFloat("sv_position", fitter.fitted_vtx().x()); // float??
       muon_pair.addUserFloat("sv_ndof", fitter.dof()); // float??
       muon_pair.addUserFloat("sv_prob", fitter.prob());
+      auto fit_p4 = fitter.fitted_p4();
       muon_pair.addUserFloat("fitted_mass", fitter.success() ? fitter.fitted_candidate().mass() : -1);
       muon_pair.addUserFloat("fitted_massErr", fitter.success() ? sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)) : -1);
       muon_pair.addUserFloat("vtx_x",muon_pair.vx());
@@ -125,7 +129,40 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       muon_pair.addUserFloat("vtx_ex",sqrt(fitter.fitted_vtx_uncertainty().cxx()));
       muon_pair.addUserFloat("vtx_ey",sqrt(fitter.fitted_vtx_uncertainty().cyy()));
       muon_pair.addUserFloat("vtx_ez",sqrt(fitter.fitted_vtx_uncertainty().czz()));
-      muon_pair.addUserFloat("vtx_chi2", fitter.chi2());
+      muon_pair.addUserFloat("sv_chi2", fitter.chi2());
+      muon_pair.addUserFloat("fitted_pt"  , fit_p4.pt());
+      muon_pair.addUserFloat("fitted_eta" , fit_p4.eta());
+      muon_pair.addUserFloat("fitted_phi" , fit_p4.phi());
+      muon_pair.addUserFloat(
+			       "fitted_cos_theta_2D",
+			       cos_theta_2D(fitter, *beamspot, fit_p4)
+			       );
+      auto lxy = l_xy(fitter, *beamspot);
+      muon_pair.addUserFloat("l_xy", lxy.value());
+      muon_pair.addUserFloat("l_xy_unc", lxy.error());
+
+      muon_pair.addUserFloat("vtx_x",muon_pair.vx());
+      muon_pair.addUserFloat("vtx_y",muon_pair.vy());
+      muon_pair.addUserFloat("vtx_z",muon_pair.vz());
+
+      muon_pair.addUserFloat("vtx_ex",sqrt(fitter.fitted_vtx_uncertainty().cxx()));
+      muon_pair.addUserFloat("vtx_ey",sqrt(fitter.fitted_vtx_uncertainty().cyy()));
+      muon_pair.addUserFloat("vtx_ez",sqrt(fitter.fitted_vtx_uncertainty().czz()));
+
+      muon_pair.addUserFloat("fitted_mu1_pt" , fitter.daughter_p4(0).pt());
+      muon_pair.addUserFloat("fitted_mu1_eta", fitter.daughter_p4(0).eta());
+      muon_pair.addUserFloat("fitted_mu1_phi", fitter.daughter_p4(0).phi());
+      muon_pair.addUserFloat("fitted_mu2_pt" , fitter.daughter_p4(1).pt());
+      muon_pair.addUserFloat("fitted_mu2_eta", fitter.daughter_p4(1).eta());
+      muon_pair.addUserFloat("fitted_mu2_phi", fitter.daughter_p4(1).phi());
+
+
+
+
+      muon_pair.addUserFloat(
+                               "cos_theta_2D",
+                               cos_theta_2D(fitter, *beamspot, muon_pair.p4())
+                               );
      
       // if needed, add here more stuff
 
