@@ -32,7 +32,7 @@
 #include "KinVtxFitter.h"
 
 constexpr bool debugGen = false;
-constexpr bool debug = true;
+constexpr bool debug = false;
 
 
 class BTo2MuTkBuilder : public edm::global::EDProducer<> {
@@ -345,6 +345,11 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
         // define selections for iso tracks (pT, eta, ...)
         if( !isotrk_selection_(trk) ) continue;
         // check if the track is the muon
+	// only consider tracks originating close to the three bodies
+	if ( !mu1_ptr->bestTrack() || fabs(trk.dz() - mu1_ptr->bestTrack()->dz()) > 0.4 ) continue;
+	if ( !mu2_ptr->bestTrack() || fabs(trk.dz() - mu2_ptr->bestTrack()->dz()) > 0.4 ) continue;
+	if ( fabs(trk.dz() - particles_ttracks->at(k_idx).track().dz()) > 0.4 ) continue;
+
         if (k_ptr->userCand("cand") ==  edm::Ptr<reco::Candidate> ( iso_tracks, iTrk ) ) {
           
           std::cout<<"old"<<std::endl;
@@ -366,26 +371,22 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
         float dr_to_k  = deltaR(cand.userFloat("fitted_k_eta") , cand.userFloat("fitted_k_phi") , trk.eta(), trk.phi());
         float dr_to_b  = deltaR(cand.userFloat("fitted_eta")   , cand.userFloat("fitted_phi") , trk.eta(), trk.phi());
         
-        if (dr_to_mu1 < 0.4)
-        {
-          mu1_iso04 += trk.pt();
-          if ( dr_to_mu1 < 0.3) mu1_iso03 += trk.pt();
-        }
-        if (dr_to_mu2 < 0.4)
-        {
-          mu2_iso04 += trk.pt();
-          if (dr_to_mu2 < 0.3)  mu2_iso03 += trk.pt();
-        }
-        if (dr_to_k < 0.4)
-        {
-          k_iso04 += trk.pt();
-          if (dr_to_k < 0.3) k_iso03 += trk.pt();
-        }
-        if (dr_to_b < 0.4)
-        {
-          b_iso04 += trk.pt();
-          if (dr_to_b < 0.3) b_iso03 += trk.pt();
-        }
+	if (dr_to_mu1 < 0.4 && dr_to_mu1>0.01){
+	  mu1_iso04 += trk.pt();
+	  if ( dr_to_mu1 < 0.3) mu1_iso03 += trk.pt();
+	}
+	if (dr_to_mu2 < 0.4 && dr_to_mu2>0.01){
+	  mu2_iso04 += trk.pt();
+	  if (dr_to_mu2 < 0.3)  mu2_iso03 += trk.pt();
+	}
+	if (dr_to_k < 0.4 && dr_to_k>0.01){
+	  k_iso04 += trk.pt();
+	  if (dr_to_k < 0.3) k_iso03 += trk.pt();
+	}
+	if (dr_to_b < 0.4){
+	  b_iso04 += trk.pt();
+	  if (dr_to_b < 0.3) b_iso03 += trk.pt();
+	}
       }
 
       cand.addUserFloat("mu1_iso03", mu1_iso03);
