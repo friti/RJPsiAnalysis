@@ -83,7 +83,7 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         isMuonFromJpsi_jpsiTrkTrg = Var("userInt('isMuonFromJpsi_jpsiTrkTrg')", int,doc="flag if the muon triggered is comming from a JPsi"),
         isDimuon0Trg = Var("userInt('isDimuon0Trg')", int,doc="flag if the Dimuon0 path was triggered"),
         isJpsiTrkTrg = Var("userInt('isJpsiTrkTrg')", int,doc="flag if the JpsiTrkTrg path was triggered"),
-        isMCMatch = Var("userInt('mcMatch')", int, doc="truth match muon")
+                        #        isMCMatch = Var("userInt('mcMatch')", int, doc="truth match muon")
     ),
 )
 

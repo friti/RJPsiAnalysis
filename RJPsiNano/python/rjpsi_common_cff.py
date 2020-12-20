@@ -69,8 +69,6 @@ TableDefaultVariables = cms.PSet(
     minDR = ufloat('min_dr'),
     maxDR = ufloat('max_dr'),
     
-    ip3D = ufloat('ip3D'),
-    ip3D_e = ufloat('ip3D'),
 
     
     #all final particles vertex
@@ -86,6 +84,7 @@ TableDefaultVariables = cms.PSet(
     bodies3_vtx_ey   = ufloat('vtx_ey'),
     bodies3_vtx_ez   = ufloat('vtx_ez'),
     bodies3_cos2D     = ufloat('cos_theta_2D'),
+    bodies3_svOK     = uint('sv_OK'),
     
     #post fit all particles vertex
     bodies3_fit_mass    = ufloat('fitted_mass'),
@@ -184,4 +183,6 @@ Final3PartTableVariables = TableDefaultVariables.clone(
     E_mu_star   = ufloat('E_mu_star'),
     E_mu_canc   = ufloat('E_mu_#'),
     n_k_used = uint('n_k_used'),
+    ip3D = ufloat('ip3D'),
+    ip3D_e = ufloat('ip3D'),
 )
