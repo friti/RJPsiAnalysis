@@ -23,7 +23,7 @@
 #include "DataFormats/Common/interface/AssociationVector.h"
 
 #include "helper.h"
-constexpr bool debug = true;
+constexpr bool debug = false;
 
 class TrackMerger : public edm::global::EDProducer<> {
 

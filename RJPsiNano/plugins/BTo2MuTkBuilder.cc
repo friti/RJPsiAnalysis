@@ -128,6 +128,8 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
 
   const reco::VertexCollection* vertices = pvSelected.product();
   // output
+
+  if(debug) std::cout<<"dimuons->size() "<<dimuons->size()<<std::endl;
   for(size_t ll_idx = 0; ll_idx < dimuons->size(); ++ll_idx) 
   {
     //std::cout << "PV " << ll_idx << ": " << vertices->at(ll_idx).position() << std::endl;
@@ -141,6 +143,7 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
     size_t isDimuon_jpsiTrkTrg = abs(ll_prt->userInt("muonpair_fromjpsitrk"));
     //size_t isDimuon_jpsiTrkTrg = abs(ll_prt->userInt("isJpsiTrkTrg"));
     //size_t isDimuon_dimuon0Trg = abs(ll_prt->userInt("isDimuon0Trg"));
+    if(debug) std::cout<<"isDimuon_jpsiTrkTrg  "<<isDimuon_jpsiTrkTrg<<std::endl;
     if(!(isDimuon_jpsiTrkTrg)) continue;
 
     //Loop  on displaced muons    
@@ -150,6 +153,7 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
       if( !particle_selection_(*k_ptr) ) continue;
       
       bool isPartTrg = k_ptr->userInt("isTriggering");
+      if(debug) std::cout<<"isTriggering "<<isPartTrg<<std::endl;
       //ha trovato il mu displaced
       if(!(isPartTrg)) {
 	//if(debug) std::cout<<"is NOT track triggered "<<k_ptr->pt()<<std::endl;

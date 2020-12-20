@@ -33,7 +33,7 @@
 
 using namespace std;
 
-constexpr bool debug = true;
+constexpr bool debug = false;
 
 class MuonTriggerSelector : public edm::EDProducer {
     
@@ -128,14 +128,14 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   if(index_jpsiTrk != triggerBits->size()) 
     pass_jpsiTrk_path = triggerBits->accept(index_jpsiTrk);
 
-  if(debug) std::cout << "pass_dimuuon0 " << pass_dimuon0_path<<" pass_trk "<<pass_jpsiTrk_path<<std::endl;
+  //  if(debug) std::cout << "pass_dimuuon0 " << pass_dimuon0_path<<" pass_trk "<<pass_jpsiTrk_path<<std::endl;
   //if(pass_dimuon0_path) std::cout << "pass_dimuuon0" << std::endl;
   std::vector<bool> jpsiFromMuon_fromDimuon0_flags;
   std::vector<bool> jpsiFromMuon_fromJpsiTrk_flags;
   std::vector<bool> dimuon0Flags;
   std::vector<bool> jpsiTrkFlags;
 
-  if(pass_dimuon0_path || pass_jpsiTrk_path) {  //is it trigger by the Dimuon0 trigger?
+  if(pass_dimuon0_path || pass_jpsiTrk_path) {  
     for (pat::TriggerObjectStandAlone obj : *triggerObjects) 
     { // note: not "const &" since we want to call unpackPathNames
       obj.unpackFilterLabels(iEvent, *triggerBits);
@@ -165,11 +165,15 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       jpsiFromMuon_fromJpsiTrk_flags.push_back(muonFromJpsi_fromJpsiTrkPath); //the muon is from the jpsi
       triggeringMuons.push_back(obj);
       if(debug){ 
-        if(dimuon0_seed == 1){ // print only muons that pass the from dimuon0
+
         std::cout << "\tTrigger object:  pt " << obj.pt() << ", eta " << obj.eta() << ", phi " << obj.phi() << std::endl;
-	      // Print trigger object collection and type
-	      std::cout << "\t   Collection: " << obj.collection() << std::endl;
-        }
+	// Print trigger object collection and type
+	std::cout << "\t   Collection: " << obj.collection() << std::endl;
+	std::cout<< "\t muonFromJpsi_fromDimuon0Path "<<muonFromJpsi_fromDimuon0Path<<std::endl;
+	std::cout<<"\t muonFromJpsi_fromJpsiTrkPath "<<muonFromJpsi_fromJpsiTrkPath<<std::endl;
+	std::cout<<"\t dimuon0_seed"<<dimuon0_seed<<std::endl;
+	std::cout<<"\t jpsitrk_seed"<<jpsitrk_seed<<std::endl;
+	
       }
       
     }//trigger objects
@@ -210,6 +214,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     {
       if(!dimuon0Flags[iTrg] && !jpsiTrkFlags[iTrg]) continue;
       //it passes the dimuon0 trigger
+      
 
       float dR = reco::deltaR(triggeringMuons[iTrg], muon);
       if(isMuonMatchedToDimuon0Path && dimuon0Flags[iTrg] && (dR < dRMuonMatchingDimuon0 || dRMuonMatchingDimuon0 == -1)  && dR < maxdR_)
@@ -227,6 +232,10 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 	      dRMuonMatchingJpsiTrk = dR;
 	      recoMuonMatchingJpsiTrk_index = iMuo;
 	      trgMuonMatchingJpsiTrk_index = iTrg;
+	      if(debug) std::cout<<"trigger jpsitrk "<< jpsiTrkFlags[iTrg]<<std::endl;
+	      if(debug) std::cout << " dR = " << dR <<std::endl;
+	      if(debug) std::cout << " HLT = " << triggeringMuons[iTrg].pt() << " " << triggeringMuons[iTrg].eta() << " " << triggeringMuons[iTrg].phi()          << std::endl;
+	      if(debug) std::cout << " reco = " << muon.pt() << " " << muon.eta() << " " << muon.phi()          << std::endl;
       }
     }
 
@@ -253,6 +262,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
       if(recoMuonMatchingJpsiTrk_index != -1)
       {
+	if(debug) std::cout<<"here it fills the vector for "<<muon.pt()<<" flag "<<jpsiFromMuon_fromJpsiTrk_flags[trgMuonMatchingJpsiTrk_index]<<std::endl;
 	      muonIsFromJpsi_jpsiTrkPath[iMuo] = jpsiFromMuon_fromJpsiTrk_flags[trgMuonMatchingJpsiTrk_index];
 	      muonIsJpsiTrkTrg[iMuo] = jpsiTrkFlags[trgMuonMatchingJpsiTrk_index];
       }
