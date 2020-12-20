@@ -20,7 +20,7 @@
 #include <limits>
 #include <algorithm>
 #include "KinVtxFitter.h"
-constexpr bool debug = true;
+constexpr bool debug = false;
 
 class DiMuonBuilder : public edm::global::EDProducer<> {
 

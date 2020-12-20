@@ -136,7 +136,9 @@ TableDefaultVariables = cms.PSet(
     b_iso04  = ufloat('b_iso04'),
 
     #beamspot
-    
+    beamspot_x     = ufloat('beamspot_x'),
+    beamspot_y     = ufloat('beamspot_y'),
+    beamspot_z     = ufloat('beamspot_z'),    
 
 
     #new variables
