@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 
 options = VarParsing('python')
 
-options.register('isMC', False,
+options.register('isMC', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Run this on real data"
@@ -47,7 +47,8 @@ outputFileNANO = cms.untracked.string('_'.join(['RJPsi', extension[options.isMC]
 #input files (it can be a list of files)
 if not options.inputFiles:
     options.inputFiles = ['root://cms-xrd-global.cern.ch//store/data/Run2018D/Charmonium/MINIAOD/12Nov2019_UL2018-v1/00000/00AC5CFC-5390-F947-911B-2074A7DFF23D.root'] if not options.isMC else \
-                         ['file:RJpsi-BcToXToJpsiMuMuSelected-RunIISummer19UL18MiniAOD_0.root']
+                         ["root://cms-xrd-global.cern.ch//store/user/manzoni/RJPsi_Bc_PMX_HLT_RECO_MINI_28oct20_v5/RJpsi-BcToXToJpsiMuMuSelected-RunIISummer19UL18MiniAOD_1000.root"]
+#                         ['file:RJpsi-BcToXToJpsiMuMuSelected-RunIISummer19UL18MiniAOD_0.root']
                          
 
                          #['root://cms-xrd-global.cern.ch//store/user/manzoni/RJPsi_Bc_PMX_HLT_RECO_MINI_28oct20_v5/RJpsi-BcToXToJpsiMuMuSelected-RunIISummer19UL18MiniAOD_1000.root']
@@ -136,6 +137,7 @@ process = nanoAOD_customizeTrackFilteredBPark(process)
 process = nanoAOD_customizeBTo3Mu(process)
 process = nanoAOD_customizeBTo2MuK(process)
 process = nanoAOD_customizeBTo2MuP(process)
+process = nanoAOD_customizeBTo2Mu3P(process)
 process = nanoAOD_customizeTriggerBitsBPark(process)  #? delete?
 
 
@@ -145,6 +147,7 @@ process = nanoAOD_customizeTriggerBitsBPark(process)  #? delete?
 process.nanoAOD_3Mu_step = cms.Path(process.nanoSequence + process.nanoBTo3MuSequence + CountBTo3Mu )
 process.nanoAOD_2MuK_step = cms.Path(process.nanoSequence + process.nanoBTo2MuKSequence + CountBTo2MuK )
 process.nanoAOD_2MuP_step = cms.Path(process.nanoSequence + process.nanoBTo2MuPSequence + CountBTo2MuP )
+process.nanoAOD_2Mu3P_step = cms.Path(process.nanoSequence + process.nanoBTo2Mu3PSequence + CountBTo2Mu3P )
 
 # customisation of the process.
 if options.isMC:
@@ -157,11 +160,12 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(
-                                process.nanoAOD_3Mu_step,
-                                    process.nanoAOD_2MuK_step,
-                                process.nanoAOD_2MuP_step,
-                                process.endjob_step, 
-                                process.NANOAODoutput_step
+    process.nanoAOD_3Mu_step,
+    process.nanoAOD_2MuK_step,
+    process.nanoAOD_2MuP_step,
+    process.nanoAOD_2Mu3P_step,
+    process.endjob_step, 
+    process.NANOAODoutput_step
                                )
 
 from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
@@ -169,9 +173,10 @@ associatePatAlgosToolsTask(process)
 
 process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
         SelectEvents = cms.vstring(
-                                   'nanoAOD_3Mu_step', 
-                                               'nanoAOD_2MuK_step', 
-                                               'nanoAOD_2MuP_step', 
+            'nanoAOD_3Mu_step', 
+            'nanoAOD_2MuK_step', 
+            'nanoAOD_2MuP_step', 
+            'nanoAOD_2Mu3P_step', 
                                    )
 )
 

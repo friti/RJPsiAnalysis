@@ -23,6 +23,7 @@ JpsiMuonPairs = cms.EDProducer(
         '&& pt > 3 '
         #        '&& userFloat("sv_chi2") < 998 ' 
     ),
+    beamSpot              = cms.InputTag("offlineBeamSpot"),
 )
 
 BuilderDefaultCfg = cms.PSet(
@@ -61,100 +62,119 @@ TableDefault = cms.EDProducer(
 )
 
 TableDefaultVariables = cms.PSet(
-  # pre-fit quantities                                                      
-  RJpsiCandVars,
-  mu1Idx = uint('mu1_idx'),
-  mu2Idx = uint('mu2_idx'),
-  kIdx = uint('k_idx'),
-  minDR = ufloat('min_dr'),
-  maxDR = ufloat('max_dr'),
-  #chi2 = ufloat('sv_chi2'),
-  ip3D = ufloat('ip3D'),
-  ip3D_e = ufloat('ip3D'),
-  svOK = uint('sv_OK'),
-  svprob = ufloat('sv_prob'),
-  l_xy = ufloat('l_xy'),
-  l_xy_unc = ufloat('l_xy_unc'),
-  vtx_x = ufloat('vtx_x'),
-  vtx_y = ufloat('vtx_y'),
-  vtx_z = ufloat('vtx_z'),
-  vtx_ex = ufloat('vtx_ex'), 
-  vtx_ey = ufloat('vtx_ey'),
-  vtx_ez = ufloat('vtx_ez'),
-  vtx_chi2 = ufloat('vtx_chi2'),
-  jpsi_vtx_x = ufloat('jpsi_vtx_x'),
-  jpsi_vtx_y = ufloat('jpsi_vtx_y'),
-  jpsi_vtx_z = ufloat('jpsi_vtx_z'),
-  jpsi_vtx_ex = ufloat('jpsi_vtx_ex'),
-  jpsi_vtx_ey = ufloat('jpsi_vtx_ey'),
-  jpsi_vtx_ez = ufloat('jpsi_vtx_ez'),
-  jpsi_vtx_chi2 = ufloat('jpsi_vtx_chi2'),
-  pv_x = ufloat('pv_x'),
-  pv_y = ufloat('pv_y'),
-  pv_z = ufloat('pv_z'),
-  pv_ex = ufloat('pv_ex'),
-  pv_ey = ufloat('pv_ey'),
-  pv_ez = ufloat('pv_ez'),
-  pv_exy = ufloat('pv_exz'),
-  pv_eyz = ufloat('pv_eyz'),
-  pv_exz = ufloat('pv_exz'),
-  pv_chi2 = ufloat('pv_chi2'),
-  # Mll                                                                                                                 
-  mll_raw = Var('userCand("dimuon").mass()', float),
-  mll_llfit = Var('userCand("dimuon").userFloat("fitted_mass")', float), # this might not work                        
-  mllErr_llfit = Var('userCand("dimuon").userFloat("fitted_massErr")', float), # this might not work                  
-  mll_fullfit = ufloat('fitted_mll'),
-  mll_vtxex= Var('userCand("dimuon").userFloat("vtx_ex")',float),
-#  mll_vtxx= Var('userCand("dimuon").userFloat("vtx_x")',float),
-#  mll_vtxy= Var('userCand("dimuon").userFloat("vtx_y")',float),
-#  mll_vtxz= Var('userCand("dimuon").userFloat("vtx_z")',float),
-#  mll_vtxex= Var('userCand("dimuon").userFloat("vtx_ex")',float),
-#  mll_vtxey= Var('userCand("dimuon").userFloat("vtx_ey")',float),
-#  mll_vtxez= Var('userCand("dimuon").userFloat("vtx_ez")',float),
+    RJpsiCandVars,
+    mu1Idx = uint('mu1_idx'),
+    mu2Idx = uint('mu2_idx'),
+    
+    minDR = ufloat('min_dr'),
+    maxDR = ufloat('max_dr'),
+    
 
-  # Cos(theta)                                                                                                          
-  cos2D = ufloat('cos_theta_2D'),
-  fit_cos2D = ufloat('fitted_cos_theta_2D'),
-  # post-fit momentum                                                                                                   
-  fit_mass = ufloat('fitted_mass'),
-  fit_massErr = ufloat('fitted_massErr'),
-  fit_pt = ufloat('fitted_pt'),
-  fit_eta = ufloat('fitted_eta'),
-  fit_phi = ufloat('fitted_phi'),
-  fit_mu1_pt = ufloat('fitted_mu1_pt'),
-  fit_mu1_eta = ufloat('fitted_mu1_eta'),
-  fit_mu1_phi = ufloat('fitted_mu1_phi'),
-  fit_mu2_pt = ufloat('fitted_mu2_pt'),
-  fit_mu2_eta = ufloat('fitted_mu2_eta'),
-  fit_mu2_phi = ufloat('fitted_mu2_phi'),
-  fit_k_pt = ufloat('fitted_k_pt'),
-  fit_k_eta = ufloat('fitted_k_eta'),
-  fit_k_phi = ufloat('fitted_k_phi'),
-  mu1_iso03 = ufloat('mu1_iso03'),
-  mu1_iso04 = ufloat('mu1_iso04'),
-  mu2_iso03 = ufloat('mu2_iso03'),
-  mu2_iso04 = ufloat('mu2_iso04'),
-  k_iso03  = ufloat('k_iso03'),
-  k_iso04  = ufloat('k_iso04'),
-  b_iso03  = ufloat('b_iso03'),
-  b_iso04  = ufloat('b_iso04'),
-  n_k_used = uint('n_k_used'),
-  n_mu1_used = uint('n_mu1_used'),
-  n_mu2_used = uint('n_mu2_used'),
-  #my variables
-  #pass_3mu=uint('pass_3mu'),
-  m_miss_sq=ufloat('m_miss_2'),
-  Q_sq=ufloat('Q_2'),
-  pt_miss=ufloat('pt_miss'),
-  pt_miss_vec=ufloat('pt_miss_vec'),
-  pt_var=ufloat('pt_var'),
-  DR=ufloat('DR'),
-  E_mu_star=ufloat('E_mu_star'),
-  E_mu_canc=ufloat('E_mu_#'),
-  m_jpsi=ufloat('m_jpsi'),
-  #jPsi_mass_online=ufloat('jPsi_mass_online')                                                         
+    
+    #all final particles vertex
+    bodies3_chi2     = ufloat('sv_chi2'),
+    bodies3_chi2_2     = ufloat('vtx_chi2'),
+    bodies3_svprob   = ufloat('sv_prob'),
+    bodies3_l_xy     = ufloat('l_xy'),
+    bodies3_l_xy_unc = ufloat('l_xy_unc'),
+    bodies3_vtx_x    = ufloat('vtx_x'),
+    bodies3_vtx_y    = ufloat('vtx_y'),
+    bodies3_vtx_z    = ufloat('vtx_z'),
+    bodies3_vtx_ex   = ufloat('vtx_ex'), 
+    bodies3_vtx_ey   = ufloat('vtx_ey'),
+    bodies3_vtx_ez   = ufloat('vtx_ez'),
+    bodies3_cos2D     = ufloat('cos_theta_2D'),
+    bodies3_svOK     = uint('sv_OK'),
+    
+    #post fit all particles vertex
+    bodies3_fit_mass    = ufloat('fitted_mass'),
+    bodies3_fit_massErr = ufloat('fitted_massErr'),
+    bodies3_fit_pt      = ufloat('fitted_pt'),
+    bodies3_fit_eta     = ufloat('fitted_eta'),
+    bodies3_fit_phi     = ufloat('fitted_phi'),
+    bodies3_fit_mu1_pt   = ufloat('fitted_mu1_pt'),
+    bodies3_fit_mu1_eta  = ufloat('fitted_mu1_eta'),
+    bodies3_fit_mu1_phi  = ufloat('fitted_mu1_phi'),
+    bodies3_fit_mu2_pt   = ufloat('fitted_mu2_pt'),
+    bodies3_fit_mu2_eta  = ufloat('fitted_mu2_eta'),
+    bodies3_fit_mu2_phi  = ufloat('fitted_mu2_phi'),
+    bodies3_fit_cos2D = ufloat('fitted_cos_theta_2D'),
 
+    #2 particles vertex
+    jpsivtx_chi2 = Var('userCand("dilepton").userFloat("sv_chi2")', float),
+    jpsivtx_svprob = Var('userCand("dilepton").userFloat("sv_prob")', float),
+    jpsivtx_l_xy = Var('userCand("dilepton").userFloat("l_xy")', float),
+    jpsivtx_l_xy_unc = Var('userCand("dilepton").userFloat("l_xy_unc")', float),
+    jpsivtx_vtx_x = Var('userCand("dilepton").userFloat("vtx_x")', float),
+    jpsivtx_vtx_y = Var('userCand("dilepton").userFloat("vtx_y")', float),
+    jpsivtx_vtx_z = Var('userCand("dilepton").userFloat("vtx_z")', float),
+    jpsivtx_vtx_ex = Var('userCand("dilepton").userFloat("vtx_ex")', float),
+    jpsivtx_vtx_ey = Var('userCand("dilepton").userFloat("vtx_ey")', float),
+    jpsivtx_vtx_ez = Var('userCand("dilepton").userFloat("vtx_ez")', float),
+    jpsivtx_cos2D = Var('userCand("dilepton").userFloat("cos_theta_2D")', float),
+
+    #post fit 2 particles vertex
+    jpsivtx_fit_mass    = Var('userCand("dilepton").userFloat("fitted_mass")', float),
+    jpsivtx_fit_massErr = Var('userCand("dilepton").userFloat("fitted_massErr")', float),
+    jpsivtx_fit_pt    = Var('userCand("dilepton").userFloat("fitted_pt")', float),
+    jpsivtx_fit_eta    = Var('userCand("dilepton").userFloat("fitted_eta")', float),
+    jpsivtx_fit_phi   = Var('userCand("dilepton").userFloat("fitted_phi")', float),
+    jpsivtx_fit_mu1_pt   = Var('userCand("dilepton").userFloat("fitted_mu1_pt")', float),
+    jpsivtx_fit_mu1_eta   = Var('userCand("dilepton").userFloat("fitted_mu1_eta")', float),
+    jpsivtx_fit_mu1_phi   = Var('userCand("dilepton").userFloat("fitted_mu1_phi")', float),
+    jpsivtx_fit_mu2_pt   = Var('userCand("dilepton").userFloat("fitted_mu2_pt")', float),
+    jpsivtx_fit_mu2_eta   = Var('userCand("dilepton").userFloat("fitted_mu2_eta")', float),
+    jpsivtx_fit_mu2_phi   = Var('userCand("dilepton").userFloat("fitted_mu2_phi")', float),
+    jpsivtx_fit_cos2D = Var('userCand("dilepton").userFloat("fitted_cos_theta_2D")', float),
+
+    #isolation
+    mu1_iso03 = ufloat('mu1_iso03'),
+    mu1_iso04 = ufloat('mu1_iso04'),
+    mu2_iso03 = ufloat('mu2_iso03'),
+    mu2_iso04 = ufloat('mu2_iso04'),
+    b_iso03  = ufloat('b_iso03'),
+    b_iso04  = ufloat('b_iso04'),
+
+    #beamspot
+    beamspot_x     = ufloat('beamspot_x'),
+    beamspot_y     = ufloat('beamspot_y'),
+    beamspot_z     = ufloat('beamspot_z'),    
+
+
+    #new variables
+    m_miss_sq   = ufloat('m_miss_2'),
+    Q_sq        = ufloat('Q_2'),
+    pt_miss     = ufloat('pt_miss'),
+    pt_miss_vec = ufloat('pt_miss_vec'),
+    pt_var      = ufloat('pt_var'),
+    DR          = ufloat('DR'),
+    m_jpsi      = ufloat('m_jpsi'),
+
+    #PV vertex
+    pv_x = ufloat('pv_x'),
+    pv_y = ufloat('pv_y'),
+    pv_z = ufloat('pv_z'),
+    pv_ex = ufloat('pv_ex'),
+    pv_ey = ufloat('pv_ey'),
+    pv_ez = ufloat('pv_ez'),
+    pv_exy = ufloat('pv_exz'),
+    pv_eyz = ufloat('pv_eyz'),
+    pv_exz = ufloat('pv_exz'),
+    pv_chi2 = ufloat('pv_chi2'),
+
+    # Mll (do we need this???)                                                                                               
+    mll_raw = Var('userCand("dimuon").mass()', float),
+    mll_llfit = Var('userCand("dimuon").userFloat("fitted_mass")', float), # this might not work       
+    mllErr_llfit = Var('userCand("dimuon").userFloat("fitted_massErr")', float), # this might not work 
+    mll_fullfit = ufloat('fitted_mll'),
+    mll_vtxex= Var('userCand("dimuon").userFloat("vtx_ex")',float),
+
+    #number of muons used
+    n_mu1_used = uint('n_mu1_used'),
+    n_mu2_used = uint('n_mu2_used'),
 )
+
+#builder for final states with 3 particles
 Final3PartTableVariables = TableDefaultVariables.clone(
     kIdx     = uint('k_idx'),
     bodies3_fit_k_pt    = ufloat('fitted_k_pt'),
@@ -164,4 +184,7 @@ Final3PartTableVariables = TableDefaultVariables.clone(
     k_iso04     = ufloat('k_iso04'),
     E_mu_star   = ufloat('E_mu_star'),
     E_mu_canc   = ufloat('E_mu_#'),
+    n_k_used = uint('n_k_used'),
+    ip3D = ufloat('ip3D'),
+    ip3D_e = ufloat('ip3D'),
 )

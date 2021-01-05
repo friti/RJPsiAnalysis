@@ -32,7 +32,7 @@
 #include "KinVtxFitter.h"
 
 constexpr bool debugGen = false;
-constexpr bool debug = true;
+constexpr bool debug = false;
 
 
 class BTo3MuBuilder : public edm::global::EDProducer<> {
@@ -152,8 +152,9 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       bool isJpsiTrkTrg = k_ptr->userInt("isJpsiTrkTrg");
       bool isMuonFromJpsi_dimuon0Trg = k_ptr->userInt("isMuonFromJpsi_dimuon0Trg");
       bool isUnpairedMuon = (isDimuon0Trg && !isMuonFromJpsi_dimuon0Trg) && isDimuon_dimuon0Trg;
-      if(!(isDimuon_jpsiTrkTrg || isUnpairedMuon)) continue;
-      //if(!(isUnpairedMuon)) continue;
+      if(debug) std::cout<<"displaced muon:"<<k_ptr->pt()<<" isDImuon0Trg "<<isDimuon0Trg<<" isMuonFromJpsi_dimuon0Trg "<<isMuonFromJpsi_dimuon0Trg<<" isUnpairedMuon "<<isUnpairedMuon<<std::endl;
+      //      if(!(isDimuon_jpsiTrkTrg || isUnpairedMuon)) continue;
+      if(!(isUnpairedMuon)) continue;
       
       math::PtEtaPhiMLorentzVector k_p4(
                 k_ptr->pt(), 
@@ -235,6 +236,7 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
             "fitted_cos_theta_2D", 
             cos_theta_2D(fitter, *beamspot, fit_p4)
             );
+
         cand.addUserFloat("vtx_ex", sqrt(fitter.fitted_vtx_uncertainty().cxx()));
         cand.addUserFloat("vtx_ey", sqrt(fitter.fitted_vtx_uncertainty().cyy()));
         cand.addUserFloat("vtx_ez", sqrt(fitter.fitted_vtx_uncertainty().czz()));
@@ -286,6 +288,8 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("vtx_y", cand.vy());
       cand.addUserFloat("vtx_z", cand.vz());
 
+      //alredy defined in dimuon builder
+      /*
       cand.addUserFloat("jpsi_vtx_x", ll_prt->userFloat("vtx_x"));
       cand.addUserFloat("jpsi_vtx_y", ll_prt->userFloat("vtx_y"));
       cand.addUserFloat("jpsi_vtx_z", ll_prt->userFloat("vtx_z"));
@@ -293,7 +297,7 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("jpsi_vtx_ey", ll_prt->userFloat("vtx_ey"));
       cand.addUserFloat("jpsi_vtx_ez", ll_prt->userFloat("vtx_ez"));
       cand.addUserFloat("jpsi_vtx_chi2", ll_prt->userFloat("vtx_chi2"));
-
+      */
       cand.addUserFloat("pv_x", bestVertex.position().x());
       cand.addUserFloat("pv_y", bestVertex.position().y());
       cand.addUserFloat("pv_z", bestVertex.position().z());
@@ -304,7 +308,11 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("pv_eyz", bestVertex.covariance(0,2));
       cand.addUserFloat("pv_exz", bestVertex.covariance(1,2));
       cand.addUserFloat("pv_chi2", ChiSquaredProbability(bestVertex.chi2(), bestVertex.ndof()));
-      
+      const reco::BeamSpot &bm = *beamspot;
+
+      cand.addUserFloat("beamspot_x", bm.x0());
+      cand.addUserFloat("beamspot_y", bm.y0());
+      cand.addUserFloat("beamspot_z", bm.z0());
 
       //mie variabili                                                                                
       //conto quanti mu totali aveva l'evento
@@ -376,6 +384,12 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
         // define selections for iso tracks (pT, eta, ...)
         if( !isotrk_selection_(trk) ) continue;
         // check if the track is the muon
+
+	// only consider tracks originating close to the three bodies
+	if ( !mu1_ptr->bestTrack() || fabs(trk.dz() - mu1_ptr->bestTrack()->dz()) > 0.4 ) continue;
+	if ( !mu2_ptr->bestTrack() || fabs(trk.dz() - mu2_ptr->bestTrack()->dz()) > 0.4 ) continue;
+	if ( !k_ptr ->bestTrack() || fabs(trk.dz() - k_ptr ->bestTrack()->dz()) > 0.4 ) continue;
+
         if (k_ptr->userCand("cand") ==  edm::Ptr<reco::Candidate> ( iso_tracks, iTrk ) ) {
           
           if(debug) std::cout<<"old"<<std::endl;
@@ -397,27 +411,22 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
         float dr_to_k  = deltaR(cand.userFloat("fitted_k_eta") , cand.userFloat("fitted_k_phi") , trk.eta(), trk.phi());
         float dr_to_b  = deltaR(cand.userFloat("fitted_eta")   , cand.userFloat("fitted_phi") , trk.eta(), trk.phi());
         
-        if (dr_to_mu1 < 0.4)
-        {
-          mu1_iso04 += trk.pt();
-          if ( dr_to_mu1 < 0.3) mu1_iso03 += trk.pt();
-        }
-        if (dr_to_mu2 < 0.4)
-        {
-          mu2_iso04 += trk.pt();
-          if (dr_to_mu2 < 0.3)  mu2_iso03 += trk.pt();
-        }
-        if (dr_to_k < 0.4)
-        {
-          k_iso04 += trk.pt();
-          if (dr_to_k < 0.3) k_iso03 += trk.pt();
-        }
-        if (dr_to_b < 0.4)
-        {
-          b_iso04 += trk.pt();
-          if (dr_to_b < 0.3) b_iso03 += trk.pt();
-        }
-      }
+	if (dr_to_mu1 < 0.4 && dr_to_mu1>0.01){
+	  mu1_iso04 += trk.pt();
+	  if ( dr_to_mu1 < 0.3) mu1_iso03 += trk.pt();
+	}
+	if (dr_to_mu2 < 0.4 && dr_to_mu2>0.01){
+	  mu2_iso04 += trk.pt();
+	  if (dr_to_mu2 < 0.3)  mu2_iso03 += trk.pt();
+	}
+	if (dr_to_k < 0.4 && dr_to_k>0.01){
+	  k_iso04 += trk.pt();
+	  if (dr_to_k < 0.3) k_iso03 += trk.pt();
+	}
+	if (dr_to_b < 0.4){
+	  b_iso04 += trk.pt();
+	  if (dr_to_b < 0.3) b_iso03 += trk.pt();
+	}      }
 
       cand.addUserFloat("mu1_iso03", mu1_iso03);
       cand.addUserFloat("mu1_iso04", mu1_iso04);

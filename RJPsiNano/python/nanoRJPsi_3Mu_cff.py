@@ -24,6 +24,7 @@ from PhysicsTools.RJPsiNano.tracksBPark_cff import *
 from PhysicsTools.RJPsiNano.BTo3Mu_cff import *
 from PhysicsTools.RJPsiNano.BTo2MuK_cff import *
 from PhysicsTools.RJPsiNano.BTo2MuP_cff import *
+from PhysicsTools.RJPsiNano.BTo2Mu3P_cff import *
 
 
 #G: nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)  #purpose?
@@ -68,6 +69,10 @@ def nanoAOD_customizeBTo2MuK(process):
 
 def nanoAOD_customizeBTo2MuP(process):
     process.nanoBTo2MuPSequence = cms.Sequence( BTo2MuPSequence + BTo2MuPTable )
+    return process
+
+def nanoAOD_customizeBTo2Mu3P(process):
+    process.nanoBTo2Mu3PSequence = cms.Sequence( BTo2Mu3PSequence + BTo2Mu3PTable )
     return process
 
 from FWCore.ParameterSet.MassReplace import massSearchReplaceAnyInputTag
