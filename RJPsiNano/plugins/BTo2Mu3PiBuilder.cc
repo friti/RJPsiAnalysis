@@ -32,7 +32,7 @@
 #include "KinVtxFitter.h"
 
 constexpr bool debugGen = false;
-constexpr bool debug = false;
+constexpr bool debug = true;
 
 
 class BTo2Mu3PiBuilder : public edm::global::EDProducer<> {
@@ -47,7 +47,7 @@ public:
     pre_vtx_selection_{cfg.getParameter<std::string>("preVtxSelection")},
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
     dimuons_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("dimuons") )},
-    pvSelected_{consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("pvSelected"))},
+    primaryVertices_{consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primaryVertices"))},
     particles_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("particles") )},
     particles_ttracks_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("particlesTransientTracks") )},
     muons_ttracks_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("muonsTransientTracks") )},
@@ -73,7 +73,7 @@ public:
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; // cut on the di-muon after the SV fit
 
   const edm::EDGetTokenT<pat::CompositeCandidateCollection> dimuons_;
-  const edm::EDGetTokenT<reco::VertexCollection> pvSelected_;
+  const edm::EDGetTokenT<reco::VertexCollection> primaryVertices_;
   const edm::EDGetTokenT<pat::CompositeCandidateCollection> particles_;
   const edm::EDGetTokenT<TransientTrackCollection> particles_ttracks_;
   const edm::EDGetTokenT<TransientTrackCollection> muons_ttracks_;
@@ -93,8 +93,8 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
   edm::Handle<pat::CompositeCandidateCollection> dimuons;
   evt.getByToken(dimuons_, dimuons);
 
-  edm::Handle<reco::VertexCollection> pvSelected;
-  evt.getByToken(pvSelected_, pvSelected);
+  edm::Handle<reco::VertexCollection> primaryVertices;
+  evt.getByToken(primaryVertices_, primaryVertices);
   
   edm::Handle<TransientTrackCollection> particles_ttracks;
   evt.getByToken(particles_ttracks_, particles_ttracks);
@@ -124,21 +124,29 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 
   std::unique_ptr<pat::CompositeCandidateCollection> ret_val(new pat::CompositeCandidateCollection());
 
-  const reco::VertexCollection* vertices = pvSelected.product();
+  const reco::VertexCollection* vertices = primaryVertices.product();
   // output
   for(size_t ll_idx = 0; ll_idx < dimuons->size(); ++ll_idx) 
   {
+    if(debug) std::cout<<"Begining of the dimuon loop"<<particles->size()<<std::endl;
     //std::cout << "PV " << ll_idx << ": " << vertices->at(ll_idx).position() << std::endl;
-    reco::Vertex bestVertex = vertices->at(ll_idx);
-    edm::Ptr<pat::CompositeCandidate> ll_prt(dimuons, ll_idx);
-    edm::Ptr<reco::Candidate> mu1_ptr = ll_prt->userCand("mu1");
-    edm::Ptr<reco::Candidate> mu2_ptr = ll_prt->userCand("mu2");
-    size_t mu1_idx = abs(ll_prt->userInt("mu1_idx"));
-    size_t mu2_idx = abs(ll_prt->userInt("mu2_idx"));
-    size_t isDimuon_dimuon0Trg = abs(ll_prt->userInt("muonpair_fromdimuon0"));
-    size_t isDimuon_jpsiTrkTrg = abs(ll_prt->userInt("muonpair_fromjpsitrk"));
-    //size_t isDimuon_jpsiTrkTrg = abs(ll_prt->userInt("isJpsiTrkTrg"));
-    //size_t isDimuon_dimuon0Trg = abs(ll_prt->userInt("isDimuon0Trg"));
+    edm::Ptr<pat::CompositeCandidate> ll_ptr(dimuons, ll_idx);
+    edm::Ptr<reco::Candidate> mu1_ptr = ll_ptr->userCand("mu1");
+    edm::Ptr<reco::Candidate> mu2_ptr = ll_ptr->userCand("mu2");
+    size_t mu1_idx = abs(ll_ptr->userInt("mu1_idx"));
+    size_t mu2_idx = abs(ll_ptr->userInt("mu2_idx"));
+
+    int pvIdx = ll_ptr->userInt("pvIdx");
+    reco::Vertex bestVertex = vertices->at(pvIdx);
+    double mu1_dxy = mu1_ptr->bestTrack()->dxy(bestVertex.position());
+    double mu1_dz = mu1_ptr->bestTrack()->dz(bestVertex.position());
+    double mu2_dxy = mu2_ptr->bestTrack()->dxy(bestVertex.position());
+    double mu2_dz = mu2_ptr->bestTrack()->dz(bestVertex.position());
+
+    size_t isDimuon_dimuon0Trg = abs(ll_ptr->userInt("muonpair_fromdimuon0"));
+    size_t isDimuon_jpsiTrkTrg = abs(ll_ptr->userInt("muonpair_fromjpsitrk"));
+    //size_t isDimuon_jpsiTrkTrg = abs(ll_ptr->userInt("isJpsiTrkTrg"));
+    //size_t isDimuon_dimuon0Trg = abs(ll_ptr->userInt("isDimuon0Trg"));
     if(!(isDimuon_jpsiTrkTrg)) continue;
 
     // first loop on pion- this one with trigger matching
@@ -199,7 +207,16 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 	    if(deltaR(muons_ttracks->at(mu2_idx).track().eta(),muons_ttracks->at(mu2_idx).track().phi(),particles_ttracks->at(pi3_idx).track().eta(),particles_ttracks->at(pi3_idx).track().phi()) < 0.1 ) continue;
 	    if(deltaR(muons_ttracks->at(mu1_idx).track().eta(),muons_ttracks->at(mu1_idx).track().phi(),particles_ttracks->at(pi3_idx).track().eta(),particles_ttracks->at(pi3_idx).track().phi()) < 0.1 ) continue;
 
+	    if(debug) std::cout<<"before dz "<<std::endl;
 
+      double pi1_dxy = pi1_ptr->bestTrack()->dxy(bestVertex.position());
+      double pi1_dz = pi1_ptr->bestTrack()->dz(bestVertex.position());
+      double pi2_dxy = pi2_ptr->bestTrack()->dxy(bestVertex.position());
+      double pi2_dz = pi2_ptr->bestTrack()->dz(bestVertex.position());
+      double pi3_dxy = pi3_ptr->bestTrack()->dxy(bestVertex.position());
+      double pi3_dz = pi3_ptr->bestTrack()->dz(bestVertex.position());
+
+	    if(debug) std::cout<<"after dz "<<std::endl;
 	    math::PtEtaPhiMLorentzVector pi3_p4(
 						pi3_ptr->pt(),
 						pi3_ptr->eta(),
@@ -209,8 +226,8 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 
 	    //the other two pions don't need the trigger matching
 	    pat::CompositeCandidate cand;
-	    cand.setP4(ll_prt->p4() + + pi1_p4 + pi2_p4 + pi3_p4);
-	    cand.setCharge(ll_prt->charge() + pi1_ptr->charge() + pi2_ptr->charge() + pi3_ptr->charge());
+	    cand.setP4(ll_ptr->p4() + + pi1_p4 + pi2_p4 + pi3_p4);
+	    cand.setCharge(ll_ptr->charge() + pi1_ptr->charge() + pi2_ptr->charge() + pi3_ptr->charge());
 	    if(debug) std::cout<<"cand pt "<<cand.pt()<<std::endl;
 	    if(debug) std::cout<<"displ p1 "<<pi1_ptr->pt()<<std::endl;
 	    if(debug) std::cout<<"displ p2 "<<pi2_ptr->pt()<<std::endl;
@@ -220,17 +237,28 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 	    
 	    cand.addUserCand("mu1", mu1_ptr);
 	    cand.addUserCand("mu2", mu2_ptr);
-	    cand.addUserInt("pi1_idx", pi1_idx);
-	    cand.addUserInt("pi2_idx", pi2_idx);
-	    cand.addUserInt("pi3_idx", pi3_idx);
-	    cand.addUserCand("dimuon", ll_prt);
-	    
+	    cand.addUserCand("pi1", pi1_ptr);
+	    cand.addUserCand("pi2", pi2_ptr);
+	    cand.addUserCand("pi3", pi3_ptr);
 
+	    cand.addUserCand("dimuon", ll_ptr);
+	    
 	    cand.addUserInt("mu1_idx", mu1_idx);
 	    cand.addUserInt("mu2_idx", mu2_idx);
 	    cand.addUserInt("pi1_idx", pi1_idx);
 	    cand.addUserInt("pi2_idx", pi2_idx);
 	    cand.addUserInt("pi3_idx", pi3_idx);
+
+      cand.addUserInt("mu1_dxy", mu1_dxy);
+      cand.addUserInt("mu1_dz", mu1_dz);
+      cand.addUserInt("mu2_dxy", mu2_dxy);
+      cand.addUserInt("mu2_dz", mu2_dz);
+      cand.addUserInt("pi1_dxy", pi1_dxy);
+      cand.addUserInt("pi1_dz", pi1_dz);
+      cand.addUserInt("pi2_dxy", pi2_dxy);
+      cand.addUserInt("pi2_dz", pi2_dz);
+      cand.addUserInt("pi3_dxy", pi3_dxy);
+      cand.addUserInt("pi3_dz", pi3_dz);
 
 	    auto dr_info = min_max_dr({mu1_ptr, mu2_ptr, pi1_ptr, pi2_ptr, pi3_ptr});
 	    
@@ -297,13 +325,13 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 	    cand.addUserFloat("vtx_chi2", ChiSquaredProbability(fitter.chi2(), fitter.dof()));
 	    
 	    /*
-	    cand.addUserFloat("jpsi_vtx_x", ll_prt->userFloat("vtx_x"));
-	    cand.addUserFloat("jpsi_vtx_y", ll_prt->userFloat("vtx_y"));
-	    cand.addUserFloat("jpsi_vtx_z", ll_prt->userFloat("vtx_z"));
-	    cand.addUserFloat("jpsi_vtx_ex", ll_prt->userFloat("vtx_ex"));
-	    cand.addUserFloat("jpsi_vtx_ey", ll_prt->userFloat("vtx_ey"));
-	    cand.addUserFloat("jpsi_vtx_ez", ll_prt->userFloat("vtx_ez"));
-	    cand.addUserFloat("jpsi_vtx_chi2", ll_prt->userFloat("vtx_chi2"));
+	    cand.addUserFloat("jpsi_vtx_x", ll_ptr->userFloat("vtx_x"));
+	    cand.addUserFloat("jpsi_vtx_y", ll_ptr->userFloat("vtx_y"));
+	    cand.addUserFloat("jpsi_vtx_z", ll_ptr->userFloat("vtx_z"));
+	    cand.addUserFloat("jpsi_vtx_ex", ll_ptr->userFloat("vtx_ex"));
+	    cand.addUserFloat("jpsi_vtx_ey", ll_ptr->userFloat("vtx_ey"));
+	    cand.addUserFloat("jpsi_vtx_ez", ll_ptr->userFloat("vtx_ez"));
+	    cand.addUserFloat("jpsi_vtx_chi2", ll_ptr->userFloat("vtx_chi2"));
 	    */
 	    cand.addUserFloat("pv_x", bestVertex.position().x());
 	    cand.addUserFloat("pv_y", bestVertex.position().y());

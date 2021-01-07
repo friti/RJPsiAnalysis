@@ -69,13 +69,16 @@ void PrimaryVertexSelector::produce(edm::Event& iEvent, const edm::EventSetup& i
     double dzMin = 1000000.;
     reco::Vertex bestVertex;
     const reco::VertexCollection* vertices = thePrimaryVerticesHandle.product();
-    for(reco::VertexCollection::const_iterator  primVertex = vertices->begin(); primVertex!= vertices->end(); primVertex++)
+    //for(reco::VertexCollection::const_iterator  primVertex = vertices->begin(); primVertex!= vertices->end(); primVertex++)
+    for(size_t i = 0; i < vertices->size() ; i++)
     {
+      reco::Vertex primVertex = vertices->at(i);
       //std::cout << "prim vertex z: " << primVertex->z() << std::endl;
-      if (abs(dzMin) > abs(dimuonTT.track().dz(primVertex->position())))
+      if (abs(dzMin) > abs(dimuonTT.track().dz(primVertex.position())))
       {
-        bestVertex = *(primVertex);
-        dzMin = dimuonTT.track().dz(primVertex->position());
+        bestVertex = primVertex;
+        //bestVertex = primVertex;
+        dzMin = dimuonTT.track().dz(primVertex.position());
       }
     }   
     //cout<< "Best vertex: " << bestVertex.x() << endl;

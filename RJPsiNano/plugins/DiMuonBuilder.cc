@@ -15,6 +15,8 @@
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "helper.h"
 #include <limits>
@@ -36,14 +38,16 @@ public:
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
     src_{consumes<MuonCollection>( cfg.getParameter<edm::InputTag>("src") )},
     ttracks_src_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("transientTracksSrc") )},
+    vertexSrc_{consumes<reco::VertexCollection> ( cfg.getParameter<edm::InputTag>("vertexCollection"))},
     beamspot_{consumes<reco::BeamSpot>( cfg.getParameter<edm::InputTag>("beamSpot") )}{
-       produces<pat::CompositeCandidateCollection>("muonPairsForBTo3Mu");
+       produces<pat::CompositeCandidateCollection>("muonPairsForB");
        produces<TransientTrackCollection>("dimuonTransientTracks");
     }
 
   ~DiMuonBuilder() override {}
   
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
+  int  getPVIdx(const reco::VertexCollection*,const reco::TransientTrack&) const;
 
   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions) {}
   
@@ -54,6 +58,7 @@ private:
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; // cut on the di-muon after the SV fit
   const edm::EDGetTokenT<MuonCollection> src_;
   const edm::EDGetTokenT<TransientTrackCollection> ttracks_src_;
+  const edm::EDGetTokenT<reco::VertexCollection> vertexSrc_;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_;
 };
 
@@ -65,8 +70,15 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   
   edm::Handle<TransientTrackCollection> ttracks;
   evt.getByToken(ttracks_src_, ttracks);
+
   edm::Handle<reco::BeamSpot> beamspot;
   evt.getByToken(beamspot_, beamspot);
+
+  edm::Handle<reco::VertexCollection> thePrimaryVerticesHandle;
+  evt.getByToken(vertexSrc_, thePrimaryVerticesHandle);
+  const reco::VertexCollection* vertices = thePrimaryVerticesHandle.product();
+
+
   // output
   std::unique_ptr<pat::CompositeCandidateCollection> ret_value(new pat::CompositeCandidateCollection());
   std::unique_ptr<TransientTrackCollection> dimuon_tt(new TransientTrackCollection);
@@ -175,16 +187,43 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       // const reco::TransientTrack& fitted_candidate_ttrk()
       if( !post_vtx_selection_(muon_pair) ) continue;
       if(!fitter.fitted_candidate_ttrk().isValid()) continue;
+      const reco::TransientTrack& dimuonTT = fitter.fitted_candidate_ttrk();
+      int pvIdx = getPVIdx(vertices, dimuonTT);
+      
+
       dimuon_tt->emplace_back(fitter.fitted_candidate_ttrk());
       //ret_value->push_back(muon_pair);
       ret_value->emplace_back(muon_pair);
       ret_value->back().addUserInt("muonpair_fromdimuon0", dimuon0_trigger);
       ret_value->back().addUserInt("muonpair_fromjpsitrk", jpsitrk_trigger);
+      ret_value->back().addUserInt("pvIdx", pvIdx);
     }
   }
   
-  evt.put(std::move(ret_value), "muonPairsForBTo3Mu");
+  evt.put(std::move(ret_value), "muonPairsForB");
   evt.put(std::move(dimuon_tt), "dimuonTransientTracks");
+}
+int DiMuonBuilder::getPVIdx(const reco::VertexCollection* vertices,const reco::TransientTrack& dimuonTT) const
+{
+    double dzMin = 1000000.;
+    reco::Vertex bestVertex;
+    int pvIdx = 0;
+    //const reco::VertexCollection* vertices = thePrimaryVerticesHandle.product();
+    for(size_t i = 0; i < vertices->size() ; i++)
+    {
+      reco::Vertex primVertex = vertices->at(i);
+      //std::cout << "prim vertex z: " << primVertex->z() << std::endl;
+      if (abs(dzMin) > abs(dimuonTT.track().dz(primVertex.position())))
+      {
+        bestVertex = primVertex;
+        pvIdx = i;
+        //bestVertex = primVertex;
+        dzMin = dimuonTT.track().dz(primVertex.position());
+      }
+    }
+    if(debug) std::cout<< "Best vertex x: " << bestVertex.x() << std::endl;
+    if(debug) std::cout<< "Best vertex id: " << pvIdx << std::endl;
+  return pvIdx;
 }
 
 DEFINE_FWK_MODULE(DiMuonBuilder);

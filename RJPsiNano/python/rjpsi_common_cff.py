@@ -4,11 +4,12 @@ from PhysicsTools.RJPsiNano.common_cff import RJpsiCandVars, ufloat, uint, ubool
 
 JpsiMuonPairs = cms.EDProducer(
     'DiMuonBuilder',
-    src                = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
-    transientTracksSrc = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'),
-    muon1Selection      = cms.string('pt > 2.5'),
-    muon2Selection      = cms.string(''),
-    preVtxSelection    = cms.string(' && '.join([
+    src                    = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
+    transientTracksSrc     = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'),
+    vertexCollection       = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    muon1Selection         = cms.string('pt > 2.5'),
+    muon2Selection         = cms.string(''),
+    preVtxSelection        = cms.string(' && '.join([
         'abs(userCand("mu1").bestTrack.dz - userCand("mu2").bestTrack.dz) <= 0.4 ',
         'mass() > 2',
         'mass() < 4',
@@ -27,8 +28,9 @@ JpsiMuonPairs = cms.EDProducer(
 )
 
 BuilderDefaultCfg = cms.PSet(
-    dimuons             = cms.InputTag('JpsiMuonPairs','muonPairsForBTo3Mu'),
-    pvSelected = cms.InputTag('pvSelector', 'bestVertex'),
+    dimuons             = cms.InputTag('JpsiMuonPairs','muonPairsForB'),
+    #pvSelected = cms.InputTag('pvSelector', 'bestVertex'),
+    primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
     #muons            = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
     muonsTransientTracks = JpsiMuonPairs.transientTracksSrc,
     #kaons                 = cms.InputTag('tracksBPark', 'SelectedTracks'),
