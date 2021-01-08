@@ -30,6 +30,13 @@ BTo2Mu3P = cms.EDProducer(
 )
 
 BTo2Mu3PTableVariables = TableDefaultVariables.clone(
+    pi1_dxy     = ufloat('pi1_dxy'),
+    pi1_dz     = ufloat('pi1_dz'),
+    pi2_dxy     = ufloat('pi2_dxy'),
+    pi2_dz     = ufloat('pi2_dz'),
+    pi3_dxy     = ufloat('pi3_dxy'),
+    pi3_dz     = ufloat('pi3_dz'),
+
     pi1Idx     = uint('pi1_idx'),
     pi2Idx     = uint('pi2_idx'),
     pi3Idx     = uint('pi3_idx'),

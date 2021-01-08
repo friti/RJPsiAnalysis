@@ -4,11 +4,12 @@ from PhysicsTools.RJPsiNano.common_cff import RJpsiCandVars, ufloat, uint, ubool
 
 JpsiMuonPairs = cms.EDProducer(
     'DiMuonBuilder',
-    src                = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
-    transientTracksSrc = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'),
-    muon1Selection      = cms.string('pt > 2.5'),
-    muon2Selection      = cms.string(''),
-    preVtxSelection    = cms.string(' && '.join([
+    src                    = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
+    transientTracksSrc     = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'),
+    vertexCollection       = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    muon1Selection         = cms.string('pt > 2.5'),
+    muon2Selection         = cms.string(''),
+    preVtxSelection        = cms.string(' && '.join([
         'abs(userCand("mu1").bestTrack.dz - userCand("mu2").bestTrack.dz) <= 0.4 ',
         'mass() > 2',
         'mass() < 4',
@@ -27,8 +28,9 @@ JpsiMuonPairs = cms.EDProducer(
 )
 
 BuilderDefaultCfg = cms.PSet(
-    dimuons             = cms.InputTag('JpsiMuonPairs','muonPairsForBTo3Mu'),
-    pvSelected = cms.InputTag('pvSelector', 'bestVertex'),
+    dimuons             = cms.InputTag('JpsiMuonPairs','muonPairsForB'),
+    #pvSelected = cms.InputTag('pvSelector', 'bestVertex'),
+    primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
     #muons            = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
     muonsTransientTracks = JpsiMuonPairs.transientTracksSrc,
     #kaons                 = cms.InputTag('tracksBPark', 'SelectedTracks'),
@@ -151,6 +153,7 @@ TableDefaultVariables = cms.PSet(
     m_jpsi      = ufloat('m_jpsi'),
 
     #PV vertex
+    pv_idx = uint('pv_idx'),
     pv_x = ufloat('pv_x'),
     pv_y = ufloat('pv_y'),
     pv_z = ufloat('pv_z'),
@@ -172,6 +175,7 @@ TableDefaultVariables = cms.PSet(
     #number of muons used
     n_mu1_used = uint('n_mu1_used'),
     n_mu2_used = uint('n_mu2_used'),
+
 )
 
 #builder for final states with 3 particles
@@ -187,4 +191,13 @@ Final3PartTableVariables = TableDefaultVariables.clone(
     n_k_used = uint('n_k_used'),
     ip3D = ufloat('ip3D'),
     ip3D_e = ufloat('ip3D'),
+
+    #dz and dxy  for muon particle w.r.t. best pv.
+
+    mu1_dxy = ufloat('mu1_dxy'),
+    mu1_dz = ufloat('mu1_dz'),
+    mu2_dxy = ufloat('mu2_dxy'),
+    mu2_dz = ufloat('mu2_dz'),
+    k_dxy = ufloat('k_dxy'),
+    k_dz = ufloat('k_dz'),
 )

@@ -3,7 +3,7 @@ from PhysicsTools.RJPsiNano.common_cff import *
 
 pvSelector = cms.EDProducer("PrimaryVertexSelector",
                             vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
-                            dimuonCollection = cms.InputTag("JpsiMuonPairs", "muonPairsForBTo3Mu"),
+                            dimuonCollection = cms.InputTag("JpsiMuonPairs", "muonPairsForB"),
                             dimuonTTCollection = cms.InputTag("JpsiMuonPairs", "dimuonTransientTracks"),
                             dzForCleaning_wrtSV = cms.double(0.0)
                             )
