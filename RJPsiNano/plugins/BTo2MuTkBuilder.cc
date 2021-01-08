@@ -159,8 +159,10 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
       edm::Ptr<pat::CompositeCandidate> k_ptr(particles, k_idx);
       if( !particle_selection_(*k_ptr) ) continue;
 
-      double k_dxy = k_ptr->bestTrack()->dxy(bestVertex.position());
-      double k_dz = k_ptr->bestTrack()->dz(bestVertex.position());
+      //double k_dxy = k_ptr->bestTrack()->dxy(bestVertex.position());
+      //double k_dz = k_ptr->bestTrack()->dz(bestVertex.position());
+      double k_dxy = particles_ttracks->at(k_idx).track().dxy(bestVertex.position());
+      double k_dz = particles_ttracks->at(k_idx).track().dz(bestVertex.position());
 
       bool isPartTrg = k_ptr->userInt("isTriggering");
       if(debug) std::cout<<"isTriggering "<<isPartTrg<<std::endl;
@@ -184,6 +186,12 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
       pat::CompositeCandidate cand;
       cand.setP4(ll_ptr->p4() + k_p4);
       cand.setCharge(ll_ptr->charge() + k_ptr->charge());
+
+      // pv info
+
+      cand.addUserInt("pv_idx", pvIdx);
+
+      // tracks info
       if(debug) std::cout<<"cand pt "<<cand.pt()<<std::endl;
       if(debug) std::cout<<"displ mu "<<k_ptr->pt()<<std::endl;
       if(debug) std::cout<<"displ m1 "<<mu1_ptr->pt()<<std::endl;
@@ -198,12 +206,12 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
       cand.addUserInt("mu2_idx", mu2_idx);
       cand.addUserInt("k_idx", k_idx);
 
-      cand.addUserInt("mu1_dxy", mu1_dxy);
-      cand.addUserInt("mu1_dz", mu1_dz);
-      cand.addUserInt("mu2_dxy", mu2_dxy);
-      cand.addUserInt("mu2_dz", mu2_dz);
-      cand.addUserInt("k_dxy", k_dxy);
-      cand.addUserInt("k_dz", k_dz);
+      cand.addUserFloat("mu1_dxy", mu1_dxy);
+      cand.addUserFloat("mu1_dz", mu1_dz);
+      cand.addUserFloat("mu2_dxy", mu2_dxy);
+      cand.addUserFloat("mu2_dz", mu2_dz);
+      cand.addUserFloat("k_dxy", k_dxy);
+      cand.addUserFloat("k_dz", k_dz);
       
       auto dr_info = min_max_dr({mu1_ptr, mu2_ptr, k_ptr});
 

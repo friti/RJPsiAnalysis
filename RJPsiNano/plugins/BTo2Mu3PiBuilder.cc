@@ -32,7 +32,7 @@
 #include "KinVtxFitter.h"
 
 constexpr bool debugGen = false;
-constexpr bool debug = true;
+constexpr bool debug = false;
 
 
 class BTo2Mu3PiBuilder : public edm::global::EDProducer<> {
@@ -209,12 +209,15 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 
 	    if(debug) std::cout<<"before dz "<<std::endl;
 
-      double pi1_dxy = pi1_ptr->bestTrack()->dxy(bestVertex.position());
-      double pi1_dz = pi1_ptr->bestTrack()->dz(bestVertex.position());
-      double pi2_dxy = pi2_ptr->bestTrack()->dxy(bestVertex.position());
-      double pi2_dz = pi2_ptr->bestTrack()->dz(bestVertex.position());
-      double pi3_dxy = pi3_ptr->bestTrack()->dxy(bestVertex.position());
-      double pi3_dz = pi3_ptr->bestTrack()->dz(bestVertex.position());
+      double pi1_dxy = particles_ttracks->at(pi1_idx).track().dxy(bestVertex.position());
+      double pi1_dz = particles_ttracks->at(pi1_idx).track().dz(bestVertex.position());
+      double pi2_dxy = particles_ttracks->at(pi2_idx).track().dxy(bestVertex.position());
+      double pi2_dz = particles_ttracks->at(pi2_idx).track().dz(bestVertex.position());
+      double pi3_dxy = particles_ttracks->at(pi3_idx).track().dxy(bestVertex.position());
+      double pi3_dz = particles_ttracks->at(pi3_idx).track().dz(bestVertex.position());
+
+	    if(debug) std::cout<<"p1 dxy "<<pi1_dxy<<std::endl;
+	    if(debug) std::cout<<"p1 dz "<<pi1_dz<<std::endl;
 
 	    if(debug) std::cout<<"after dz "<<std::endl;
 	    math::PtEtaPhiMLorentzVector pi3_p4(
@@ -234,6 +237,12 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 	    if(debug) std::cout<<"displ p3 "<<pi3_ptr->pt()<<std::endl;
 	    if(debug) std::cout<<"displ m1 "<<mu1_ptr->pt()<<std::endl;
 	    if(debug) std::cout<<"displ m2 "<<mu2_ptr->pt()<<std::endl;
+
+      // pv info
+
+      cand.addUserInt("pv_idx", pvIdx);
+
+      // tracks info
 	    
 	    cand.addUserCand("mu1", mu1_ptr);
 	    cand.addUserCand("mu2", mu2_ptr);
@@ -249,16 +258,16 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 	    cand.addUserInt("pi2_idx", pi2_idx);
 	    cand.addUserInt("pi3_idx", pi3_idx);
 
-      cand.addUserInt("mu1_dxy", mu1_dxy);
-      cand.addUserInt("mu1_dz", mu1_dz);
-      cand.addUserInt("mu2_dxy", mu2_dxy);
-      cand.addUserInt("mu2_dz", mu2_dz);
-      cand.addUserInt("pi1_dxy", pi1_dxy);
-      cand.addUserInt("pi1_dz", pi1_dz);
-      cand.addUserInt("pi2_dxy", pi2_dxy);
-      cand.addUserInt("pi2_dz", pi2_dz);
-      cand.addUserInt("pi3_dxy", pi3_dxy);
-      cand.addUserInt("pi3_dz", pi3_dz);
+      cand.addUserFloat("mu1_dxy", mu1_dxy);
+      cand.addUserFloat("mu1_dz", mu1_dz);
+      cand.addUserFloat("mu2_dxy", mu2_dxy);
+      cand.addUserFloat("mu2_dz", mu2_dz);
+      cand.addUserFloat("pi1_dxy", pi1_dxy);
+      cand.addUserFloat("pi1_dz", pi1_dz);
+      cand.addUserFloat("pi2_dxy", pi2_dxy);
+      cand.addUserFloat("pi2_dz", pi2_dz);
+      cand.addUserFloat("pi3_dxy", pi3_dxy);
+      cand.addUserFloat("pi3_dz", pi3_dz);
 
 	    auto dr_info = min_max_dr({mu1_ptr, mu2_ptr, pi1_ptr, pi2_ptr, pi3_ptr});
 	    

@@ -137,10 +137,10 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
     double mu1_dz = mu1_ptr->bestTrack()->dz(bestVertex.position());
     double mu2_dz = mu2_ptr->bestTrack()->dz(bestVertex.position());
 
-    std::cout << "mu1_dxy" << mu1_dxy << std::endl;
-    std::cout << "mu1_dz" << mu1_dz << std::endl;
-    std::cout << "mu2_dxy" << mu2_dxy << std::endl;
-    std::cout << "mu2_dz" << mu2_dz << std::endl;
+    if(debug) std::cout << "mu1_dxy" << mu1_dxy << std::endl;
+    if(debug) std::cout << "mu1_dz" << mu1_dz << std::endl;
+    if(debug) std::cout << "mu2_dxy" << mu2_dxy << std::endl;
+    if(debug) std::cout << "mu2_dz" << mu2_dz << std::endl;
     
     size_t isDimuon_dimuon0Trg = abs(ll_ptr->userInt("muonpair_fromdimuon0"));
     size_t isDimuon_jpsiTrkTrg = abs(ll_ptr->userInt("muonpair_fromjpsitrk"));
@@ -181,10 +181,16 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       // Use UserCands as they should not use memory but keep the Ptr itself
       // Put the muon passing the corresponding selection
 
+
       pat::CompositeCandidate cand;
       cand.setP4(ll_ptr->p4() + k_p4);
       cand.setCharge(ll_ptr->charge() + k_ptr->charge());
 
+      // pv info
+
+      cand.addUserInt("pv_idx", pvIdx);
+
+      // tracks info
       cand.addUserCand("mu1", mu1_ptr);
       cand.addUserCand("mu2", mu2_ptr);
       cand.addUserCand("k", k_ptr);
@@ -194,12 +200,12 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserInt("mu2_idx", mu2_idx);
       cand.addUserInt("k_idx", k_idx);
 
-      cand.addUserInt("mu1_dxy", mu1_dxy);
-      cand.addUserInt("mu1_dz", mu1_dz);
-      cand.addUserInt("mu2_dxy", mu2_dxy);
-      cand.addUserInt("mu2_dz", mu2_dz);
-      cand.addUserInt("k_dxy", k_dxy);
-      cand.addUserInt("k_dz", k_dz);
+      cand.addUserFloat("mu1_dxy", mu1_dxy);
+      cand.addUserFloat("mu1_dz", mu1_dz);
+      cand.addUserFloat("mu2_dxy", mu2_dxy);
+      cand.addUserFloat("mu2_dz", mu2_dz);
+      cand.addUserFloat("k_dxy", k_dxy);
+      cand.addUserFloat("k_dz", k_dz);
 
       if(debug) std::cout<<"cand pt "<<cand.pt()<<std::endl;
       if(debug) std::cout<<"displ mu "<<k_ptr->pt()<<std::endl;

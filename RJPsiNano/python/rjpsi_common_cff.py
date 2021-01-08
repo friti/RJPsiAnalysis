@@ -153,6 +153,7 @@ TableDefaultVariables = cms.PSet(
     m_jpsi      = ufloat('m_jpsi'),
 
     #PV vertex
+    pv_idx = uint('pv_idx'),
     pv_x = ufloat('pv_x'),
     pv_y = ufloat('pv_y'),
     pv_z = ufloat('pv_z'),
@@ -174,6 +175,7 @@ TableDefaultVariables = cms.PSet(
     #number of muons used
     n_mu1_used = uint('n_mu1_used'),
     n_mu2_used = uint('n_mu2_used'),
+
 )
 
 #builder for final states with 3 particles
@@ -189,4 +191,13 @@ Final3PartTableVariables = TableDefaultVariables.clone(
     n_k_used = uint('n_k_used'),
     ip3D = ufloat('ip3D'),
     ip3D_e = ufloat('ip3D'),
+
+    #dz and dxy  for muon particle w.r.t. best pv.
+
+    mu1_dxy = ufloat('mu1_dxy'),
+    mu1_dz = ufloat('mu1_dz'),
+    mu2_dxy = ufloat('mu2_dxy'),
+    mu2_dz = ufloat('mu2_dz'),
+    k_dxy = ufloat('k_dxy'),
+    k_dz = ufloat('k_dz'),
 )
