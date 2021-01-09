@@ -10,5 +10,6 @@ cmssw_compile:
     variables:
         CMS_PATH: /cvmfs/cms.cern.ch
         CMSSW_REALIASE: CMSSW_10_6_14
+        SCRAM_ARCH: slc7_amd64_gcc700
     script:
         - /bin/bash ./.gitlab/build.sh
