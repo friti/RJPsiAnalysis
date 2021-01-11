@@ -154,6 +154,7 @@ TableDefaultVariables = cms.PSet(
 
     #PV vertex
     pv_idx = uint('pv_idx'),
+    nPrimaryVertices = uint('nPrimaryVertices'),
     pv_x = ufloat('pv_x'),
     pv_y = ufloat('pv_y'),
     pv_z = ufloat('pv_z'),

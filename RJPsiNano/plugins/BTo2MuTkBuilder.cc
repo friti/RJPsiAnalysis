@@ -127,6 +127,7 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
   std::unique_ptr<pat::CompositeCandidateCollection> ret_val(new pat::CompositeCandidateCollection());
 
   const reco::VertexCollection* vertices = primaryVertices.product();
+  int nPrimaryVertices = vertices->size();
   // output
 
   if(debug) std::cout<<"dimuons->size() "<<dimuons->size()<<std::endl;
@@ -190,6 +191,7 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
       // pv info
 
       cand.addUserInt("pv_idx", pvIdx);
+      cand.addUserInt("nPrimaryVertices", nPrimaryVertices);
 
       // tracks info
       if(debug) std::cout<<"cand pt "<<cand.pt()<<std::endl;
