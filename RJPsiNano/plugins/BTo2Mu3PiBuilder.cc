@@ -143,6 +143,10 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
     double mu1_dz = mu1_ptr->bestTrack()->dz(bestVertex.position());
     double mu2_dxy = mu2_ptr->bestTrack()->dxy(bestVertex.position());
     double mu2_dz = mu2_ptr->bestTrack()->dz(bestVertex.position());
+    double mu1_dxyErr = mu1_ptr->bestTrack()->dxyError(bestVertex.position(),bestVertex.covariance());
+    double mu2_dxyErr = mu2_ptr->bestTrack()->dxyError(bestVertex.position(),bestVertex.covariance());
+    double mu1_dzErr = mu1_ptr->bestTrack()->dzError();
+    double mu2_dzErr = mu2_ptr->bestTrack()->dzError();
 
     size_t isDimuon_dimuon0Trg = abs(ll_ptr->userInt("muonpair_fromdimuon0"));
     size_t isDimuon_jpsiTrkTrg = abs(ll_ptr->userInt("muonpair_fromjpsitrk"));
@@ -216,6 +220,12 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
       double pi2_dz = particles_ttracks->at(pi2_idx).track().dz(bestVertex.position());
       double pi3_dxy = particles_ttracks->at(pi3_idx).track().dxy(bestVertex.position());
       double pi3_dz = particles_ttracks->at(pi3_idx).track().dz(bestVertex.position());
+      double pi1_dxyErr = particles_ttracks->at(pi1_idx).track().dxyError(bestVertex.position(),bestVertex.covariance());
+      double pi1_dzErr = particles_ttracks->at(pi1_idx).track().dzError();
+      double pi2_dxyErr = particles_ttracks->at(pi2_idx).track().dxyError(bestVertex.position(),bestVertex.covariance());
+      double pi2_dzErr = particles_ttracks->at(pi2_idx).track().dzError();
+      double pi3_dxyErr = particles_ttracks->at(pi3_idx).track().dxyError(bestVertex.position(),bestVertex.covariance());
+      double pi3_dzErr = particles_ttracks->at(pi3_idx).track().dzError();
 
 	    if(debug) std::cout<<"p1 dxy "<<pi1_dxy<<std::endl;
 	    if(debug) std::cout<<"p1 dz "<<pi1_dz<<std::endl;
@@ -270,6 +280,17 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
       cand.addUserFloat("pi2_dz", pi2_dz);
       cand.addUserFloat("pi3_dxy", pi3_dxy);
       cand.addUserFloat("pi3_dz", pi3_dz);
+
+      cand.addUserFloat("mu1_dxyErr", mu1_dxyErr);
+      cand.addUserFloat("mu1_dzErr", mu1_dzErr);
+      cand.addUserFloat("mu2_dxyErr", mu2_dxyErr);
+      cand.addUserFloat("mu2_dzErr", mu2_dzErr);
+      cand.addUserFloat("pi1_dxyErr", pi1_dxyErr);
+      cand.addUserFloat("pi1_dzErr", pi1_dzErr);
+      cand.addUserFloat("pi2_dxyErr", pi2_dxyErr);
+      cand.addUserFloat("pi2_dzErr", pi2_dzErr);
+      cand.addUserFloat("pi3_dxyErr", pi3_dxyErr);
+      cand.addUserFloat("pi3_dzErr", pi3_dzErr);
 
 	    auto dr_info = min_max_dr({mu1_ptr, mu2_ptr, pi1_ptr, pi2_ptr, pi3_ptr});
 	    

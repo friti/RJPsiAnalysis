@@ -36,6 +36,12 @@ BTo2Mu3PTableVariables = TableDefaultVariables.clone(
     pi2_dz     = ufloat('pi2_dz'),
     pi3_dxy     = ufloat('pi3_dxy'),
     pi3_dz     = ufloat('pi3_dz'),
+    pi1_dxyErr     = ufloat('pi1_dxyErr'),
+    pi1_dzErr     = ufloat('pi1_dzErr'),
+    pi2_dxyErr     = ufloat('pi2_dxyErr'),
+    pi2_dzErr     = ufloat('pi2_dzErr'),
+    pi3_dxyErr     = ufloat('pi3_dxyErr'),
+    pi3_dzErr     = ufloat('pi3_dzErr'),
 
     pi1Idx     = uint('pi1_idx'),
     pi2Idx     = uint('pi2_idx'),
