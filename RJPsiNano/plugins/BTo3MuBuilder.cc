@@ -137,6 +137,10 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
     double mu2_dxy = mu2_ptr->bestTrack()->dxy(bestVertex.position());
     double mu1_dz = mu1_ptr->bestTrack()->dz(bestVertex.position());
     double mu2_dz = mu2_ptr->bestTrack()->dz(bestVertex.position());
+    double mu1_dxyErr = mu1_ptr->bestTrack()->dxyError(bestVertex.position(),bestVertex.covariance());
+    double mu2_dxyErr = mu2_ptr->bestTrack()->dxyError(bestVertex.position(),bestVertex.covariance());
+    double mu1_dzErr = mu1_ptr->bestTrack()->dzError();
+    double mu2_dzErr = mu2_ptr->bestTrack()->dzError();
 
     if(debug) std::cout << "mu1_dxy" << mu1_dxy << std::endl;
     if(debug) std::cout << "mu1_dz" << mu1_dz << std::endl;
@@ -159,6 +163,8 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       if( !k_selection_(*k_ptr) ) continue;
       double k_dxy = k_ptr->bestTrack()->dxy(bestVertex.position());
       double k_dz = k_ptr->bestTrack()->dz(bestVertex.position());
+      double k_dxyErr = k_ptr->bestTrack()->dxyError(bestVertex.position(),bestVertex.covariance());
+      double k_dzErr = k_ptr->bestTrack()->dzError();
 
   
       //std::cout << "here1" << std::endl;
@@ -208,6 +214,12 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("mu2_dz", mu2_dz);
       cand.addUserFloat("k_dxy", k_dxy);
       cand.addUserFloat("k_dz", k_dz);
+      cand.addUserFloat("mu1_dxyErr", mu1_dxyErr);
+      cand.addUserFloat("mu1_dzErr", mu1_dzErr);
+      cand.addUserFloat("mu2_dxyErr", mu2_dxyErr);
+      cand.addUserFloat("mu2_dzErr", mu2_dzErr);
+      cand.addUserFloat("k_dxyErr", k_dxyErr);
+      cand.addUserFloat("k_dzErr", k_dzErr);
 
       if(debug) std::cout<<"cand pt "<<cand.pt()<<std::endl;
       if(debug) std::cout<<"displ mu "<<k_ptr->pt()<<std::endl;

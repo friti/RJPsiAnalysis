@@ -147,6 +147,11 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
     double mu1_dz = mu1_ptr->bestTrack()->dz(bestVertex.position());
     double mu2_dz = mu2_ptr->bestTrack()->dz(bestVertex.position());
 
+    double mu1_dxyErr = mu1_ptr->bestTrack()->dxyError(bestVertex.position(),bestVertex.covariance());
+    double mu2_dxyErr = mu2_ptr->bestTrack()->dxyError(bestVertex.position(),bestVertex.covariance());
+    double mu1_dzErr = mu1_ptr->bestTrack()->dzError();
+    double mu2_dzErr = mu2_ptr->bestTrack()->dzError();
+
     size_t isDimuon_dimuon0Trg = abs(ll_ptr->userInt("muonpair_fromdimuon0"));
     size_t isDimuon_jpsiTrkTrg = abs(ll_ptr->userInt("muonpair_fromjpsitrk"));
     //size_t isDimuon_jpsiTrkTrg = abs(ll_ptr->userInt("isJpsiTrkTrg"));
@@ -160,10 +165,11 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
       edm::Ptr<pat::CompositeCandidate> k_ptr(particles, k_idx);
       if( !particle_selection_(*k_ptr) ) continue;
 
-      //double k_dxy = k_ptr->bestTrack()->dxy(bestVertex.position());
-      //double k_dz = k_ptr->bestTrack()->dz(bestVertex.position());
+      
       double k_dxy = particles_ttracks->at(k_idx).track().dxy(bestVertex.position());
       double k_dz = particles_ttracks->at(k_idx).track().dz(bestVertex.position());
+      double k_dxyErr = particles_ttracks->at(k_idx).track().dxyError(bestVertex.position(),bestVertex.covariance());
+      double k_dzErr = particles_ttracks->at(k_idx).track().dzError();
 
       bool isPartTrg = k_ptr->userInt("isTriggering");
       if(debug) std::cout<<"isTriggering "<<isPartTrg<<std::endl;
@@ -214,6 +220,13 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
       cand.addUserFloat("mu2_dz", mu2_dz);
       cand.addUserFloat("k_dxy", k_dxy);
       cand.addUserFloat("k_dz", k_dz);
+
+      cand.addUserFloat("mu1_dxyErr", mu1_dxyErr);
+      cand.addUserFloat("mu1_dzErr", mu1_dzErr);
+      cand.addUserFloat("mu2_dxyErr", mu2_dxyErr);
+      cand.addUserFloat("mu2_dzErr", mu2_dzErr);
+      cand.addUserFloat("k_dxyErr", k_dxyErr);
+      cand.addUserFloat("k_dzErr", k_dzErr);
       
       auto dr_info = min_max_dr({mu1_ptr, mu2_ptr, k_ptr});
 

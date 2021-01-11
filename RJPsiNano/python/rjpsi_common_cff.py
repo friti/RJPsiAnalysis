@@ -181,6 +181,11 @@ TableDefaultVariables = cms.PSet(
     mu1_dz = ufloat('mu1_dz'),
     mu2_dxy = ufloat('mu2_dxy'),
     mu2_dz = ufloat('mu2_dz'),
+
+    mu1_dxyErr = ufloat('mu1_dxyErr'),
+    mu1_dzErr = ufloat('mu1_dzErr'),
+    mu2_dxyErr = ufloat('mu2_dxyErr'),
+    mu2_dzErr = ufloat('mu2_dzErr'),
 )
 
 #builder for final states with 3 particles
@@ -201,4 +206,6 @@ Final3PartTableVariables = TableDefaultVariables.clone(
 
     k_dxy = ufloat('k_dxy'),
     k_dz = ufloat('k_dz'),
+    k_dxyErr = ufloat('k_dxyErr'),
+    k_dzErr = ufloat('k_dzErr'),
 )
