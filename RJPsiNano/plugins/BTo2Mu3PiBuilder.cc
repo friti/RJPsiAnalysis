@@ -125,6 +125,7 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
   std::unique_ptr<pat::CompositeCandidateCollection> ret_val(new pat::CompositeCandidateCollection());
 
   const reco::VertexCollection* vertices = primaryVertices.product();
+  int nPrimaryVertices = vertices->size();
   // output
   for(size_t ll_idx = 0; ll_idx < dimuons->size(); ++ll_idx) 
   {
@@ -241,6 +242,7 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
       // pv info
 
       cand.addUserInt("pv_idx", pvIdx);
+      cand.addUserInt("nPrimaryVertices", nPrimaryVertices);
 
       // tracks info
 	    
