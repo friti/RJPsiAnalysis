@@ -38,8 +38,8 @@ nanoSequence = cms.Sequence(nanoMetadata)# +
                             #triggerObjectBParkTables + l1bits)
 
 nanoSequenceMC = cms.Sequence(particleLevelBParkSequence + genParticleBParkSequence + 
-                              genParticleBParkTables + decayFlagsTables) # + lheInfoTable) 
-#                              globalTablesMC + genWeightsTable + genParticleBParkTables) # + lheInfoTable) 
+                              genParticleBParkTables + decayFlagsTables + # + lheInfoTable) 
+                              globalTablesMC) # + genWeightsTable + genParticleBParkTables + lheInfoTable) 
 
 
 def nanoAOD_customizeMuonTriggerBPark(process):  #delete trigger inside
