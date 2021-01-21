@@ -21,6 +21,7 @@ JpsiMuonPairs = cms.EDProducer(
     ),
     postVtxSelection   = cms.string(
         'userFloat("sv_prob") > 1.e-5 '
+        '&& userFloat("sv_success") > 0. '
         '&& pt > 3 '
         #        '&& userFloat("sv_chi2") < 998 ' 
     ),
