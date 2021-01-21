@@ -404,7 +404,7 @@ void BTo2MuTkBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup co
 
         if (k_ptr->userCand("cand") ==  edm::Ptr<reco::Candidate> ( iso_tracks, iTrk ) ) {
           
-          std::cout<<"old"<<std::endl;
+          if(debug) std::cout<<"old"<<std::endl;
           continue;
         }
         

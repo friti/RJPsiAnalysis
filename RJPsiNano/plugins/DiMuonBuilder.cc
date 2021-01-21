@@ -132,17 +132,19 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
         {LEP_SIGMA, LEP_SIGMA} //some small sigma for the particle mass
         );
 
+      muon_pair.addUserFloat("sv_success", fitter.success()); // float??
+      muon_pair.addUserFloat("sv_prob", fitter.prob());
       muon_pair.addUserFloat("sv_chi2", fitter.chi2());
+      if( !post_vtx_selection_(muon_pair) ) continue;
       //if(debug) std::cout << "vx_: " << fitter.fitted_candidate() << std::endl;
       muon_pair.addUserFloat("sv_position", fitter.fitted_vtx().x()); // float??
       muon_pair.addUserFloat("sv_ndof", fitter.dof()); // float??
-      muon_pair.addUserFloat("sv_prob", fitter.prob());
       auto fit_p4 = fitter.fitted_p4();
       muon_pair.addUserFloat("fitted_mass", fitter.success() ? fitter.fitted_candidate().mass() : -1);
       muon_pair.addUserFloat("fitted_massErr", fitter.success() ? sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)) : -1);
-      muon_pair.addUserFloat("vtx_x",muon_pair.vx());
-      muon_pair.addUserFloat("vtx_y",muon_pair.vy());
-      muon_pair.addUserFloat("vtx_z",muon_pair.vz());
+      muon_pair.addUserFloat("vtx_x",fitter.fitted_vtx().x());
+      muon_pair.addUserFloat("vtx_y",fitter.fitted_vtx().y());
+      muon_pair.addUserFloat("vtx_z",fitter.fitted_vtx().z());
       muon_pair.addUserFloat("vtx_ex",sqrt(fitter.fitted_vtx_uncertainty().cxx()));
       muon_pair.addUserFloat("vtx_ey",sqrt(fitter.fitted_vtx_uncertainty().cyy()));
       muon_pair.addUserFloat("vtx_ez",sqrt(fitter.fitted_vtx_uncertainty().czz()));
@@ -185,7 +187,6 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 
       // cut on the SV info
       // const reco::TransientTrack& fitted_candidate_ttrk()
-      if( !post_vtx_selection_(muon_pair) ) continue;
       if(!fitter.fitted_candidate_ttrk().isValid()) continue;
       const reco::TransientTrack& dimuonTT = fitter.fitted_candidate_ttrk();
       int pvIdx = getPVIdx(vertices, dimuonTT);
