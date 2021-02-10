@@ -81,8 +81,12 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         isTriggering = Var("userInt('isTriggering')", int,doc="flag the reco muon is also triggering"),
         isMuonFromJpsi_dimuon0Trg = Var("userInt('isMuonFromJpsi_dimuon0Trg')", int,doc="flag if the muon triggered is comming from a JPsi"),
         isMuonFromJpsi_jpsiTrkTrg = Var("userInt('isMuonFromJpsi_jpsiTrkTrg')", int,doc="flag if the muon triggered is comming from a JPsi"),
+        isMuonFromJpsi_jpsiTrk_PsiPrimeTrg = Var("userInt('isMuonFromJpsi_jpsiTrk_PsiPrimeTrg')", int,doc="flag if the muon triggered is comming from a JPsi"),
+        isMuonFromJpsi_jpsiTrk_NonResonantTrg = Var("userInt('isMuonFromJpsi_jpsiTrk_NonResonantTrg')", int,doc="flag if the muon triggered is comming from a JPsi"),
         isDimuon0Trg = Var("userInt('isDimuon0Trg')", int,doc="flag if the Dimuon0 path was triggered"),
         isJpsiTrkTrg = Var("userInt('isJpsiTrkTrg')", int,doc="flag if the JpsiTrkTrg path was triggered"),
+        isJpsiTrk_PsiPrimeTrg = Var("userInt('isJpsiTrk_PsiPrimeTrg')", int,doc="flag if the JpsiTrk_PsiPrimeTrg path was triggered"),
+        isJpsiTrk_NonResonantTrg = Var("userInt('isJpsiTrk_NonResonantTrg')", int,doc="flag if the JpsiTrk_NonResonantTrg path was triggered"),
                         #        isMCMatch = Var("userInt('mcMatch')", int, doc="truth match muon")
     ),
 )
@@ -124,7 +128,9 @@ muonTriggerMatchedTable = muonBParkTable.clone(
         vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
         vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6),
         trgMuonDimuon0_index = Var("userInt('trgMuonDimuon0_index')", int,doc="index in trigger muon collection"),
-        trgMuonJpsiTrk_index = Var("userInt('trgMuonJpsiTrk_index')", int,doc="index in trigger muon collection")
+        trgMuonJpsiTrk_index = Var("userInt('trgMuonJpsiTrk_index')", int,doc="index in trigger muon collection"),
+        trgMuonJpsiTrk_PsiPrime_index = Var("userInt('trgMuonJpsiTrk_PsiPrime_index')", int,doc="index in trigger muon collection"),
+        trgMuonJpsiTrk_NonResonant_index = Var("userInt('trgMuonJpsiTrk_NonResonant_index')", int,doc="index in trigger muon collection")
    )
 )
 
