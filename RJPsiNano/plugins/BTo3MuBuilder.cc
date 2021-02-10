@@ -149,9 +149,11 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
     
     size_t isDimuon_dimuon0Trg = abs(ll_ptr->userInt("muonpair_fromdimuon0"));
     size_t isDimuon_jpsiTrkTrg = abs(ll_ptr->userInt("muonpair_fromjpsitrk"));
+    size_t isDimuon_jpsiTrk_PsiPrimeTrg = abs(ll_ptr->userInt("muonpair_fromjpsitrk_PsiPrime"));
+    size_t isDimuon_jpsiTrk_NonResonantTrg = abs(ll_ptr->userInt("muonpair_fromjpsitrk_NonResonant"));
     //size_t isDimuon_jpsiTrkTrg = abs(ll_ptr->userInt("isJpsiTrkTrg"));
     //size_t isDimuon_dimuon0Trg = abs(ll_ptr->userInt("isDimuon0Trg"));
-    if(!(isDimuon_dimuon0Trg)) {
+    if(!isDimuon_dimuon0Trg && !isDimuon_jpsiTrk_PsiPrimeTrg && !isDimuon_jpsiTrkTrg && !isDimuon_jpsiTrk_NonResonantTrg) {
       if(debug) std::cout<<"Not dimuon0 trigger couple"<<std::endl;
       continue;
     }
@@ -171,11 +173,21 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       //ha trovato il mu displaced
       bool isDimuon0Trg = k_ptr->userInt("isDimuon0Trg");
       bool isJpsiTrkTrg = k_ptr->userInt("isJpsiTrkTrg");
+      bool isJpsiTrk_PsiPrimeTrg = k_ptr->userInt("isJpsiTrk_PsiPrimeTrg");
+      bool isJpsiTrk_NonResonantTrg = k_ptr->userInt("isJpsiTrk_NonResonantTrg");
+      
       bool isMuonFromJpsi_dimuon0Trg = k_ptr->userInt("isMuonFromJpsi_dimuon0Trg");
-      bool isUnpairedMuon = (isDimuon0Trg && !isMuonFromJpsi_dimuon0Trg) && isDimuon_dimuon0Trg;
-      if(debug) std::cout<<"displaced muon:"<<k_ptr->pt()<<" isDImuon0Trg "<<isDimuon0Trg<<" isMuonFromJpsi_dimuon0Trg "<<isMuonFromJpsi_dimuon0Trg<<" isUnpairedMuon "<<isUnpairedMuon<<std::endl;
+      bool isMuonFromJpsi_jpsiTrkTrg = k_ptr->userInt("isMuonFromJpsi_jpsiTrkTrg");
+      bool isMuonFromJpsi_jpsiTrk_PsiPrimeTrg = k_ptr->userInt("isMuonFromJpsi_jpsiTrk_PsiPrimeTrg");
+      bool isMuonFromJpsi_jpsiTrk_NonResonantTrg = k_ptr->userInt("isMuonFromJpsi_jpsiTrk_NonResonantTrg");
+
+      bool isUnpairedMuon_dimuon0 = (isDimuon0Trg && !isMuonFromJpsi_dimuon0Trg) && isDimuon_dimuon0Trg;
+      bool isUnpairedMuon_jpsiTrk = (isJpsiTrkTrg && !isMuonFromJpsi_jpsiTrkTrg) && isDimuon_jpsiTrkTrg;
+      bool isUnpairedMuon_jpsiTrk_PsiPrime = (isJpsiTrk_PsiPrimeTrg && !isMuonFromJpsi_jpsiTrk_PsiPrimeTrg) && isDimuon_jpsiTrk_PsiPrimeTrg;
+      bool isUnpairedMuon_jpsiTrk_NonResonant = (isJpsiTrk_NonResonantTrg && !isMuonFromJpsi_jpsiTrk_NonResonantTrg) && isDimuon_jpsiTrk_NonResonantTrg;
+      if(debug) std::cout<<"displaced muon:"<<k_ptr->pt()<<" isDImuon0Trg "<<isDimuon0Trg<<" isMuonFromJpsi_dimuon0Trg "<<isMuonFromJpsi_dimuon0Trg<<" isUnpairedMuon "<<isUnpairedMuon_dimuon0<<std::endl;
       //      if(!(isDimuon_jpsiTrkTrg || isUnpairedMuon)) continue;
-      if(!(isUnpairedMuon)) continue;
+      if(!isUnpairedMuon_dimuon0 && !isUnpairedMuon_jpsiTrk && !isUnpairedMuon_jpsiTrk_PsiPrime && !isUnpairedMuon_jpsiTrk_NonResonant) continue;
       
       math::PtEtaPhiMLorentzVector k_p4(
                 k_ptr->pt(), 
