@@ -9,7 +9,5 @@ python  puReweight.py
 # output file slightly different name
 #rm input file
 echo "================= puReweight finished ================"
-echo "==================Removing old Files ================"
-#rm RJPsi_mc_2021Feb10.root
-echo "==================Removed ================"
+
 

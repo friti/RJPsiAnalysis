@@ -21,9 +21,9 @@ config.Data.inputDBS = 'global'
 config.section_('JobType')
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = '../test/run_nano_jpsi_cfg.py'
-config.JobType.inputFiles = ['crab_script.sh', '../test/run_nano_jpsi_cfg.py', 'puReweight.py','PileupHistogram-goldenJSON-13tev-2018-100bins_withVar.root']
+config.JobType.inputFiles = ['crab_script_mc.sh', '../test/run_nano_jpsi_cfg.py', 'puReweight.py','PileupHistogram-goldenJSON-13tev-2018-100bins_withVar.root']
 #config.JobType.psetName = 'PSet.py'
-config.JobType.scriptExe = 'crab_script.sh'
+config.JobType.scriptExe = 'crab_script_mc.sh'
 #config.JobType.maxJobRuntimeMin = 3000
 config.JobType.allowUndistributedCMSSW = True
 config.Data.allowNonValidInputDataset = True
@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
 
   parser = ArgumentParser()
-  parser.add_argument('-y', '--yaml', default = 'samples_mc_rjpsi.yml', help = 'File with dataset descriptions')
+  parser.add_argument('-y', '--yaml', default = 'samples_mc_bcx_rjpsi.yml', help = 'File with dataset descriptions')
   parser.add_argument('-f', '--filter', default='*', help = 'filter samples, POSIX regular expressions allowed')
   args = parser.parse_args()
 
