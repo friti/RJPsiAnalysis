@@ -88,8 +88,12 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
     if(!mu1_selection_(*mu1_ptr)) continue; 
     int isMuonFromJpsi_dimuon0_1 = mu1_ptr->userInt("isMuonFromJpsi_dimuon0Trg");
     int isMuonFromJpsi_jpsiTrk_1 = mu1_ptr->userInt("isMuonFromJpsi_jpsiTrkTrg");
+    int isMuonFromJpsi_jpsiTrk_PsiPrime_1 = mu1_ptr->userInt("isMuonFromJpsi_jpsiTrk_PsiPrimeTrg");
+    int isMuonFromJpsi_jpsiTrk_NonResonant_1 = mu1_ptr->userInt("isMuonFromJpsi_jpsiTrk_NonResonantTrg");
     int isDimuon0Trg1 = mu1_ptr->userInt("isDimuon0Trg");
     int isJpsiTrkTrg1 = mu1_ptr->userInt("isJpsiTrkTrg");
+    int isJpsiTrk_PsiPrimeTrg1 = mu1_ptr->userInt("isJpsiTrk_PsiPrimeTrg");
+    int isJpsiTrk_NonResonantTrg1 = mu1_ptr->userInt("isJpsiTrk_NonResonantTrg");
 
     if(debug) std::cout<< "mu1 "<<mu1_ptr->pt()<<" isMuonFromJpsi_jpsiTrk_1 "<<isMuonFromJpsi_jpsiTrk_1<<" isJpsiTrkTrg1 "<<isJpsiTrkTrg1<<std::endl;
 
@@ -99,10 +103,16 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       // Form pairs only with triggered muons
       int isMuonFromJpsi_dimuon0_2 = mu2_ptr->userInt("isMuonFromJpsi_dimuon0Trg");
       int isMuonFromJpsi_jpsiTrk_2 = mu2_ptr->userInt("isMuonFromJpsi_jpsiTrkTrg");
+      int isMuonFromJpsi_jpsiTrk_PsiPrime_2 = mu2_ptr->userInt("isMuonFromJpsi_jpsiTrk_PsiPrimeTrg");
+      int isMuonFromJpsi_jpsiTrk_NonResonant_2 = mu2_ptr->userInt("isMuonFromJpsi_jpsiTrk_NonResonantTrg");
       int isDimuon0Trg2 = mu2_ptr->userInt("isDimuon0Trg");
       int isJpsiTrkTrg2 = mu2_ptr->userInt("isJpsiTrkTrg");
+      int isJpsiTrk_PsiPrimeTrg2 = mu2_ptr->userInt("isJpsiTrk_PsiPrimeTrg");
+      int isJpsiTrk_NonResonantTrg2 = mu2_ptr->userInt("isJpsiTrk_NonResonantTrg");
       int dimuon0_trigger = (isDimuon0Trg1 && isMuonFromJpsi_dimuon0_1) && (isDimuon0Trg2 && isMuonFromJpsi_dimuon0_2);
       int jpsitrk_trigger = (isJpsiTrkTrg1 && isMuonFromJpsi_jpsiTrk_1) && (isJpsiTrkTrg2 && isMuonFromJpsi_jpsiTrk_2);
+      int jpsitrk_PsiPrime_trigger = (isJpsiTrk_PsiPrimeTrg1 && isMuonFromJpsi_jpsiTrk_PsiPrime_1) && (isJpsiTrk_PsiPrimeTrg2 && isMuonFromJpsi_jpsiTrk_PsiPrime_2);
+      int jpsitrk_NonResonant_trigger = (isJpsiTrk_NonResonantTrg1 && isMuonFromJpsi_jpsiTrk_NonResonant_1) && (isJpsiTrk_NonResonantTrg2 && isMuonFromJpsi_jpsiTrk_NonResonant_2);
 
       if(debug) std::cout<< "mu2 "<<mu2_ptr->pt()<<" isMuonFromJpsi_jpsiTrk_2 "<<isMuonFromJpsi_jpsiTrk_2<<" isJpsiTrkTrg2 "<<isJpsiTrkTrg2<<std::endl;
       
@@ -116,6 +126,8 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       muon_pair.addUserInt("mu1_idx", mu1_idx );
       muon_pair.addUserInt("mu2_idx", mu2_idx );
       muon_pair.addUserInt("isJpsiTrkTrg", jpsitrk_trigger);
+      muon_pair.addUserInt("isJpsiTrk_PsiPrimeTrg", jpsitrk_PsiPrime_trigger);
+      muon_pair.addUserInt("isJpsiTrk_NonResonantTrg", jpsitrk_NonResonant_trigger);
       muon_pair.addUserInt("isDimuon0Trg", dimuon0_trigger);
       // Use UserCands as they should not use memory but keep the Ptr itself
       muon_pair.addUserCand("mu1", mu1_ptr );
@@ -197,6 +209,8 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       ret_value->emplace_back(muon_pair);
       ret_value->back().addUserInt("muonpair_fromdimuon0", dimuon0_trigger);
       ret_value->back().addUserInt("muonpair_fromjpsitrk", jpsitrk_trigger);
+      ret_value->back().addUserInt("muonpair_fromjpsitrk_PsiPrime", jpsitrk_PsiPrime_trigger);
+      ret_value->back().addUserInt("muonpair_fromjpsitrk_NonResonant", jpsitrk_NonResonant_trigger);
       ret_value->back().addUserInt("pvIdx", pvIdx);
     }
   }
