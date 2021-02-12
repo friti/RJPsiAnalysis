@@ -34,7 +34,6 @@
 using namespace std;
 
 constexpr bool debug = false;
-constexpr bool debugSeg = false;
 
 class MuonTriggerSelector : public edm::EDProducer {
     
@@ -97,7 +96,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   //const reco::Vertex & PV = vertexHandle->front();
 
   if(debug) std::cout << " MuonTriggerSelector::produce " << std::endl;
-  if(debugSeg) std::cout << "Here1 " << std::endl;
 
   edm::Handle<edm::TriggerResults> triggerBits;
   iEvent.getByToken(triggerBits_, triggerBits);
@@ -154,7 +152,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   std::vector<bool> jpsiTrk_PsiPrimeFlags;
   std::vector<bool> jpsiTrk_NonResonantFlags;
 
-  if(debugSeg) std::cout << "Here2 " << std::endl;
   if(pass_dimuon0_path || pass_jpsiTrk1_path || pass_jpsiTrk2_path || pass_jpsiTrk3_path || pass_jpsiTrk4_path) {  
     for (pat::TriggerObjectStandAlone obj : *triggerObjects) 
     { // note: not "const &" since we want to call unpackPathNames
@@ -220,7 +217,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     }//trigger objects
   }
 
-  if(debugSeg) std::cout << "Here3 " << std::endl;
   if(debug)
   {
     std::cout << "\n total n of triggering muons = " << triggeringMuons.size() << std::endl;
@@ -269,7 +265,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     int recoMuonMatchingJpsiTrk_NonResonant_index = -1;
     int trgMuonMatchingJpsiTrk_NonResonant_index = -1;
 
-    if(debugSeg) std::cout << "Here4 " << std::endl;
     for(unsigned int iTrg=0; iTrg<triggeringMuons.size(); ++iTrg)
     {
       if(!dimuon0Flags[iTrg] && !jpsiTrkFlags[iTrg] && !jpsiTrk_PsiPrimeFlags[iTrg] && !jpsiTrk_NonResonantFlags[iTrg]) continue;
@@ -320,7 +315,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
     }
     //save reco muon 
-    if(debugSeg) std::cout << "Here5 " << std::endl;
     if(recoMuonMatchingDimuon0_index != -1 || recoMuonMatchingJpsiTrk_index !=-1 || recoMuonMatchingJpsiTrk_PsiPrime_index !=-1 || recoMuonMatchingJpsiTrk_NonResonant_index !=-1)
     {
 	    muonIsTrigger[iMuo] = 1;
@@ -332,7 +326,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 	    trgmuons_out->emplace_back(recoTriggerMuonCand);
 	    //keep track of original muon index for SelectedMuons collection
 
-      if(debugSeg) std::cout << "Here6 " << std::endl;
       if(recoMuonMatchingDimuon0_index != -1)
       {
 	      muonIsFromJpsi_dimuon0Path[iMuo] = jpsiFromMuon_fromDimuon0_flags[trgMuonMatchingDimuon0_index];
@@ -341,10 +334,9 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       else
       {
 	      muonIsFromJpsi_dimuon0Path[iMuo] = 0;//jpsiFromMuon_fromDimuon0_flags[trgMuonMatchingDimuon0_index];
-	      muonIsDimuon0Trg[iMuo] = 0;dimuon0Flags[trgMuonMatchingDimuon0_index];
+	      muonIsDimuon0Trg[iMuo] = 0;//dimuon0Flags[trgMuonMatchingDimuon0_index];
       }
 
-      if(debugSeg) std::cout << "Here6.1 " << std::endl;
       if(recoMuonMatchingJpsiTrk_index != -1)
       {
 	      if(debug) std::cout<<"here it fills the vector for "<<muon.pt()<<" flag "<<jpsiFromMuon_fromJpsiTrk_flags[trgMuonMatchingJpsiTrk_index]<<std::endl;
@@ -356,34 +348,27 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 	      muonIsFromJpsi_jpsiTrkPath[iMuo] = 0;//jpsiFromMuon_fromJpsiTrk_flags[trgMuonMatchingJpsiTrk_index];
 	      muonIsJpsiTrkTrg[iMuo] = 0;//jpsiTrkFlags[trgMuonMatchingJpsiTrk_index];
       }
-      if(debugSeg) std::cout << "Here6.2 " << std::endl;
       if(recoMuonMatchingJpsiTrk_PsiPrime_index != -1)
       {
-        if(debugSeg) std::cout << "Here6.21 " << std::endl;
 	      muonIsFromJpsi_jpsiTrk_PsiPrimePath[iMuo] = jpsiFromMuon_fromJpsiTrk_PsiPrime_flags[trgMuonMatchingJpsiTrk_PsiPrime_index];
-        if(debugSeg) std::cout << "Here6.22 " << std::endl;
-	      muonIsJpsiTrk_PsiPrimeTrg[iMuo] = jpsiTrkFlags[trgMuonMatchingJpsiTrk_PsiPrime_index];
+	      muonIsJpsiTrk_PsiPrimeTrg[iMuo] = jpsiTrk_PsiPrimeFlags[trgMuonMatchingJpsiTrk_PsiPrime_index];
       }
       else
       {
-        if(debugSeg) std::cout << "Here6.23 " << std::endl;
 	      muonIsFromJpsi_jpsiTrk_PsiPrimePath[iMuo] = 0;//jpsiFromMuon_fromJpsiTrk_flags[trgMuonMatchingJpsiTrk_index];
-        if(debugSeg) std::cout << "Here6.24 " << std::endl;
 	      muonIsJpsiTrk_PsiPrimeTrg[iMuo] = 0;//jpsiTrkFlags[trgMuonMatchingJpsiTrk_index];
       }
 
-      if(debugSeg) std::cout << "Here6.3 " << std::endl;
       if(recoMuonMatchingJpsiTrk_NonResonant_index != -1)
       {
 	      muonIsFromJpsi_jpsiTrk_NonResonantPath[iMuo] = jpsiFromMuon_fromJpsiTrk_NonResonant_flags[trgMuonMatchingJpsiTrk_NonResonant_index];
-	      muonIsJpsiTrk_NonResonantTrg[iMuo] = jpsiTrkFlags[trgMuonMatchingJpsiTrk_NonResonant_index];
+	      muonIsJpsiTrk_NonResonantTrg[iMuo] = jpsiTrk_PsiPrimeFlags[trgMuonMatchingJpsiTrk_NonResonant_index];
       }
       else
       {
 	      muonIsFromJpsi_jpsiTrk_NonResonantPath[iMuo] = 0;//jpsiFromMuon_fromJpsiTrk_flags[trgMuonMatchingJpsiTrk_index];
 	      muonIsJpsiTrk_NonResonantTrg[iMuo] = 0;//jpsiTrkFlags[trgMuonMatchingJpsiTrk_index];
       }
-      if(debugSeg) std::cout << "Here7 " << std::endl;
       /*
       if(debug){      
         std::cout << "HERE" << std::endl;
@@ -433,7 +418,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     const reco::TransientTrack muonTT((*(mu.bestTrack())), &(*bFieldHandle)); //sara: check, why not using inner track for muons? 
     if (!muonTT.isValid()) continue;
     
-    if(debugSeg) std::cout << "Here8 " << std::endl;
 
     muons_out->emplace_back(mu);
     muons_out->back().addUserInt("isTriggering", muonIsTrigger[muIdx]);
@@ -446,7 +430,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     muons_out->back().addUserInt("isJpsiTrk_PsiPrimeTrg", muonIsJpsiTrk_PsiPrimeTrg[muIdx]);
     muons_out->back().addUserInt("isJpsiTrk_NonResonantTrg", muonIsJpsiTrk_NonResonantTrg[muIdx]);
 
-    if(debugSeg) std::cout << "Here9 " << std::endl;
     trans_muons_out->emplace_back(muonTT);
   }
 

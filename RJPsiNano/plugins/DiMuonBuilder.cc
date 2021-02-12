@@ -116,7 +116,7 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 
       if(debug) std::cout<< "mu2 "<<mu2_ptr->pt()<<" isMuonFromJpsi_jpsiTrk_2 "<<isMuonFromJpsi_jpsiTrk_2<<" isJpsiTrkTrg2 "<<isJpsiTrkTrg2<<std::endl;
       
-      if(!jpsitrk_trigger && !dimuon0_trigger) continue;
+      if(!jpsitrk_trigger && !dimuon0_trigger && !jpsitrk_PsiPrime_trigger && !jpsitrk_NonResonant_trigger) continue;
       
       pat::CompositeCandidate muon_pair;
       muon_pair.setP4(mu1_ptr->p4() + mu2_ptr->p4());
