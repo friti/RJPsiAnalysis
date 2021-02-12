@@ -44,7 +44,7 @@ BuilderDefaultCfg = cms.PSet(
     preVtxSelection       = cms.string(''),
     postVtxSelection      = cms.string(' && '.join([
         'userFloat("fitted_cos_theta_2D") >= 0',
-        'mass < 8.',
+        'mass < 10.',
         'userInt("sv_OK") == 1',
         'userFloat("sv_prob") > 1e-8',
         ])
