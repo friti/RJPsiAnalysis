@@ -2,8 +2,10 @@ import ROOT
 import numpy as np
 import datetime
 import os
+import time
 production_tag = datetime.date.today().strftime('%Y%b%d')
 
+start_time = time.time()
 print("Starting")
 #data pu histo 
 data_file = 'PileupHistogram-goldenJSON-13tev-2018-100bins_withVar.root'
@@ -14,18 +16,14 @@ data_histo_down = input_data.Get("pileup_minus")
 print("Data histo loaded")
 
 #mc nanoAOD input
-#mc_file = 'RJPsi_mc_2020Nov25_89.root'
-#mc_file = 'RJPsi_mc_10614.root'
 mc_file = 'RJPsi_mc_'+production_tag+'.root'
 input_mc = ROOT.TFile.Open(mc_file)
 mc_tree = input_mc.Get("Events")
 print("MC tree loaded")
 
 #output
-#newfile = ROOT.TFile("output_pu_reweight.root", "RECREATE")
 newfile = ROOT.TFile('RJPsi_mc_pu_'+production_tag+'.root', "RECREATE")
 newtree = mc_tree.CloneTree(0)
-#newtree = mc_tree.CopyTree("","",-1,0)
 pu_weights = np.array([0.])
 pu_weights_up = np.array([0.])
 pu_weights_down = np.array([0.])
@@ -49,7 +47,6 @@ data_vals_up = []
 data_vals_down = []
 #check if same number of bins
 if(data_histo.GetNcells() != mc_histo.GetNcells()):
-    print(data_histo.GetNcells, mc_histo.GetNcells)
     print("Numerator and Denominator have different number of bins")
     
 #takes values of the bins of the two histograms
@@ -71,10 +68,6 @@ scale_data_down = 1.0/data_histo_down.Integral()
 data_vals_down = [i * scale_data_down for i in data_vals_down]
 print("Values of the histograms normalized")
 
-#weights = np.zeros(len(mc_vals),dtype = float)
-#newfile = ROOT.TFile("pureweight.root", "RECREATE")
-#newtree = mc_tree.CloneTree(0)
-#puweight_branch = newtree.Branch("puWeight",weights,'weights/F')
 
 weights = []
 weights_up = []
@@ -133,7 +126,7 @@ input_data.Close()
 #newfile.cd()
 #newtree.Write() 
 #newfile.Close()
-
+print("--- %s seconds ---" % (time.time() - start_time))
     
 
 
