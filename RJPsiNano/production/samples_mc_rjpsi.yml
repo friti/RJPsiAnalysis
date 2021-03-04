@@ -1,0 +1,26 @@
+common:
+  data:
+    lumimask : https://raw.githubusercontent.com/friti/BParkingNANO/ul/BParkingNano/production/json_DCSONLY.txt
+    splitting: 20
+    globaltag: 106X_dataRun2_v28
+  mc:
+    splitting: 1
+    globaltag: 106X_upgrade2018_realistic_v11_L1v1
+
+samples:
+  BcToJPsiMuMu:
+     dataset: /BcToJPsiMuMu_inclusive_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/RunIISummer20UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1_ext1-v2/MINIAODSIM
+     isMC: True
+  
+  HbToJPsiMuMu:
+     dataset: /HbToJPsiMuMu_TuneCP5_13TeV-pythia8-evtgen/RunIISummer20UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1-v1/MINIAODSIM
+     isMC: True
+
+  #BcToJpsiTauNu:
+  #  dataset: /BcToJPsiTauNu_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/RunIISummer19UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1_ext1-v2/MINIAODSIM
+  #  isMC: True
+
+  #BcToJpsiMuNu:
+  #  dataset: /BcToJPsiMuNu_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/RunIISummer19UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1_ext1-v2/MINIAODSIM
+  #  isMC: True
+

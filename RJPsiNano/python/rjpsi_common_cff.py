@@ -201,7 +201,7 @@ Final3PartTableVariables = TableDefaultVariables.clone(
     E_mu_canc   = ufloat('E_mu_#'),
     n_k_used = uint('n_k_used'),
     ip3D = ufloat('ip3D'),
-    ip3D_e = ufloat('ip3D'),
+    ip3D_e = ufloat('ip3D_e'),
 
     #dz and dxy  for muon particle w.r.t. best pv.
 

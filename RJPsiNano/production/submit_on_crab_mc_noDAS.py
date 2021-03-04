@@ -1,32 +1,37 @@
-from CRABClient.UserUtilities import config, ClientException, getUsernameFromSiteDB
+from CRABClient.UserUtilities import config, ClientException
 #from input_crab_data import dataset_files
 import yaml
 import datetime
 from fnmatch import fnmatch
 from argparse import ArgumentParser
-
+from path_miniAOD_BcToXToJpsi_almostall import files
 production_tag = datetime.date.today().strftime('%Y%b%d')
 
 config = config()
 config.section_('General')
 config.General.transferOutputs = True
 config.General.transferLogs = True
-config.General.workArea = 'BParkingNANO_%s' % production_tag
+config.General.workArea = 'RJPsiNANO_%s' % production_tag
 
 config.section_('Data')
 config.Data.publication = False
-config.Data.outLFNDirBase = '/store/group/cmst3/group/bpark/%s' % (config.General.workArea)
+config.Data.outLFNDirBase = '/store/user/friti/%s' % ('crab_job_' + production_tag)
 config.Data.inputDBS = 'global'
 
 config.section_('JobType')
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = '../test/run_nano_cfg.py'
-config.JobType.maxJobRuntimeMin = 3000
+config.JobType.psetName = '../test/run_nano_jpsi_cfg.py'
+config.JobType.inputFiles = ['crab_script_mc.sh', '../test/run_nano_jpsi_cfg.py', 'puReweight.py','PileupHistogram-goldenJSON-13tev-2018-100bins_withVar.root']
+#config.JobType.psetName = 'PSet.py'
+config.JobType.scriptExe = 'crab_script_mc.sh'
+#config.JobType.maxJobRuntimeMin = 3000
 config.JobType.allowUndistributedCMSSW = True
+config.Data.allowNonValidInputDataset = True
 
 config.section_('User')
 config.section_('Site')
-config.Site.storageSite = 'T2_CH_CERN'
+config.Site.storageSite = 'T2_CH_CSCS'
+#config.Site.storageSite = 'T3_CH_PSI'
 
 if __name__ == '__main__':
 
@@ -45,7 +50,7 @@ if __name__ == '__main__':
 
 
   parser = ArgumentParser()
-  parser.add_argument('-y', '--yaml', default = 'samples_mc_mmm.yml', help = 'File with dataset descriptions')
+  parser.add_argument('-y', '--yaml', default = 'samples_mc_bcx_rjpsi.yml', help = 'File with dataset descriptions')
   parser.add_argument('-f', '--filter', default='*', help = 'filter samples, POSIX regular expressions allowed')
   args = parser.parse_args()
 
@@ -66,11 +71,10 @@ if __name__ == '__main__':
 
         isMC = info['isMC']
 
-        config.Data.inputDataset = info['dataset'] % part \
-                                   if part is not None else \
-                                      info['dataset']
-
-        config.General.requestName = name
+        #config.Data.userInputFiles = files[5000:]
+        config.Data.userInputFiles = files[:2]
+        #config.General.requestName = name + '2'
+        config.General.requestName = name 
         common_branch = 'mc' if isMC else 'data'
         config.Data.splitting = 'FileBased' if isMC else 'LumiBased'
         if not isMC:
@@ -96,7 +100,8 @@ if __name__ == '__main__':
             'globalTag=%s' % globaltag,
         ]
         
-        config.JobType.outputFiles = ['_'.join(['BParkNANO', 'mc' if isMC else 'data', production_tag])+'.root']
+        config.JobType.outputFiles = ['_'.join(['RJPsi', 'mc' if isMC else 'data','pu', production_tag])+'.root']
+        #config.JobType.outputFiles = ['_'.join(['RJPsi', 'mc' if isMC else 'data', production_tag])+'.root']
         
         print config
         submit(config)
