@@ -1,5 +1,4 @@
-from CRABClient.UserUtilities import config, ClientException, getUsernameFromSiteDB
-#from input_crab_data import dataset_files
+from CRABClient.UserUtilities import config, ClientException
 import yaml
 import datetime
 from fnmatch import fnmatch
@@ -11,22 +10,25 @@ config = config()
 config.section_('General')
 config.General.transferOutputs = True
 config.General.transferLogs = True
-config.General.workArea = 'BParkingNANO_%s' % production_tag
+config.General.workArea = 'RJPsiNANO_%s' % production_tag
 
 config.section_('Data')
 config.Data.publication = False
-config.Data.outLFNDirBase = '/store/group/cmst3/group/bpark/%s' % (config.General.workArea)
+config.Data.outLFNDirBase = '/store/user/friti/%s' % ('crab_job_' + production_tag)
 config.Data.inputDBS = 'global'
 
 config.section_('JobType')
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = '../test/run_nano_cfg.py'
-config.JobType.maxJobRuntimeMin = 3000
+config.JobType.psetName = '../test/run_nano_jpsi_cfg.py'
+#config.JobType.scriptExe = 'crab_script.sh'
+#config.JobType.maxJobRuntimeMin = 3000
 config.JobType.allowUndistributedCMSSW = True
+config.Data.allowNonValidInputDataset = True
 
 config.section_('User')
 config.section_('Site')
-config.Site.storageSite = 'T2_CH_CERN'
+config.Site.storageSite = 'T2_CH_CSCS'
+#config.Site.storageSite = 'T3_CH_PSI'
 
 if __name__ == '__main__':
 
@@ -45,7 +47,7 @@ if __name__ == '__main__':
 
 
   parser = ArgumentParser()
-  parser.add_argument('-y', '--yaml', default = 'samples_mc_mmm.yml', help = 'File with dataset descriptions')
+  parser.add_argument('-y', '--yaml', default = 'samples_data_rjpsi.yml', help = 'File with dataset descriptions')
   parser.add_argument('-f', '--filter', default='*', help = 'filter samples, POSIX regular expressions allowed')
   args = parser.parse_args()
 
@@ -96,7 +98,7 @@ if __name__ == '__main__':
             'globalTag=%s' % globaltag,
         ]
         
-        config.JobType.outputFiles = ['_'.join(['BParkNANO', 'mc' if isMC else 'data', production_tag])+'.root']
+        config.JobType.outputFiles = ['_'.join(['RJPsi', 'mc' if isMC else 'data', production_tag])+'.root']
         
         print config
         submit(config)
