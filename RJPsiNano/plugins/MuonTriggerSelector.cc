@@ -34,6 +34,7 @@
 using namespace std;
 
 constexpr bool debug = false;
+constexpr bool debugTrg = false;
 
 class MuonTriggerSelector : public edm::EDProducer {
     
@@ -174,24 +175,34 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       bool jpsitrk_PsiPrime_seed = false;
       bool jpsitrk_NonResonant_seed = false;
 
+      //if(pass_jpsiTrk5_path || pass_jpsiTrk6_path) 
+      //  if(debugTrg) std::cout << "pass_nonREsonant path" << std::endl;
 
       if(obj.hasFilterLabel("hltVertexmumuFilterJpsiMuon3p5") )
         muonFromJpsi_fromDimuon0Path = true;
       if(obj.hasFilterLabel("hltTripleMuL3PreFiltered222")){
         dimuon0_seed = true;
       }
+
       if(obj.hasFilterLabel("hltDisplacedmumuFilterDoubleMu4Jpsi") )
         muonFromJpsi_fromJpsiTrkPath = true;
       if(obj.hasFilterLabel("hltJpsiTkVertexFilter")){
         jpsitrk_seed = true;
       }
+
       if(obj.hasFilterLabel("hltDisplacedmumuFilterDoubleMu4PsiPrime") )
+      {
         muonFromJpsi_fromJpsiTrk_PsiPrimePath = true;
+      }
       if(obj.hasFilterLabel("hltPsiPrimeTkVertexFilter")){
         jpsitrk_PsiPrime_seed = true;
       }
+
       if(obj.hasFilterLabel("hltDisplacedmumuFilterDoubleMu4LowMassNonResonant") )
+      {
         muonFromJpsi_fromJpsiTrk_NonResonantPath = true;
+        //if(debugTrg) std::cout << "hltDisplacedmumuFilterDoubleMu4NonResonant" << std::endl;
+      }
       if(obj.hasFilterLabel("hltLowMassNonResonantTkVertexFilter")){
         jpsitrk_NonResonant_seed = true;
       }
@@ -199,8 +210,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       //for each triggered muon I know which trigger it passes
       dimuon0Flags.push_back(dimuon0_seed); //unpaired muon passes the dimuon0
       jpsiTrkFlags.push_back(jpsitrk_seed); //unpaired muon passes the jpsitrk
-      jpsiTrk_PsiPrimeFlags.push_back(jpsitrk_PsiPrime_seed); //unpaired muon passes the jpsitrk
-      jpsiTrk_NonResonantFlags.push_back(jpsitrk_NonResonant_seed); //unpaired muon passes the jpsitrk
+      jpsiTrk_PsiPrimeFlags.push_back(jpsitrk_PsiPrime_seed); //unpaired muon passes the psiprimetrk
+      jpsiTrk_NonResonantFlags.push_back(jpsitrk_NonResonant_seed); //unpaired muon passes the nonResonantrk
 
       jpsiFromMuon_fromDimuon0_flags.push_back(muonFromJpsi_fromDimuon0Path); //the muon is from the jpsi
       jpsiFromMuon_fromJpsiTrk_flags.push_back(muonFromJpsi_fromJpsiTrkPath); //the muon is from the jpsi
@@ -243,6 +254,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   std::vector<int> muonIsJpsiTrk_PsiPrimeTrg(muons->size(), 0);
   std::vector<int> muonIsJpsiTrk_NonResonantTrg(muons->size(), 0);
 
+  if(debugTrg) std::cout << "Event -------------------- " << std::endl;
+  
   for(const pat::Muon & muon : *muons)
   {
     //this is for triggering muon not really need to be configurable
@@ -250,10 +263,10 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     //if(!(muon.isLooseMuon() && muon.isSoftMuon(PV))) continue;
     bool isMuonMatchedToDimuon0Path = !(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v5")==nullptr);
     bool isMuonMatchedToJpsiTrkPath = !(muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v14")==nullptr) || !(muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v15")==nullptr);
-    
     bool isMuonMatchedToJpsiTrk_PsiPrimePath = !(muon.triggerObjectMatchByPath("HLT_DoubleMu4_PsiPrimeTrk_Displaced_v14")==nullptr) || !(muon.triggerObjectMatchByPath("HLT_DoubleMu4_PsiPrimeTrk_Displaced_v15")==nullptr);
     bool isMuonMatchedToJpsiTrk_NonResonantPath = !(muon.triggerObjectMatchByPath("HLT_DoubleMu4_LowMassNonResonantTrk_Displaced_v14")==nullptr) || ! (muon.triggerObjectMatchByPath("HLT_DoubleMu4_LowMassNonResonantTrk_Displaced_v15")==nullptr);
 
+    //if( isMuonMatchedToJpsiTrk_NonResonantPath ) std::cout << " isMuonMatchedToJpsiTrk_NonResonantPath-------------------- " << std::endl;
 
 
     float dRMuonMatchingDimuon0 = -1.;
@@ -366,10 +379,11 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 	      muonIsJpsiTrk_PsiPrimeTrg[iMuo] = 0;//jpsiTrkFlags[trgMuonMatchingJpsiTrk_index];
       }
 
+      if(debugTrg) if( isMuonMatchedToJpsiTrk_NonResonantPath ) std::cout << "recoMuonMatchingJpsiTrk_NonResonant_flag=====================  " << jpsiFromMuon_fromJpsiTrk_NonResonant_flags[recoMuonMatchingJpsiTrk_NonResonant_index] << std::endl;
       if(recoMuonMatchingJpsiTrk_NonResonant_index != -1)
       {
 	      muonIsFromJpsi_jpsiTrk_NonResonantPath[iMuo] = jpsiFromMuon_fromJpsiTrk_NonResonant_flags[trgMuonMatchingJpsiTrk_NonResonant_index];
-	      muonIsJpsiTrk_NonResonantTrg[iMuo] = jpsiTrk_PsiPrimeFlags[trgMuonMatchingJpsiTrk_NonResonant_index];
+	      muonIsJpsiTrk_NonResonantTrg[iMuo] = jpsiTrk_NonResonantFlags[trgMuonMatchingJpsiTrk_NonResonant_index];
       }
       else
       {
@@ -446,3 +460,4 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 }
 
 DEFINE_FWK_MODULE(MuonTriggerSelector);
+
