@@ -186,7 +186,10 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       bool isUnpairedMuon_jpsiTrk_NonResonant = (isJpsiTrk_NonResonantTrg && !isMuonFromJpsi_jpsiTrk_NonResonantTrg) && isDimuon_jpsiTrk_NonResonantTrg;
       if(debug) std::cout<<"displaced muon:"<<k_ptr->pt()<<" isDImuon0Trg "<<isDimuon0Trg<<" isMuonFromJpsi_dimuon0Trg "<<isMuonFromJpsi_dimuon0Trg<<" isUnpairedMuon "<<isUnpairedMuon_dimuon0<<std::endl;
       //      if(!(isDimuon_jpsiTrkTrg || isUnpairedMuon)) continue;
-      if(!isUnpairedMuon_dimuon0 && !isUnpairedMuon_jpsiTrk && !isUnpairedMuon_jpsiTrk_PsiPrime && !isUnpairedMuon_jpsiTrk_NonResonant) continue;
+      if(!(isUnpairedMuon_dimuon0 && isDimuon_dimuon0Trg) && 
+         !(isUnpairedMuon_jpsiTrk && isDimuon_jpsiTrkTrg) && 
+         !(isUnpairedMuon_jpsiTrk_PsiPrime && isDimuon_jpsiTrk_PsiPrimeTrg) && 
+         !(isUnpairedMuon_jpsiTrk_NonResonant && isDimuon_jpsiTrk_NonResonantTrg)) continue;
       
       math::PtEtaPhiMLorentzVector k_p4(
                 k_ptr->pt(), 
