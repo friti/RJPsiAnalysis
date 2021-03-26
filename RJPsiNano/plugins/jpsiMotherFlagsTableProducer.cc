@@ -136,8 +136,9 @@ void jpsiMotherFlagsTableProducer::produce(edm::Event& iEvent, const edm::EventS
       if ( jpsiMeson.numberOfMothers()>1 && debug) std::cout << "number of jpsi mom: " << jpsiMeson.numberOfMothers() << std::endl;
             
       for (size_t imom = 0; imom < jpsiMeson.numberOfMothers(); imom++){
-            
+	if(debug) std::cout<<"jpsimother"<<jpsiMeson.mother(imom)->pdgId()<<std::endl;
 	const reco::Candidate * candMom = checkMom( jpsiMeson.mother(imom)) ;
+	if(debug) std::cout<<"candMom"<<candMom->pdgId()<<std::endl;
 	
 	if (candMom == nullptr) continue;
 	if (candMom != nullptr && isAncestor(candMom, &jpsiMeson )){
@@ -168,15 +169,15 @@ void jpsiMotherFlagsTableProducer::produce(edm::Event& iEvent, const edm::EventS
   uint8_t flag_xizero_b = 0;
   uint8_t flag_other = 0;
 
-  if(abs(theMom_pdgId) == 511) flag_bzero = 1.;
-  else if(abs(theMom_pdgId) == 521) flag_bplus = 1;
-  else if(abs(theMom_pdgId) == 531) flag_bzero_s = 1;
-  else if(abs(theMom_pdgId) == 541) flag_bplus_c = 1;
-  else if(abs(theMom_pdgId) == 5112) flag_sigmaminus_b = 1;
+  if(abs(theMom_pdgId) == 511 || abs(theMom_pdgId) == 513) flag_bzero = 1.;
+  else if(abs(theMom_pdgId) == 521 || abs(theMom_pdgId) == 523) flag_bplus = 1;
+  else if(abs(theMom_pdgId) == 531 || abs(theMom_pdgId) == 533) flag_bzero_s = 1;
+  else if(abs(theMom_pdgId) == 541 || abs(theMom_pdgId) == 543) flag_bplus_c = 1;
+  else if(abs(theMom_pdgId) == 5112 || abs(theMom_pdgId) == 5114) flag_sigmaminus_b = 1;
   else if(abs(theMom_pdgId) == 5122) flag_lambdazero_b = 1;
-  else if(abs(theMom_pdgId) == 5132) flag_ximinus_b = 1;
-  else if(abs(theMom_pdgId) == 5212) flag_sigmazero_b = 1;
-  else if(abs(theMom_pdgId) == 5232) flag_xizero_b = 1;
+  else if(abs(theMom_pdgId) == 5132 || abs(theMom_pdgId) == 5314) flag_ximinus_b = 1;
+  else if(abs(theMom_pdgId) == 5212 || abs(theMom_pdgId) == 5214) flag_sigmazero_b = 1;
+  else if(abs(theMom_pdgId) == 5232 || abs(theMom_pdgId) == 5324) flag_xizero_b = 1;
   else flag_other = 1;
 
   auto tab = std::make_unique<nanoaod::FlatTable>(1,"",true);
