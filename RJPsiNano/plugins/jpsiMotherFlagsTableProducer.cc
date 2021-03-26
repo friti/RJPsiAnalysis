@@ -103,7 +103,7 @@ void jpsiMotherFlagsTableProducer::produce(edm::Event& iEvent, const edm::EventS
   std::vector<int> broPdgId;
   std::vector<double> broPt, broEta, broPhi;
   std::vector<const reco::Candidate*> anc_vec;
-  const reco::Candidate *theMom = nullptr; 
+  //const reco::Candidate *theMom = nullptr; 
   int theMom_pdgId; 
 
   //Looking for jpsi daughters -> muons
@@ -118,15 +118,11 @@ void jpsiMotherFlagsTableProducer::produce(edm::Event& iEvent, const edm::EventS
 	if(motherInPrunedCollection != nullptr && isAncestor( &jpsiMeson , motherInPrunedCollection)){
 	  if (dau.pdgId() == -13)     {
 	    foundJpsiMum = true; 
-	    //NTuple->genJpsiMupPt->push_back(dau.pt());
-	    //NTuple->genJpsiMupEta->push_back(dau.eta());
-	    //NTuple->genJpsiMupPhi->push_back(dau.phi());
+
 	  }
 	  else if (dau.pdgId() == 13) {
 	    foundJpsiMup = true; 
-	    //NTuple->genJpsiMumPt->push_back(dau.pt());
-	    //NTuple->genJpsiMumEta->push_back(dau.eta());
-	    //NTuple->genJpsiMumPhi->push_back(dau.phi());
+
 	  }  
 	}
       }
@@ -134,9 +130,6 @@ void jpsiMotherFlagsTableProducer::produce(edm::Event& iEvent, const edm::EventS
       if (!(foundJpsiMup && foundJpsiMum)) continue;    
       if(debug) std::cout<<"YES"<<std::endl;
 
-      //NTuple->genJpsiPt->push_back(jpsiMeson.pt());
-      //NTuple->genJpsiEta->push_back(jpsiMeson.eta());
-      //NTuple->genJpsiPhi->push_back(jpsiMeson.phi());
     
       // find jpsi original ancestor -> To Save!
       if(debug) std::cout<<"Number of mothers of the jpsi "<<jpsiMeson.numberOfMothers()<<std::endl;
@@ -149,11 +142,8 @@ void jpsiMotherFlagsTableProducer::produce(edm::Event& iEvent, const edm::EventS
 	if (candMom == nullptr) continue;
 	if (candMom != nullptr && isAncestor(candMom, &jpsiMeson )){
 	  if ( candMom->mother(0) != nullptr) {
-	    //NTuple->genJpsiAncestorPdgId->push_back(candMom->pdgId());
-	    //NTuple->genJpsiAncestorPt ->push_back(candMom->pt()); 
-	    //NTuple->genJpsiAncestorEta->push_back(candMom->eta()); 
-	    //NTuple->genJpsiAncestorPhi->push_back(candMom->phi()); 
-	    theMom = candMom;
+
+	    //theMom = candMom;
 	    theMom_pdgId = candMom->pdgId();
 	    if(debug) std::cout<<"We found a mom "<<theMom_pdgId<<std::endl;
 	    break;
@@ -162,27 +152,6 @@ void jpsiMotherFlagsTableProducer::produce(edm::Event& iEvent, const edm::EventS
       }
     }
   }        
-  //now find other children of original ancestor
-  broPdgId.clear(); broPt.clear(); broEta.clear(); broPhi.clear();
-  for (const pat::PackedGenParticle &dau : *packed) {
-    anc_vec.clear();
-    const reco::Candidate * motherInPrunedCollection = dau.mother(0) ;
-    if(motherInPrunedCollection != nullptr && \
-           theMom != nullptr && \
-       isAncestor( theMom , motherInPrunedCollection)){
-      broPdgId.push_back(dau.pdgId());
-      broPt.push_back(dau.pt());  
-      broEta.push_back(dau.eta());
-      broPhi.push_back(dau.phi());
-      //                std::cout << dau.pdgId()  << "\t is brother of jpsi" << std::endl;
-      //                printAncestors( motherInPrunedCollection, &anc_vec);
-      //                if (anc_vec.size()>0) std::cout << std::endl ;
-    }
-  }   
-  //  NTuple->genJpsiBroPdgId->push_back(broPdgId);
-  //NTuple->genJpsiBroPt   ->push_back(broPt);
-  //NTuple->genJpsiBroEta  ->push_back(broEta);
-  //NTuple->genJpsiBroPhi  ->push_back(broPhi);
 
 
   //GEN
@@ -208,7 +177,7 @@ void jpsiMotherFlagsTableProducer::produce(edm::Event& iEvent, const edm::EventS
   else if(abs(theMom_pdgId) == 5132) flag_ximinus_b = 1;
   else if(abs(theMom_pdgId) == 5212) flag_sigmazero_b = 1;
   else if(abs(theMom_pdgId) == 5232) flag_xizero_b = 1;
-  else if(abs(theMom_pdgId) == 1) flag_other = 1;
+  else flag_other = 1;
 
   auto tab = std::make_unique<nanoaod::FlatTable>(1,"",true);
 
