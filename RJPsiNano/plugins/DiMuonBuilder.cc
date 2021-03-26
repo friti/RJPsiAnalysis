@@ -114,9 +114,15 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       int jpsitrk_PsiPrime_trigger = (isJpsiTrk_PsiPrimeTrg1 && isMuonFromJpsi_jpsiTrk_PsiPrime_1) && (isJpsiTrk_PsiPrimeTrg2 && isMuonFromJpsi_jpsiTrk_PsiPrime_2);
       int jpsitrk_NonResonant_trigger = (isJpsiTrk_NonResonantTrg1 && isMuonFromJpsi_jpsiTrk_NonResonant_1) && (isJpsiTrk_NonResonantTrg2 && isMuonFromJpsi_jpsiTrk_NonResonant_2);
 
+      // if(isJpsiTrk_NonResonantTrg1) std::cout << "DimuonBuilder::isJpsiTrk_NonResonantTrg1" << std::endl;
+      // if(isJpsiTrk_NonResonantTrg2) std::cout << "DimuonBuilder::isJpsiTrk_NonResonantTrg2" << std::endl;
+      // if(isMuonFromJpsi_jpsiTrk_NonResonant_1) std::cout << "DimuonBuilder::isMuonFromJpsi_jpsiTrk_NonResonant_1" << std::endl;
+      // if(isMuonFromJpsi_jpsiTrk_NonResonant_2) std::cout << "DimuonBuilder::isMuonFromJpsi_jpsiTrk_NonResonant_2" << std::endl;
+
       if(debug) std::cout<< "mu2 "<<mu2_ptr->pt()<<" isMuonFromJpsi_jpsiTrk_2 "<<isMuonFromJpsi_jpsiTrk_2<<" isJpsiTrkTrg2 "<<isJpsiTrkTrg2<<std::endl;
       
       if(!jpsitrk_trigger && !dimuon0_trigger && !jpsitrk_PsiPrime_trigger && !jpsitrk_NonResonant_trigger) continue;
+      //  std::cout << "++++DimuonBuilder::jpsitrk_NonResonant_trigger" << std::endl;
       
       pat::CompositeCandidate muon_pair;
       muon_pair.setP4(mu1_ptr->p4() + mu2_ptr->p4());
@@ -153,6 +159,7 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       muon_pair.addUserFloat("sv_ndof", fitter.dof()); // float??
       auto fit_p4 = fitter.fitted_p4();
       muon_pair.addUserFloat("fitted_mass", fitter.success() ? fitter.fitted_candidate().mass() : -1);
+      //std::cout << "Dimuon mass: " << fitter.fitted_candidate().mass() << std::endl;
       muon_pair.addUserFloat("fitted_massErr", fitter.success() ? sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)) : -1);
       muon_pair.addUserFloat("vtx_x",fitter.fitted_vtx().x());
       muon_pair.addUserFloat("vtx_y",fitter.fitted_vtx().y());
