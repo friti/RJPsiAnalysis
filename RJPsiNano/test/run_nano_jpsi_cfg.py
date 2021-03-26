@@ -5,7 +5,7 @@ import FWCore.ParameterSet.Config as cms
 
 options = VarParsing('python')
 
-options.register('isMC', False,
+options.register('isMC', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Run this on real data"
@@ -32,7 +32,7 @@ options.register('skip',0,
     "skip first N events"
 )
 
-options.setDefault('maxEvents',-1)
+options.setDefault('maxEvents',1000)
 options.setDefault('tag', '10614')
 #options.setDefault('tag', '2021Feb09')
 options.parseArguments()
@@ -52,7 +52,8 @@ outputFileNANO = cms.untracked.string('_'.join(['RJPsi', extension[options.isMC]
 #input files (it can be a list of files)
 if not options.inputFiles:
     options.inputFiles = ['root://cmsxrootd.fnal.gov//store/data/Run2018D/Charmonium/MINIAOD/12Nov2019_UL2018-v1/120000/3D4F26E7-5686-2141-A0BC-41C47223357F.root'] if not options.isMC else \
-                         ["root://cms-xrd-global.cern.ch//store/user/manzoni/RJPsi_Bc_PMX_HLT_RECO_MINI_28oct20_v5/RJpsi-BcToXToJpsiMuMuSelected-RunIISummer19UL18MiniAOD_1000.root"]
+                         ["root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL18MiniAOD/HbToJPsiMuMu_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/106X_upgrade2018_realistic_v11_L1v1-v1/00000/014EC954-4C5E-AD48-BB44-401D779323E3.root"] #Hb jpsi+X sample
+#["root://cms-xrd-global.cern.ch//store/user/manzoni/RJPsi_Bc_PMX_HLT_RECO_MINI_28oct20_v5/RJpsi-BcToXToJpsiMuMuSelected-RunIISummer19UL18MiniAOD_1000.root"]
 #                         ['root://cms-xrd-global.cern.ch//store/mc/RunIIAutumn18MiniAOD/OniaAndX_ToMuMu_MuFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/00000/01325465-A815-E24E-ABB3-DAB8D4880BDE.root']
 #                         ['file:RJpsi-BcToXToJpsiMuMuSelected-RunIISummer19UL18MiniAOD_0.root']
                          
