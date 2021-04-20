@@ -147,7 +147,7 @@ void DecayFlagsTableProducer::produce(edm::Event& iEvent, const edm::EventSetup&
           }
           else if(final_daus[0] == 211){
             if (final_daus[1] == 443) flag_jpsi_pi = 1;
-            if (final_daus[1] == 211 && final_daus[2] ==211 && final_daus[1] == 443) flag_jpsi_3pi = 1;
+            if (final_daus[1] == 211 && final_daus[2] ==211 && final_daus[3] == 443) flag_jpsi_3pi = 1;
           }
           else if ((final_daus[0] == 431 && final_daus[1] == 443) || (final_daus[0] == 433 && final_daus[1] == 443)) flag_jpsi_hc = 1;  
           else{
