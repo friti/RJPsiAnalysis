@@ -41,6 +41,7 @@ class BTo3MuBuilder : public edm::global::EDProducer<> {
 public:
   typedef std::vector<reco::TransientTrack> TransientTrackCollection;
   typedef std::vector<reco::GenParticle> GenParticleCollection;
+  //typedef std::vector<KinVtxFitter> KinVtxFitterCollection;
 
   explicit BTo3MuBuilder(const edm::ParameterSet &cfg):
     k_selection_{cfg.getParameter<std::string>("muonSelection")},
@@ -62,7 +63,7 @@ public:
   ~BTo3MuBuilder() override {}
   
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
-  Measurement1D getIP(KinVtxFitter fitter, reco::TransientTrack transientTrackMu) const;
+  Measurement1D getIP(edm::Ptr<pat::CompositeCandidate> ll_ptr, reco::Vertex pv, reco::TransientTrack transientTrackMu) const;
 
   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions) {}
   
@@ -267,7 +268,7 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 					      fitter.fitted_vtx().z()
              )  
           );
-        Measurement1D ip3D = getIP(fitter, muons_ttracks->at(k_idx));
+	Measurement1D ip3D = getIP(ll_ptr, bestVertex, muons_ttracks->at(k_idx));
         auto lxy = l_xy(fitter, *beamspot);
         cand.addUserFloat("l_xy", lxy.value());
         cand.addUserFloat("l_xy_unc", lxy.error());
@@ -506,32 +507,38 @@ void BTo3MuBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   evt.put(std::move(ret_val));
 }//produce  
 
-Measurement1D BTo3MuBuilder::getIP(KinVtxFitter fitter,reco::TransientTrack transientTrackMu) const
+Measurement1D BTo3MuBuilder::getIP(edm::Ptr<pat::CompositeCandidate> ll_ptr, reco::Vertex pv, reco::TransientTrack transientTrackMu) const
 {
   // computing 3d impact parameter
-  GlobalVector jpsiDirection(fitter.fitted_p4().x(), fitter.fitted_p4().y(), fitter.fitted_p4().z());
-  reco::Vertex::Point jpsiVertexPosition(fitter.fitted_vtx().x(),fitter.fitted_vtx().y(),fitter.fitted_vtx().z());
+  //GlobalVector jpsiDirection(fitter.fitted_p4().x(), fitter.fitted_p4().y(), fitter.fitted_p4().z());
+  //reco::Vertex::Point jpsiVertexPosition(fitter.fitted_vtx().x(),fitter.fitted_vtx().y(),fitter.fitted_vtx().z());
+  reco::Vertex::Point jpsiVertexPosition(ll_ptr->userFloat("vtx_x"),ll_ptr->userFloat("vtx_y"),ll_ptr->userFloat("vtx_z"));
 
-  const double err00 = fitter.fitted_candidate().kinematicParametersError().matrix()(0,0);
+  /*const double err00 = fitter.fitted_candidate().kinematicParametersError().matrix()(0,0);
   const double err11 = fitter.fitted_candidate().kinematicParametersError().matrix()(1,1);
   const double err22 = fitter.fitted_candidate().kinematicParametersError().matrix()(2,2);
   const double err01 = fitter.fitted_candidate().kinematicParametersError().matrix()(0,1);
   const double err02 = fitter.fitted_candidate().kinematicParametersError().matrix()(0,2);
   const double err12 = fitter.fitted_candidate().kinematicParametersError().matrix()(1,2);
+  */
+  
   reco::Vertex::Error jpsiVertexError;
 
-  jpsiVertexError(0,0) = err00;
-  jpsiVertexError(0,1) = err01;
-  jpsiVertexError(0,2) = err02;
-  jpsiVertexError(1,0) = err01;
-  jpsiVertexError(1,1) = err11;
-  jpsiVertexError(1,2) = err12;
-  jpsiVertexError(2,0) = err02;
-  jpsiVertexError(2,1) = err12;
-  jpsiVertexError(2,2) = err22;
+  jpsiVertexError(0,0) = ll_ptr->userFloat("jpsi_err00");
+  jpsiVertexError(0,1) = ll_ptr->userFloat("jpsi_err01");
+  jpsiVertexError(0,2) = ll_ptr->userFloat("jpsi_err02");
+  jpsiVertexError(1,0) = ll_ptr->userFloat("jpsi_err01");
+  jpsiVertexError(1,1) = ll_ptr->userFloat("jpsi_err11");
+  jpsiVertexError(1,2) = ll_ptr->userFloat("jpsi_err12");
+  jpsiVertexError(2,0) = ll_ptr->userFloat("jpsi_err02");
+  jpsiVertexError(2,1) = ll_ptr->userFloat("jpsi_err12");
+  jpsiVertexError(2,2) = ll_ptr->userFloat("jpsi_err22");
 
-  GlobalVector jpsiGlobalVector(fitter.fitted_p4().x(), fitter.fitted_p4().y(), fitter.fitted_p4().z());
-  const reco::Vertex jpsiVertex(jpsiVertexPosition, jpsiVertexError, fitter.chi2(), fitter.dof(), 2);
+  //jpsi vtx - pv
+  //  GlobalVector jpsiGlobalVector(fitter.fitted_p4().x() - pv.position().x(), fitter.fitted_p4().y() - pv.position().y(), fitter.fitted_p4().z() - pv.position().z());
+  GlobalVector jpsiGlobalVector(ll_ptr->userFloat("fitted_x") - pv.position().x(), ll_ptr->userFloat("fitted_y") - pv.position().y(), ll_ptr->userFloat("fitted_z") - pv.position().z());
+  //const reco::Vertex jpsiVertex(jpsiVertexPosition, jpsiVertexError, fitter.chi2(), fitter.dof(), 2);
+  const reco::Vertex jpsiVertex(jpsiVertexPosition, jpsiVertexError, ll_ptr->userFloat("sv_chi2"), ll_ptr->userFloat("sv_ndof"), 2);
 
   SignedImpactParameter3D signed_ip3D;
   Measurement1D ip3D = signed_ip3D.apply(transientTrackMu,jpsiGlobalVector,jpsiVertex).second;

@@ -171,6 +171,17 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       muon_pair.addUserFloat("fitted_pt"  , fit_p4.pt());
       muon_pair.addUserFloat("fitted_eta" , fit_p4.eta());
       muon_pair.addUserFloat("fitted_phi" , fit_p4.phi());
+      muon_pair.addUserFloat("fitted_x",fit_p4.x());
+      muon_pair.addUserFloat("fitted_y",fit_p4.y());
+      muon_pair.addUserFloat("fitted_z",fit_p4.z());
+      muon_pair.addUserFloat("jpsi_err00",fitter.fitted_candidate().kinematicParametersError().matrix()(0,0));
+      muon_pair.addUserFloat("jpsi_err11",fitter.fitted_candidate().kinematicParametersError().matrix()(1,1));
+      muon_pair.addUserFloat("jpsi_err22",fitter.fitted_candidate().kinematicParametersError().matrix()(2,2));
+      muon_pair.addUserFloat("jpsi_err01",fitter.fitted_candidate().kinematicParametersError().matrix()(0,1));
+      muon_pair.addUserFloat("jpsi_err02",fitter.fitted_candidate().kinematicParametersError().matrix()(0,2));
+      muon_pair.addUserFloat("jpsi_err12",fitter.fitted_candidate().kinematicParametersError().matrix()(1,2));
+      
+      
       muon_pair.addUserFloat(
 			       "fitted_cos_theta_2D",
 			       cos_theta_2D(fitter, *beamspot, fit_p4)
@@ -219,6 +230,7 @@ void DiMuonBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       ret_value->back().addUserInt("muonpair_fromjpsitrk_PsiPrime", jpsitrk_PsiPrime_trigger);
       ret_value->back().addUserInt("muonpair_fromjpsitrk_NonResonant", jpsitrk_NonResonant_trigger);
       ret_value->back().addUserInt("pvIdx", pvIdx);
+      
     }
   }
   
