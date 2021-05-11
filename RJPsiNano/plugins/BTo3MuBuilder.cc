@@ -536,7 +536,7 @@ Measurement1D BTo3MuBuilder::getIP(edm::Ptr<pat::CompositeCandidate> ll_ptr, rec
 
   //jpsi vtx - pv
   //  GlobalVector jpsiGlobalVector(fitter.fitted_p4().x() - pv.position().x(), fitter.fitted_p4().y() - pv.position().y(), fitter.fitted_p4().z() - pv.position().z());
-  GlobalVector jpsiGlobalVector(ll_ptr->userFloat("fitted_x") - pv.position().x(), ll_ptr->userFloat("fitted_y") - pv.position().y(), ll_ptr->userFloat("fitted_z") - pv.position().z());
+  GlobalVector jpsiGlobalVector(ll_ptr->userFloat("vtx_x") - pv.position().x(), ll_ptr->userFloat("vtx_y") - pv.position().y(), ll_ptr->userFloat("vtx_z") - pv.position().z());
   //const reco::Vertex jpsiVertex(jpsiVertexPosition, jpsiVertexError, fitter.chi2(), fitter.dof(), 2);
   const reco::Vertex jpsiVertex(jpsiVertexPosition, jpsiVertexError, ll_ptr->userFloat("sv_chi2"), ll_ptr->userFloat("sv_ndof"), 2);
 
