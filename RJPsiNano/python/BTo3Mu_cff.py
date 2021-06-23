@@ -14,6 +14,7 @@ BTo3Mu = cms.EDProducer(
     muons = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
     muonSelection = cms.string(''),
     srcGen = cms.InputTag("prunedGenParticles"),
+    dimuons_fitter = cms.InputTag('JpsiMuonPairs','dimuonFitter')
 )
 
 BTo3MuTableVariables = Final3PartTableVariables.clone()
