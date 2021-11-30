@@ -11,6 +11,7 @@ cmsenv
 git cms-init
 git cms-merge-topic -u friti:TransientTracks
 git cms-merge-topic -u friti:KinParticleVtxFitter
+git cms-merge-topic -u friti:GenParticlesPrecision
 git clone git@github.com:friti/RJPsiAnalysis.git  ./PhysicsTools
 git cms-addpkg PhysicsTools/NanoAOD
 scram b
