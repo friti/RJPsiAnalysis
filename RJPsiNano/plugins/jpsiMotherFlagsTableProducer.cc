@@ -16,7 +16,7 @@
 
 using namespace std;
 
-constexpr bool debug = true;
+constexpr bool debug = false;
 
 bool isAncestor(const reco::Candidate* ancestor, const reco::Candidate * particle)
 {
