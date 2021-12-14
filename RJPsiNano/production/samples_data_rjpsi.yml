@@ -17,7 +17,7 @@ samples:
     isMC: False
 
   data_Run2018C_UL:
-    dataset: /Charmonium/Run2018C-12Nov2019_UL2018-v1/MINIAOD
+    dataset: /Charmonium/Run2018C-12Nov2019_UL2018_rsb_v2-v2/MINIAOD
     isMC: False
 
   data_Run2018D_UL:

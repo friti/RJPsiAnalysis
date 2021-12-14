@@ -8,13 +8,33 @@ common:
     globaltag: 106X_upgrade2018_realistic_v11_L1v1
 
 samples:
-  BcToJPsiMuMu:
-     dataset: /BcToJPsiMuMu_inclusive_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/RunIISummer20UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1_ext1-v2/MINIAODSIM
+  HbToJPsiMuMu_3MuFilter:
+     dataset: /HbToJPsiMuMu_3MuFilter_TuneCP5_13TeV-pythia8-evtgen/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1_ext1-v3/MINIAODSIM 
      isMC: True
+
+  #BuToJpsiK:
+  #  dataset: /BuToJpsiK_BMuonFilter_SoftQCDnonD_TuneCP5_13TeV-pythia8-evtgen/RunIISummer20UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1-v2/MINIAODSIM
+  #  isMC: True
+
+  #BcToJPsiMuMu_1:
+  #  dataset: /BcToJPsiMuMu_inclusive_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/RunIISummer20UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1-v2/MINIAODSIM
+  #  isMC: True
+
+  #BcToJPsiMuMu_2:
+  #  dataset: /BcToJPsiMuMu_inclusive_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/RunIISummer20UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1_ext1-v2/MINIAODSIM
+  #  isMC: True
+
+  #BcToJPsiMuMu_3:
+  #  dataset: /BcToJPsiMuMu_inclusive_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/RunIISummer20UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1_ext2-v2/MINIAODSIM
+  # isMC: True
   
-  HbToJPsiMuMu:
-     dataset: /HbToJPsiMuMu_TuneCP5_13TeV-pythia8-evtgen/RunIISummer20UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1-v1/MINIAODSIM
-     isMC: True
+  # HbToJPsiMuMu:
+  #   dataset: /HbToJPsiMuMu_TuneCP5_13TeV-pythia8-evtgen/RunIISummer20UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1-v1/MINIAODSIM
+  #   isMC: True
+  
+  #HbToJPsiMuMu_3MuFilter: #old version
+  #    dataset: /HbToJPsiMuMu_3MuFilter_TuneCP5_13TeV-pythia8-evtgen/RunIISummer20UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1-v1/MINIAODSIM
+  #    isMC: True
 
   #BcToJpsiTauNu:
   #  dataset: /BcToJPsiTauNu_TuneCP5_13TeV-bcvegpy2-pythia8-evtgen/RunIISummer19UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1_ext1-v2/MINIAODSIM
