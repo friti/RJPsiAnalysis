@@ -63,6 +63,7 @@ public:
   ~BTo2Mu3PiBuilder() override {}
   
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
+  int  getPVIdx(const reco::VertexCollection*,const reco::TransientTrack&) const;
   Measurement1D getIP(KinVtxFitter fitter, reco::TransientTrack transientTrackMu) const;
 
   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions) {}
@@ -138,15 +139,15 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
     size_t mu2_idx = abs(ll_ptr->userInt("mu2_idx"));
 
     int pvIdx = ll_ptr->userInt("pvIdx");
-    reco::Vertex bestVertex = vertices->at(pvIdx);
-    double mu1_dxy = mu1_ptr->bestTrack()->dxy(bestVertex.position());
-    double mu1_dz = mu1_ptr->bestTrack()->dz(bestVertex.position());
-    double mu2_dxy = mu2_ptr->bestTrack()->dxy(bestVertex.position());
-    double mu2_dz = mu2_ptr->bestTrack()->dz(bestVertex.position());
-    double mu1_dxyErr = mu1_ptr->bestTrack()->dxyError(bestVertex.position(),bestVertex.covariance());
-    double mu2_dxyErr = mu2_ptr->bestTrack()->dxyError(bestVertex.position(),bestVertex.covariance());
-    double mu1_dzErr = mu1_ptr->bestTrack()->dzError();
-    double mu2_dzErr = mu2_ptr->bestTrack()->dzError();
+    reco::Vertex pv_jpsi = vertices->at(pvIdx);
+    double mu1_pvjpsi_dxy = mu1_ptr->bestTrack()->dxy(pv_jpsi.position());
+    double mu1_pvjpsi_dz = mu1_ptr->bestTrack()->dz(pv_jpsi.position());
+    double mu2_pvjpsi_dxy = mu2_ptr->bestTrack()->dxy(pv_jpsi.position());
+    double mu2_pvjpsi_dz = mu2_ptr->bestTrack()->dz(pv_jpsi.position());
+    double mu1_pvjpsi_dxyErr = mu1_ptr->bestTrack()->dxyError(pv_jpsi.position(),pv_jpsi.covariance());
+    double mu2_pvjpsi_dxyErr = mu2_ptr->bestTrack()->dxyError(pv_jpsi.position(),pv_jpsi.covariance());
+    double mu1_pvjpsi_dzErr = mu1_ptr->bestTrack()->dzError();
+    double mu2_pvjpsi_dzErr = mu2_ptr->bestTrack()->dzError();
 
     size_t isDimuon_dimuon0Trg = abs(ll_ptr->userInt("muonpair_fromdimuon0"));
     size_t isDimuon_jpsiTrkTrg = abs(ll_ptr->userInt("muonpair_fromjpsitrk"));
@@ -214,17 +215,17 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 
 	    if(debug) std::cout<<"before dz "<<std::endl;
 
-      double pi1_dxy = particles_ttracks->at(pi1_idx).track().dxy(bestVertex.position());
-      double pi1_dz = particles_ttracks->at(pi1_idx).track().dz(bestVertex.position());
-      double pi2_dxy = particles_ttracks->at(pi2_idx).track().dxy(bestVertex.position());
-      double pi2_dz = particles_ttracks->at(pi2_idx).track().dz(bestVertex.position());
-      double pi3_dxy = particles_ttracks->at(pi3_idx).track().dxy(bestVertex.position());
-      double pi3_dz = particles_ttracks->at(pi3_idx).track().dz(bestVertex.position());
-      double pi1_dxyErr = particles_ttracks->at(pi1_idx).track().dxyError(bestVertex.position(),bestVertex.covariance());
+      double pi1_dxy = particles_ttracks->at(pi1_idx).track().dxy(pv_jpsi.position());
+      double pi1_dz = particles_ttracks->at(pi1_idx).track().dz(pv_jpsi.position());
+      double pi2_dxy = particles_ttracks->at(pi2_idx).track().dxy(pv_jpsi.position());
+      double pi2_dz = particles_ttracks->at(pi2_idx).track().dz(pv_jpsi.position());
+      double pi3_dxy = particles_ttracks->at(pi3_idx).track().dxy(pv_jpsi.position());
+      double pi3_dz = particles_ttracks->at(pi3_idx).track().dz(pv_jpsi.position());
+      double pi1_dxyErr = particles_ttracks->at(pi1_idx).track().dxyError(pv_jpsi.position(),pv_jpsi.covariance());
       double pi1_dzErr = particles_ttracks->at(pi1_idx).track().dzError();
-      double pi2_dxyErr = particles_ttracks->at(pi2_idx).track().dxyError(bestVertex.position(),bestVertex.covariance());
+      double pi2_dxyErr = particles_ttracks->at(pi2_idx).track().dxyError(pv_jpsi.position(),pv_jpsi.covariance());
       double pi2_dzErr = particles_ttracks->at(pi2_idx).track().dzError();
-      double pi3_dxyErr = particles_ttracks->at(pi3_idx).track().dxyError(bestVertex.position(),bestVertex.covariance());
+      double pi3_dxyErr = particles_ttracks->at(pi3_idx).track().dxyError(pv_jpsi.position(),pv_jpsi.covariance());
       double pi3_dzErr = particles_ttracks->at(pi3_idx).track().dzError();
 
 	    if(debug) std::cout<<"p1 dxy "<<pi1_dxy<<std::endl;
@@ -251,7 +252,7 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 
       // pv info
 
-      cand.addUserInt("pv_idx", pvIdx);
+      cand.addUserInt("pvjpsi_idx", pvIdx);
       cand.addUserInt("nPrimaryVertices", nPrimaryVertices);
 
       // tracks info
@@ -270,10 +271,10 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 	    cand.addUserInt("pi2_idx", pi2_idx);
 	    cand.addUserInt("pi3_idx", pi3_idx);
 
-      cand.addUserFloat("mu1_dxy", mu1_dxy);
-      cand.addUserFloat("mu1_dz", mu1_dz);
-      cand.addUserFloat("mu2_dxy", mu2_dxy);
-      cand.addUserFloat("mu2_dz", mu2_dz);
+      cand.addUserFloat("mu1_pvjpsi_dxy", mu1_pvjpsi_dxy);
+      cand.addUserFloat("mu1_pvjpsi_dz", mu1_pvjpsi_dz);
+      cand.addUserFloat("mu2_pvjpsi_dxy", mu2_pvjpsi_dxy);
+      cand.addUserFloat("mu2_pvjpsi_dz", mu2_pvjpsi_dz);
       cand.addUserFloat("pi1_dxy", pi1_dxy);
       cand.addUserFloat("pi1_dz", pi1_dz);
       cand.addUserFloat("pi2_dxy", pi2_dxy);
@@ -281,10 +282,10 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
       cand.addUserFloat("pi3_dxy", pi3_dxy);
       cand.addUserFloat("pi3_dz", pi3_dz);
 
-      cand.addUserFloat("mu1_dxyErr", mu1_dxyErr);
-      cand.addUserFloat("mu1_dzErr", mu1_dzErr);
-      cand.addUserFloat("mu2_dxyErr", mu2_dxyErr);
-      cand.addUserFloat("mu2_dzErr", mu2_dzErr);
+      cand.addUserFloat("mu1_pvjpsi_dxyErr", mu1_pvjpsi_dxyErr);
+      cand.addUserFloat("mu1_pvjpsi_dzErr", mu1_pvjpsi_dzErr);
+      cand.addUserFloat("mu2_pvjpsi_dxyErr", mu2_pvjpsi_dxyErr);
+      cand.addUserFloat("mu2_pvjpsi_dzErr", mu2_pvjpsi_dzErr);
       cand.addUserFloat("pi1_dxyErr", pi1_dxyErr);
       cand.addUserFloat("pi1_dzErr", pi1_dzErr);
       cand.addUserFloat("pi2_dxyErr", pi2_dxyErr);
@@ -321,6 +322,9 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 	    cand.addUserFloat("ip3D", ip3D.value());
 	    cand.addUserFloat("ip3D_e", ip3D.error());
 	    */
+	    // pv shortest dz from jpsi + mu
+	    const reco::TransientTrack& threemuonTT = fitter.fitted_candidate_ttrk();
+	    
 	    used_muon1_id.emplace_back(mu1_idx);
 	    used_muon2_id.emplace_back(mu2_idx);
 	    used_pi1_id.emplace_back(pi1_idx);
@@ -355,7 +359,7 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 	    cand.addUserFloat("vtx_ey", sqrt(fitter.fitted_vtx_uncertainty().cyy()));
 	    cand.addUserFloat("vtx_ez", sqrt(fitter.fitted_vtx_uncertainty().czz()));
 	    cand.addUserFloat("vtx_chi2", ChiSquaredProbability(fitter.chi2(), fitter.dof()));
-	    
+
 	    /*
 	    cand.addUserFloat("jpsi_vtx_x", ll_ptr->userFloat("vtx_x"));
 	    cand.addUserFloat("jpsi_vtx_y", ll_ptr->userFloat("vtx_y"));
@@ -365,17 +369,18 @@ void BTo2Mu3PiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 	    cand.addUserFloat("jpsi_vtx_ez", ll_ptr->userFloat("vtx_ez"));
 	    cand.addUserFloat("jpsi_vtx_chi2", ll_ptr->userFloat("vtx_chi2"));
 	    */
-	    cand.addUserFloat("pv_x", bestVertex.position().x());
-	    cand.addUserFloat("pv_y", bestVertex.position().y());
-	    cand.addUserFloat("pv_z", bestVertex.position().z());
-	    cand.addUserFloat("pv_ex", bestVertex.covariance(0,0));
-	    cand.addUserFloat("pv_ey", bestVertex.covariance(1,1));
-	    cand.addUserFloat("pv_ez", bestVertex.covariance(2,2));
-	    cand.addUserFloat("pv_exy", bestVertex.covariance(0,1));
-	    cand.addUserFloat("pv_eyz", bestVertex.covariance(0,2));
-	    cand.addUserFloat("pv_exz", bestVertex.covariance(1,2));
-	    cand.addUserFloat("pv_chi2", ChiSquaredProbability(bestVertex.chi2(), bestVertex.ndof()));
-      
+	    cand.addUserFloat("pvjpsi_x", pv_jpsi.position().x());
+	    cand.addUserFloat("pvjpsi_y", pv_jpsi.position().y());
+	    cand.addUserFloat("pvjpsi_z", pv_jpsi.position().z());
+	    cand.addUserFloat("pvjpsi_ex", pv_jpsi.covariance(0,0));
+	    cand.addUserFloat("pvjpsi_ey", pv_jpsi.covariance(1,1));
+	    cand.addUserFloat("pvjpsi_ez", pv_jpsi.covariance(2,2));
+	    cand.addUserFloat("pvjpsi_exy", pv_jpsi.covariance(0,1));
+	    cand.addUserFloat("pvjpsi_eyz", pv_jpsi.covariance(0,2));
+	    cand.addUserFloat("pvjpsi_exz", pv_jpsi.covariance(1,2));
+	    cand.addUserFloat("pvjpsi_chi2", ChiSquaredProbability(pv_jpsi.chi2(), pv_jpsi.ndof()));
+	    
+
 
 	    cand.addUserFloat("fitted_mu1_pt" , fitter.daughter_p4(0).pt()); 
 	    cand.addUserFloat("fitted_mu1_eta", fitter.daughter_p4(0).eta());
@@ -582,6 +587,29 @@ Measurement1D BTo2Mu3PiBuilder::getIP(KinVtxFitter fitter,reco::TransientTrack t
   SignedImpactParameter3D signed_ip3D;
   Measurement1D ip3D = signed_ip3D.apply(transientTrackMu,jpsiGlobalVector,jpsiVertex).second;
   return ip3D;
+}
+
+int BTo2Mu3PiBuilder::getPVIdx(const reco::VertexCollection* vertices,const reco::TransientTrack& dimuonTT) const
+{
+    double dzMin = 1000000.;
+    reco::Vertex bestVertex;
+    int pvIdx = 0;
+    //const reco::VertexCollection* vertices = thePrimaryVerticesHandle.product();
+    for(size_t i = 0; i < vertices->size() ; i++)
+    {
+      reco::Vertex primVertex = vertices->at(i);
+      //std::cout << "prim vertex z: " << primVertex->z() << std::endl;
+      if (abs(dzMin) > abs(dimuonTT.track().dz(primVertex.position())))
+      {
+        bestVertex = primVertex;
+        pvIdx = i;
+        //bestVertex = primVertex;
+        dzMin = dimuonTT.track().dz(primVertex.position());
+      }
+    }
+    if(debug) std::cout<< "Best vertex x: " << bestVertex.x() << std::endl;
+    if(debug) std::cout<< "Best vertex id: " << pvIdx << std::endl;
+  return pvIdx;
 }
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(BTo2Mu3PiBuilder);

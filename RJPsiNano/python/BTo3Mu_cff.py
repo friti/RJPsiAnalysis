@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import Var, CandVars
 from PhysicsTools.RJPsiNano.common_cff import RJpsiCandVars, ufloat, uint, ubool
-from PhysicsTools.RJPsiNano.rjpsi_common_cff import JpsiMuonPairs, BuilderDefaultCfg, TableDefaultVariables, TableDefault,Final3PartTableVariables
+from PhysicsTools.RJPsiNano.rjpsi_common_cff import JpsiMuonPairs, BuilderDefaultCfg, TableDefaultVariables, TableDefault,Final3PartTableVariables, Final3MuonsTableVariables
 from PhysicsTools.RJPsiNano.primaryVertices_cff import *
 
 BTo3MuCfg = BuilderDefaultCfg.clone()
@@ -17,7 +17,7 @@ BTo3Mu = cms.EDProducer(
     dimuons_fitter = cms.InputTag('JpsiMuonPairs','dimuonFitter')
 )
 
-BTo3MuTableVariables = Final3PartTableVariables.clone()
+BTo3MuTableVariables = Final3MuonsTableVariables.clone()
 
 BTo3MuTable = TableDefault.clone()
 BTo3MuTable.src       = cms.InputTag("BTo3Mu")

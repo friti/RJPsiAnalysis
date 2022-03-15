@@ -154,18 +154,19 @@ TableDefaultVariables = cms.PSet(
     m_jpsi      = ufloat('m_jpsi'),
 
     #PV vertex
-    pv_idx = uint('pv_idx'),
     nPrimaryVertices = uint('nPrimaryVertices'),
-    pv_x = ufloat('pv_x'),
-    pv_y = ufloat('pv_y'),
-    pv_z = ufloat('pv_z'),
-    pv_ex = ufloat('pv_ex'),
-    pv_ey = ufloat('pv_ey'),
-    pv_ez = ufloat('pv_ez'),
-    pv_exy = ufloat('pv_exz'),
-    pv_eyz = ufloat('pv_eyz'),
-    pv_exz = ufloat('pv_exz'),
-    pv_chi2 = ufloat('pv_chi2'),
+    pvjpsi_idx = uint('pvjpsi_idx'),
+    pvjpsi_x = ufloat('pvjpsi_x'),
+    pvjpsi_y = ufloat('pvjpsi_y'),
+    pvjpsi_z = ufloat('pvjpsi_z'),
+    pvjpsi_ex = ufloat('pvjpsi_ex'),
+    pvjpsi_ey = ufloat('pvjpsi_ey'),
+    pvjpsi_ez = ufloat('pvjpsi_ez'),
+    pvjpsi_exy = ufloat('pvjpsi_exz'),
+    pvjpsi_eyz = ufloat('pvjpsi_eyz'),
+    pvjpsi_exz = ufloat('pvjpsi_exz'),
+    pvjpsi_chi2 = ufloat('pvjpsi_chi2'),
+
 
     # Mll (do we need this???)                                                                                               
     mll_raw = Var('userCand("dimuon").mass()', float),
@@ -178,15 +179,16 @@ TableDefaultVariables = cms.PSet(
     n_mu1_used = uint('n_mu1_used'),
     n_mu2_used = uint('n_mu2_used'),
 
-    mu1_dxy = ufloat('mu1_dxy'),
-    mu1_dz = ufloat('mu1_dz'),
-    mu2_dxy = ufloat('mu2_dxy'),
-    mu2_dz = ufloat('mu2_dz'),
+    mu1_pvjpsi_dxy = ufloat('mu1_pvjpsi_dxy'),
+    mu1_pvjpsi_dz = ufloat('mu1_pvjpsi_dz'),
+    mu2_pvjpsi_dxy = ufloat('mu2_pvjpsi_dxy'),
+    mu2_pvjpsi_dz = ufloat('mu2_pvjpsi_dz'),
 
-    mu1_dxyErr = ufloat('mu1_dxyErr'),
-    mu1_dzErr = ufloat('mu1_dzErr'),
-    mu2_dxyErr = ufloat('mu2_dxyErr'),
-    mu2_dzErr = ufloat('mu2_dzErr'),
+    mu1_pvjpsi_dxyErr = ufloat('mu1_pvjpsi_dxyErr'),
+    mu1_pvjpsi_dzErr = ufloat('mu1_pvjpsi_dzErr'),
+    mu2_pvjpsi_dxyErr = ufloat('mu2_pvjpsi_dxyErr'),
+    mu2_pvjpsi_dzErr = ufloat('mu2_pvjpsi_dzErr'),
+
 )
 
 #builder for final states with 3 particles
@@ -200,13 +202,77 @@ Final3PartTableVariables = TableDefaultVariables.clone(
     E_mu_star   = ufloat('E_mu_star'),
     E_mu_canc   = ufloat('E_mu_#'),
     n_k_used = uint('n_k_used'),
-    ip3D = ufloat('ip3D'),
-    ip3D_e = ufloat('ip3D_e'),
+    ip3D_pvjpsi = ufloat('ip3D_pvjpsi'),
+    ip3D_pvjpsi_e = ufloat('ip3D_pvjpsi_e'),
+
 
     #dz and dxy  for muon particle w.r.t. best pv.
 
-    k_dxy = ufloat('k_dxy'),
-    k_dz = ufloat('k_dz'),
-    k_dxyErr = ufloat('k_dxyErr'),
-    k_dzErr = ufloat('k_dzErr'),
+    k_pvjpsi_dxy = ufloat('k_pvjpsi_dxy'),
+    k_pvjpsi_dz = ufloat('k_pvjpsi_dz'),
+    k_pvjpsi_dxyErr = ufloat('k_pvjpsi_dxyErr'),
+    k_pvjpsi_dzErr = ufloat('k_pvjpsi_dzErr'),
+)
+
+#builder for final states with 3 muons
+Final3MuonsTableVariables = Final3PartTableVariables.clone(
+    ip3D_pvb = ufloat('ip3D_pvb'),
+    ip3D_pvb_e = ufloat('ip3D_pvb_e'),
+
+    k_pvb_dxy = ufloat('k_pvb_dxy'),
+    k_pvb_dz = ufloat('k_pvb_dz'),
+    k_pvb_dxyErr = ufloat('k_pvb_dxyErr'),
+    k_pvb_dzErr = ufloat('k_pvb_dzErr'),
+
+    pvb_idx = uint('pvb_idx'),
+    pvb_x = ufloat('pvb_x'),
+    pvb_y = ufloat('pvb_y'),
+    pvb_z = ufloat('pvb_z'),
+    pvb_ex = ufloat('pvb_ex'),
+    pvb_ey = ufloat('pvb_ey'),
+    pvb_ez = ufloat('pvb_ez'),
+    pvb_exy = ufloat('pvb_exz'),
+    pvb_eyz = ufloat('pvb_eyz'),
+    pvb_exz = ufloat('pvb_exz'),
+    pvb_chi2 = ufloat('pvb_chi2'),
+
+    mu1_pvb_dxy = ufloat('mu1_pvb_dxy'),
+    mu1_pvb_dz = ufloat('mu1_pvb_dz'),
+    mu2_pvb_dxy = ufloat('mu2_pvb_dxy'),
+    mu2_pvb_dz = ufloat('mu2_pvb_dz'),
+
+    mu1_pvb_dxyErr = ufloat('mu1_pvb_dxyErr'),
+    mu1_pvb_dzErr = ufloat('mu1_pvb_dzErr'),
+    mu2_pvb_dxyErr = ufloat('mu2_pvb_dxyErr'),
+    mu2_pvb_dzErr = ufloat('mu2_pvb_dzErr'),
+
+    ip3D_pvfirst = ufloat('ip3D_pvfirst'),
+    ip3D_pvfirst_e = ufloat('ip3D_pvfirst_e'),
+
+    k_pvfirst_dxy = ufloat('k_pvfirst_dxy'),
+    k_pvfirst_dz = ufloat('k_pvfirst_dz'),
+    k_pvfirst_dxyErr = ufloat('k_pvfirst_dxyErr'),
+    k_pvfirst_dzErr = ufloat('k_pvfirst_dzErr'),
+
+    pvfirst_idx = uint('pvfirst_idx'),
+    pvfirst_x = ufloat('pvfirst_x'),
+    pvfirst_y = ufloat('pvfirst_y'),
+    pvfirst_z = ufloat('pvfirst_z'),
+    pvfirst_ex = ufloat('pvfirst_ex'),
+    pvfirst_ey = ufloat('pvfirst_ey'),
+    pvfirst_ez = ufloat('pvfirst_ez'),
+    pvfirst_exy = ufloat('pvfirst_exz'),
+    pvfirst_eyz = ufloat('pvfirst_eyz'),
+    pvfirst_exz = ufloat('pvfirst_exz'),
+    pvfirst_chi2 = ufloat('pvfirst_chi2'),
+
+    mu1_pvfirst_dxy = ufloat('mu1_pvfirst_dxy'),
+    mu1_pvfirst_dz = ufloat('mu1_pvfirst_dz'),
+    mu2_pvfirst_dxy = ufloat('mu2_pvfirst_dxy'),
+    mu2_pvfirst_dz = ufloat('mu2_pvfirst_dz'),
+
+    mu1_pvfirst_dxyErr = ufloat('mu1_pvfirst_dxyErr'),
+    mu1_pvfirst_dzErr = ufloat('mu1_pvfirst_dzErr'),
+    mu2_pvfirst_dxyErr = ufloat('mu2_pvfirst_dxyErr'),
+    mu2_pvfirst_dzErr = ufloat('mu2_pvfirst_dzErr'),
 )

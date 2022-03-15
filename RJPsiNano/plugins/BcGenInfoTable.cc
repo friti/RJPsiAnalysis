@@ -46,6 +46,9 @@ void BcGenInfoTableProducer::produce(edm::Event& iEvent, const edm::EventSetup& 
   float bc_gen_eta = 0.;
   float bc_gen_phi = 0.;
   float bc_gen_mass = 0.;
+  float bc_gen_vx = 0.;
+  float bc_gen_vy = 0.;
+  float bc_gen_vz = 0.;
   float mu1_gen_pt = 0.;
   float mu1_gen_eta = 0.;
   float mu1_gen_phi = 0.;
@@ -66,6 +69,9 @@ void BcGenInfoTableProducer::produce(edm::Event& iEvent, const edm::EventSetup& 
   float jpsi_gen_eta = 0.;
   float jpsi_gen_phi = 0.;
   float jpsi_gen_mass = 0.;
+  float jpsi_gen_vx = 0.;
+  float jpsi_gen_vy = 0.;
+  float jpsi_gen_vz = 0.;
 
   //GEN
   if(debug) std::cout<<"In the bc gen code..."<<std::endl;
@@ -144,10 +150,19 @@ void BcGenInfoTableProducer::produce(edm::Event& iEvent, const edm::EventSetup& 
 	  bc_gen_phi = the_b->phi();
 	  bc_gen_mass = the_b->mass();
 
+	  bc_gen_vx = the_b->vx();
+	  bc_gen_vy = the_b->vy();
+	  bc_gen_vz = the_b->vz();
+
+	  if(debug) std::cout<<"The Bc production vertex is "<<the_b->vx()<<std::endl;
 	  jpsi_gen_pt = gen.pt();
 	  jpsi_gen_eta = gen.eta();
 	  jpsi_gen_phi = gen.phi();
 	  jpsi_gen_mass = gen.mass();
+
+	  jpsi_gen_vx = gen.vx();
+	  jpsi_gen_vy = gen.vy();
+	  jpsi_gen_vz = gen.vz();
 
 
 	  // Bc. jpsi+mu
@@ -207,6 +222,12 @@ void BcGenInfoTableProducer::produce(edm::Event& iEvent, const edm::EventSetup& 
   tab->addColumnValue<float>("BcGenInfo_jpsi_gen_eta", jpsi_gen_eta, "bc gen information", nanoaod::FlatTable::FloatColumn);
   tab->addColumnValue<float>("BcGenInfo_jpsi_gen_phi", jpsi_gen_phi, "bc gen information", nanoaod::FlatTable::FloatColumn);
   tab->addColumnValue<float>("BcGenInfo_jpsi_gen_mass", jpsi_gen_mass, "bc gen information", nanoaod::FlatTable::FloatColumn);
+  tab->addColumnValue<float>("BcGenInfo_bc_gen_vx", bc_gen_vx, "bc gen information", nanoaod::FlatTable::FloatColumn);
+  tab->addColumnValue<float>("BcGenInfo_bc_gen_vy", bc_gen_vy, "bc gen information", nanoaod::FlatTable::FloatColumn);
+  tab->addColumnValue<float>("BcGenInfo_bc_gen_vz", bc_gen_vz, "bc gen information", nanoaod::FlatTable::FloatColumn);
+  tab->addColumnValue<float>("BcGenInfo_jpsi_gen_vx", jpsi_gen_vx, "bc gen information", nanoaod::FlatTable::FloatColumn);
+  tab->addColumnValue<float>("BcGenInfo_jpsi_gen_vy", jpsi_gen_vy, "bc gen information", nanoaod::FlatTable::FloatColumn);
+  tab->addColumnValue<float>("BcGenInfo_jpsi_gen_vz", jpsi_gen_vz, "bc gen information", nanoaod::FlatTable::FloatColumn);
   iEvent.put(std::move(tab));
 }
 
