@@ -117,7 +117,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   std::unique_ptr<TransientTrackCollection> trans_muons_out( new TransientTrackCollection );
 
   // Getting the indexes of the HLT paths
-  unsigned int index_dimuon0 = names.triggerIndex("HLT_Dimuon0_Jpsi3p5_Muon2_v5");
+  unsigned int index_dimuon01 = names.triggerIndex("HLT_Dimuon0_Jpsi3p5_Muon2_v5");
+  unsigned int index_dimuon02 = names.triggerIndex("HLT_Dimuon0_Jpsi3p5_Muon2_v6");
   unsigned int index_jpsiTrk1 = names.triggerIndex("HLT_DoubleMu4_JpsiTrk_Displaced_v14");
   unsigned int index_jpsiTrk2 = names.triggerIndex("HLT_DoubleMu4_JpsiTrk_Displaced_v15");
   unsigned int index_jpsiTrk3 = names.triggerIndex("HLT_DoubleMu4_PsiPrimeTrk_Displaced_v14");
@@ -127,15 +128,18 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
   
   
-  bool pass_dimuon0_path= false;
+  bool pass_dimuon01_path= false;
+  bool pass_dimuon02_path= false;
   bool pass_jpsiTrk1_path = false;
   bool pass_jpsiTrk2_path = false;
   bool pass_jpsiTrk3_path = false;
   bool pass_jpsiTrk4_path = false;
   bool pass_jpsiTrk5_path = false;
   bool pass_jpsiTrk6_path = false;
-  if(index_dimuon0 != triggerBits->size()) 
-    pass_dimuon0_path = triggerBits->accept(index_dimuon0);
+  if(index_dimuon01 != triggerBits->size()) 
+    pass_dimuon01_path = triggerBits->accept(index_dimuon01);
+  if(index_dimuon02 != triggerBits->size()) 
+    pass_dimuon02_path = triggerBits->accept(index_dimuon02);
   if(index_jpsiTrk1 != triggerBits->size()) 
     pass_jpsiTrk1_path = triggerBits->accept(index_jpsiTrk1);
   if(index_jpsiTrk2 != triggerBits->size()) 
@@ -160,7 +164,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   std::vector<bool> jpsiTrk_PsiPrimeFlags;
   std::vector<bool> jpsiTrk_NonResonantFlags;
 
-  if(pass_dimuon0_path || pass_jpsiTrk1_path || pass_jpsiTrk2_path || pass_jpsiTrk3_path || pass_jpsiTrk4_path || pass_jpsiTrk5_path || pass_jpsiTrk6_path) {  
+  if(pass_dimuon01_path || pass_dimuon02_path || pass_jpsiTrk1_path || pass_jpsiTrk2_path || pass_jpsiTrk3_path || pass_jpsiTrk4_path || pass_jpsiTrk5_path || pass_jpsiTrk6_path) {  
+    //if(pass_dimuon01_path || pass_jpsiTrk1_path || pass_jpsiTrk2_path || pass_jpsiTrk3_path || pass_jpsiTrk4_path || pass_jpsiTrk5_path || pass_jpsiTrk6_path) {  
     for (pat::TriggerObjectStandAlone obj : *triggerObjects) 
     { // note: not "const &" since we want to call unpackPathNames
       obj.unpackFilterLabels(iEvent, *triggerBits);
@@ -225,6 +230,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       	std::cout << "\t   Collection: " << obj.collection() << std::endl;
       	std::cout<< "\t muonFromJpsi_fromDimuon0Path "<<muonFromJpsi_fromDimuon0Path<<std::endl;
       	std::cout<<"\t muonFromJpsi_fromJpsiTrkPath "<<muonFromJpsi_fromJpsiTrkPath<<std::endl;
+      	std::cout<<"\t pass_dimuon0_path"<<pass_dimuon01_path<<std::endl;
       	std::cout<<"\t dimuon0_seed"<<dimuon0_seed<<std::endl;
       	std::cout<<"\t jpsitrk_seed"<<jpsitrk_seed<<std::endl;
       	std::cout<<"\t jpsitrk_PsiPrime_seed"<<jpsitrk_PsiPrime_seed<<std::endl;
@@ -261,7 +267,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     //this is for triggering muon not really need to be configurable
     unsigned int iMuo(&muon - &(muons->at(0)) );
     //if(!(muon.isLooseMuon() && muon.isSoftMuon(PV))) continue;
-    bool isMuonMatchedToDimuon0Path = !(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v5")==nullptr);
+    bool isMuonMatchedToDimuon0Path = !(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v5")==nullptr) || !(muon.triggerObjectMatchByPath("HLT_Dimuon0_Jpsi3p5_Muon2_v6")==nullptr);
     bool isMuonMatchedToJpsiTrkPath = !(muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v14")==nullptr) || !(muon.triggerObjectMatchByPath("HLT_DoubleMu4_JpsiTrk_Displaced_v15")==nullptr);
     bool isMuonMatchedToJpsiTrk_PsiPrimePath = !(muon.triggerObjectMatchByPath("HLT_DoubleMu4_PsiPrimeTrk_Displaced_v14")==nullptr) || !(muon.triggerObjectMatchByPath("HLT_DoubleMu4_PsiPrimeTrk_Displaced_v15")==nullptr);
     bool isMuonMatchedToJpsiTrk_NonResonantPath = !(muon.triggerObjectMatchByPath("HLT_DoubleMu4_LowMassNonResonantTrk_Displaced_v14")==nullptr) || ! (muon.triggerObjectMatchByPath("HLT_DoubleMu4_LowMassNonResonantTrk_Displaced_v15")==nullptr);
